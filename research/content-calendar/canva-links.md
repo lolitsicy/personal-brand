@@ -21,7 +21,7 @@ Text-only layouts on a flat #E4EDF4 shape. To add a photo, delete the shape or u
 | S014 | DAHYcAL6Xlw | https://canva.link/nykeu6d40ma4wfg |
 | S015 | DAHYcM-WbgM | https://canva.link/qcpzmbium9hebnk |
 | S016 | DAHYcFV4cgs | https://canva.link/wtzyy3k8wr2pmmz |
-| S017 | DAHYcdhU_XI | https://canva.link/h8s8rtoy4qt487e |
+| S017 | DAHYc9bCjNM | https://www.canva.com/d/HSsz5441fd85nkl |
 | S018 | DAHYcUH-ri0 | https://canva.link/gnkgyd7i7dqklb5 |
 | S019 | DAHYcVOarWc | https://canva.link/i281v9hj3cvfzy7 |
 | S020 | DAHYcbohYz4 | https://canva.link/5mex2ist2ty1aur |
@@ -38,11 +38,28 @@ Text-only layouts on a flat #E4EDF4 shape. To add a photo, delete the shape or u
 | S031 | DAHYb3ckRH4 | https://canva.link/mwwnhhvfnslgou4 |
 | S032 | DAHYb7plx30 | https://canva.link/6zdgi29soflnj66 |
 | S033 | DAHYb29fYxk | https://canva.link/cqus60tmqkyuy79 |
+| S034 | DAHYcXeCBaY | https://canva.link/7otaqk6r52rvdxr |
+| S035 | DAHYcd2ccnY | https://canva.link/47rcmp3w8i3exhu |
+| S036 | DAHYcaLhdvY | https://canva.link/70e43azs2do2v9v |
+| S037 | DAHYcUEI9_w | https://canva.link/aeci1xrb9nsyy6o |
+| S038 | DAHYcfHBvwE | https://canva.link/tkclkyd26w0q32a |
+| S039 | DAHYcTNsu9Y | https://canva.link/5yj6vqyarrs0oia |
+| S040 | DAHYcr9lUxE | https://canva.link/g5an76qgunrzz18 |
+| S041 | DAHYcph43aQ | https://canva.link/u8pm6493h84vbyy |
+| S042 | DAHYcr7Xlrs | https://canva.link/cu71veg1uyi19sf |
+| S043 | DAHYckBtFZQ | https://canva.link/zf6b9z8oavp4odz |
+| S044 | DAHYcgxYGyU | https://canva.link/x7yoozxfmvda57q |
+| S045 | DAHYcreHaZg | https://canva.link/856rzp2d16tvfr5 |
+| S046 | DAHYcu_Pqmg | https://canva.link/6ynlmxk431stc4n |
+| S047 | DAHYckavCwE | https://canva.link/v5gvqtl1bvu0aml |
+| S048 | DAHYclctb58 | https://canva.link/mdc1yfjsx2pxyjq |
+| S049 | DAHYcoIG6FM | https://canva.link/q1n6evvfk7p7nog |
+| S050 | DAHYcxBUNvc | https://canva.link/0rtahua21p6kegz |
 | S061 | DAHYbvhNELc | https://canva.link/x075boedrpp1vip |
 | S062 | DAHYbnysOS8 | https://canva.link/t3inab5w3gpa6z1 |
 | S063 | DAHYbuMdArM | https://canva.link/oxsnvfo11hdhfba |
 | S064 | DAHYbsL_BO4 | https://canva.link/wafa3idsbttlty8 |
 
-Still to build: S034–S060, S065–S100.
+Still to build: S051–S060, S065–S100.
 
-Known issue: S017 came back 9:16 instead of 3:4 portrait; needs a 1080×1440 copy.
+To delete: old 9:16 S017 (DAHYcdhU_XI, titled "... | OLD 9x16 delete") in W2.
