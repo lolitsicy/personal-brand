@@ -1,0 +1,172 @@
+<title>Metabolic Reset Launch Calendar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a production schedule. Timeline on top, then a filterable week-by-week run sheet. */
+:root {
+  --bg: #F3F7FA; --surface: #FFFFFF; --ink: #0F1B26; --muted: #5A6A79; --line: #D6E0E8;
+  --accent: #2E6A96; --ice: #DCEBF5; --pre: #8FB4CF; --launch: #1E2A36; --launch-ink: #E3ECF4;
+  --warn: #A3670F; --warn-bg: #FBF0DC;
+  --f-feed: #2E6A96; --f-carousel: #6A5AA8; --f-reel: #2F7D5B; --f-story: #A3670F;
+  --display: "Bodoni Moda", "Didot", Georgia, serif;
+  --body: "Geist", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B1219; --surface: #121C26; --ink: #E7EEF4; --muted: #93A4B3; --line: #24323F;
+  --accent: #9CC8E8; --ice: #16283A; --pre: #3E6683; --launch: #C9D8E4; --launch-ink: #0B1219;
+  --warn: #E9B866; --warn-bg: #2E2312;
+  --f-feed: #9CC8E8; --f-carousel: #B9A9F0; --f-reel: #7FCFA6; --f-story: #E9B866;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B1219; --surface: #121C26; --ink: #E7EEF4; --muted: #93A4B3; --line: #24323F;
+  --accent: #9CC8E8; --ice: #16283A; --pre: #3E6683; --launch: #C9D8E4; --launch-ink: #0B1219;
+  --warn: #E9B866; --warn-bg: #2E2312;
+  --f-feed: #9CC8E8; --f-carousel: #B9A9F0; --f-reel: #7FCFA6; --f-story: #E9B866;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); line-height: 1.05; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h3 { font-size: 1.2rem; }
+p { margin: 0; }
+.eyebrow, .mono { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+.eyebrow { text-transform: uppercase; }
+.lede { color: var(--muted); max-width: 64ch; font-size: 1.05rem; }
+header { display: grid; gap: 14px; }
+section { margin-top: 56px; display: grid; gap: 18px; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; min-width: 120px; }
+.stat b { font-family: var(--display); font-size: 1.6rem; font-weight: 400; font-variant-numeric: tabular-nums; }
+
+.timeline { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; overflow-x: auto; }
+.tl-inner { min-width: 860px; display: grid; gap: 6px; }
+.tl-row { display: grid; grid-template-columns: 230px 1fr; gap: 12px; align-items: center; }
+.tl-label { font-size: 13px; line-height: 1.25; }
+.tl-label small { display: block; color: var(--muted); font-size: 11.5px; }
+.tl-track { position: relative; height: 26px; border-radius: 6px; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(100%/9 - 1px), var(--line) calc(100%/9 - 1px), var(--line) calc(100%/9)); }
+.bar { position: absolute; top: 3px; bottom: 3px; border-radius: 5px; font-family: var(--mono); font-size: 11px; padding: 0 8px; display: flex; align-items: center; white-space: nowrap; overflow: hidden; }
+.bar.pre { background: var(--pre); color: var(--ink); }
+.bar.launch { background: var(--launch); color: var(--launch-ink); }
+.tl-axis { position: relative; height: 18px; margin-left: 242px; }
+.tl-axis span { position: absolute; font-family: var(--mono); font-size: 11px; color: var(--muted); transform: translateX(-2px); }
+.ms-track { position: relative; height: 0; }
+.golive { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); }
+.milestones { display: grid; gap: 6px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.ms { display: flex; gap: 10px; align-items: baseline; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 13.5px; min-width: 0; }
+.ms .mono { white-space: nowrap; }
+.ms.key { border-color: var(--accent); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 500 13px var(--body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.week { display: grid; gap: 10px; }
+.week-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.days { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.post { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--f, var(--line)); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.post-top { display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.post h4 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.05rem; line-height: 1.25; }
+.post p { font-size: 13.5px; color: var(--muted); overflow-wrap: anywhere; }
+.need { font-family: var(--mono); font-size: 11.5px; color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 2px 6px; justify-self: start; }
+.f-FEED { --f: var(--f-feed); } .f-CAROUSEL { --f: var(--f-carousel); } .f-REEL { --f: var(--f-reel); } .f-STORY { --f: var(--f-story); }
+.checklist { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 76ch; }
+footer { margin-top: 56px; color: var(--muted); font-size: 13px; }
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Maison Belasi · Metabolic Reset · Pre-launch to launch</p>
+  <h1>Metabolic Reset Launch Calendar</h1>
+  <p class="lede">100 organic posts and 11 ad campaigns from the waitlist opening on 21 October to the first-edition gifting push. Launch day is Thursday 3 December 2026.</p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<section aria-labelledby="ads">
+  <h2 id="ads">Ad flighting</h2>
+  <p class="lede">Light bars are pre-launch (waitlist, Leads objective). Dark bars are launch (Sales objective). Name campaigns "PRE |" and "LAUNCH |" in Ads Manager so you can switch a whole phase at once.</p>
+  <div class="timeline"><div class="tl-inner" id="tl"></div></div>
+  <div class="milestones" id="ms"></div>
+</section>
+
+<section aria-labelledby="golive">
+  <h2 id="golive">Go-live switch, 2 and 3 December</h2>
+  <ol class="checklist">
+    <li>By 30 Nov: place a test order and confirm the pixel's Purchase event shows in Events Manager.</li>
+    <li>2 Dec morning: L3 Waitlist to buyer goes live for early access [CONFIRM]. Email the waitlist at the same time.</li>
+    <li>2 Dec 23:59: filter campaigns by "PRE |", select all, turn off.</li>
+    <li>3 Dec 07:00: filter by "LAUNCH |", turn on L1 and L2. Swap the bio link from the waitlist page to the shop.</li>
+    <li>4 Dec: turn on L4 once there's a day of site traffic to retarget.</li>
+    <li>Don't change budgets for 3–4 days after launch. Let the ad sets exit learning.</li>
+  </ol>
+</section>
+
+<section aria-labelledby="posts">
+  <h2 id="posts">Post run sheet</h2>
+  <div class="filters" role="group" aria-label="Filter posts">
+    <button class="chip" type="button" id="f-ALL" data-f="ALL" aria-pressed="true">All</button>
+    <button class="chip" type="button" id="f-FEED" data-f="FEED" aria-pressed="false"><span class="dot" style="background:var(--f-feed)"></span>Feed</button>
+    <button class="chip" type="button" id="f-CAROUSEL" data-f="CAROUSEL" aria-pressed="false"><span class="dot" style="background:var(--f-carousel)"></span>Carousel</button>
+    <button class="chip" type="button" id="f-REEL" data-f="REEL" aria-pressed="false"><span class="dot" style="background:var(--f-reel)"></span>Reel + TikTok</button>
+    <button class="chip" type="button" id="f-STORY" data-f="STORY" aria-pressed="false"><span class="dot" style="background:var(--f-story)"></span>Story</button>
+    <button class="chip" type="button" id="f-NEEDS" data-f="NEEDS" aria-pressed="false">Needs footage or confirm</button>
+  </div>
+  <div id="weeks" style="display:grid;gap:36px"></div>
+</section>
+
+<footer>Canva: "Metabolic Reset | Organic Social | Pre-launch to Launch", one folder per week. Each design is named "S### Day DD Mon | FORMAT | title". Source: research/content-calendar/posts.csv.</footer>
+</div>
+
+<script>
+const POSTS = __POSTS__;
+const ADS = __ADS__;
+const MS = __MILESTONES__;
+const WEEKS = __WEEKS__;
+const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-NZ", { weekday: "short", day: "numeric", month: "short" });
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const counts = { FEED: 0, CAROUSEL: 0, REEL: 0, STORY: 0 };
+POSTS.forEach(p => counts[p.format.split("-")[0]]++);
+document.getElementById("stats").innerHTML = [
+  ["posts", POSTS.length], ["feed", counts.FEED], ["carousels", counts.CAROUSEL], ["reels + tiktok", counts.REEL], ["stories", counts.STORY], ["ad campaigns", ADS.length]
+].map(([l, v]) => `<div class="stat"><b>${v}</b><span class="mono">${l}</span></div>`).join("");
+
+const golive = MS.find(m => m.date === "2026-12-03");
+let tl = `<div class="tl-axis">${WEEKS.map(w => `<span style="left:${w.left}%">${w.label}</span>`).join("")}</div>`;
+tl += ADS.map(a => `<div class="tl-row"><div class="tl-label">${esc(a.name)}<small>${esc(a.sets)}</small></div>
+  <div class="tl-track"><div class="golive" style="left:${golive.left}%"></div><div class="bar ${a.phase === "PRE" ? "pre" : "launch"}" style="left:${a.left}%;width:${a.width}%" title="${esc(a.note)}">${fmt(a.start)} to ${fmt(a.end)}</div></div></div>`).join("");
+document.getElementById("tl").innerHTML = tl;
+document.getElementById("ms").innerHTML = MS.map(m => `<div class="ms ${m.date === "2026-12-03" ? "key" : ""}"><span class="mono">${fmt(m.date)}</span><span>${esc(m.label)}</span></div>`).join("");
+
+function render(filter) {
+  const byWeek = [];
+  POSTS.forEach(p => {
+    const kind = p.format.split("-")[0];
+    if (filter !== "ALL" && filter !== "NEEDS" && kind !== filter) return;
+    if (filter === "NEEDS" && !p.needs) return;
+    let w = byWeek.find(x => x.week === p.week);
+    if (!w) { w = { week: p.week, theme: p.theme, posts: [] }; byWeek.push(w); }
+    w.posts.push(p);
+  });
+  document.getElementById("weeks").innerHTML = byWeek.map(w => `<div class="week">
+    <div class="week-head"><h3>${esc(w.week)} · ${esc(w.theme)}</h3><span class="mono">${w.posts.length} posts</span></div>
+    <div class="days">${w.posts.map(p => `<article class="post f-${p.format.split("-")[0]}">
+      <div class="post-top"><span>${p.id} · ${fmt(p.date)}</span><span>${esc(p.format.replace("-", " ×"))}</span></div>
+      <h4>${esc(p.on_image)}</h4>
+      <p>${esc(p.caption)}</p>
+      <p class="mono">${esc(p.platforms)} · ${esc(p.pillar)}</p>
+      ${p.needs ? `<span class="need">${esc(p.needs)}</span>` : ""}
+    </article>`).join("")}</div></div>`).join("");
+}
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === c ? "true" : "false"));
+  render(c.dataset.f);
+}));
+render("ALL");
+</script>
