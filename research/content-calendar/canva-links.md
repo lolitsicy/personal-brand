@@ -80,7 +80,34 @@ Text-only layouts on a flat #E4EDF4 shape. To add a photo, delete the shape or u
 | S073 | DAHYdQTzGes | https://canva.link/osmqdtmkfype6pi |
 | S074 | DAHYddwExqQ | https://canva.link/vdh0zx0rwfqqt4u |
 | S075 | DAHYdbNWZqg | https://canva.link/vicef2j6n5i0xmk |
+| S076 | DAHYdT0M-wA | https://canva.link/dq0tspvnu6bz8lg |
+| S077 | DAHYdeAMFUM | https://canva.link/263k6y66awtqo22 |
+| S078 | DAHYdc1Ilxg | https://canva.link/6df8hu75twk37kn |
+| S079 | DAHYdRsm0E0 | https://canva.link/5uumq56ymefk7zu |
+| S080 | DAHYdXABgwo | https://canva.link/js4xnqpu3w6mvfa |
+| S081 | DAHYdV8Ixqc | https://www.canva.com/d/eP3FKxotQ-JOYvN |
+| S082 | DAHYdm1II08 | https://canva.link/jr62wdaiyqxlwl4 |
+| S083 | DAHYdlIqCTo | https://canva.link/dgxkfz794ecbp0u |
+| S084 | DAHYdkRYmKA | https://canva.link/5csdew81icug62l |
+| S085 | DAHYdpsN55Y | https://canva.link/h6p5yjc7dhqxd0b |
+| S086 | DAHYdvsrPQc | https://canva.link/0hor7h2t4e96ebp |
+| S087 | DAHYdgmAt8w | https://canva.link/sh5oeah6bhal75h |
+| S088 | DAHYdq24b84 | https://canva.link/4k33oyb0i5r3yon |
+| S089 | DAHYdiuZgvw | https://canva.link/mxv6ywol5bstyzq |
+| S090 | DAHYdkoCn6A | https://canva.link/092f772te3y2mp5 |
+| S091 | DAHYdz_gcWw | https://canva.link/q31l1nf766hxuu4 |
+| S092 | DAHYdwgrq8U | https://canva.link/flvm9vailzak2bf |
+| S093 | DAHYd8eneGQ | https://canva.link/9o1zs577k3g9pfg |
+| S094 | DAHYdzu_-Kg | https://canva.link/5c1ufa2m0k7f5l8 |
+| S095 | DAHYd3mptKg | https://canva.link/8dbmmehaoh9p981 |
+| S096 | DAHYd3a4mwo | https://canva.link/8zfs13eb070nr48 |
+| S097 | DAHYdw8ElfU | https://canva.link/70yrdsuq9364nkn |
+| S098 | DAHYd8nqWAY | https://canva.link/g4mb6rgp52lpzbr |
+| S099 | DAHYd37MAKg | https://www.canva.com/d/U8crPnqXdbAwVQR |
+| S100 | DAHYd8Pide0 | https://canva.link/z69vkj4smyj3fm3 |
 
-Still to build: S076–S100.
+All 100 built.
 
-To delete: old 9:16 S017 (DAHYcdhU_XI, titled "... | OLD 9x16 delete") in W2.
+To delete (titled "... | OLD 9x16 delete"): S017 DAHYcdhU_XI (W2), S081 DAHYdVk0pxs and S099 DAHYd-DDbO8 (Canva root).
+
+Fix by hand: headline serif varies across slides in carousels S053, S060, S071, S085, S091, S096 (select all headlines, set one font). Tight letter spacing on S074, S098, S099.
