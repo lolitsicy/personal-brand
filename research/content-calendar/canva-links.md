@@ -55,11 +55,32 @@ Text-only layouts on a flat #E4EDF4 shape. To add a photo, delete the shape or u
 | S048 | DAHYclctb58 | https://canva.link/mdc1yfjsx2pxyjq |
 | S049 | DAHYcoIG6FM | https://canva.link/q1n6evvfk7p7nog |
 | S050 | DAHYcxBUNvc | https://canva.link/0rtahua21p6kegz |
+| S051 | DAHYc4-RGyU | https://canva.link/6b9mmr3j87ph1df |
+| S052 | DAHYc9XBh_s | https://canva.link/gdvlbwsah5thf0d |
+| S053 | DAHYc5xhbbo | https://canva.link/nwqqriarc1j6psv |
+| S054 | DAHYc0QS6C0 | https://canva.link/jwafqqvy5gta3kt |
+| S055 | DAHYc-KKT4A | https://canva.link/9fqdvr3akhzxz5b |
+| S056 | DAHYc-YD0-Y | https://canva.link/4adffr1t7pj4hws |
+| S057 | DAHYc9QmO3Y | https://canva.link/criojzgeix0al0c |
+| S058 | DAHYcz2Cetw | https://canva.link/1zn34xgevqar0em |
+| S059 | DAHYdLnhzfI | https://canva.link/tg0rbs3cj9vz2k8 |
+| S060 | DAHYdEqCgSc | https://canva.link/uj08wlu5075j9g7 |
 | S061 | DAHYbvhNELc | https://canva.link/x075boedrpp1vip |
 | S062 | DAHYbnysOS8 | https://canva.link/t3inab5w3gpa6z1 |
 | S063 | DAHYbuMdArM | https://canva.link/oxsnvfo11hdhfba |
 | S064 | DAHYbsL_BO4 | https://canva.link/wafa3idsbttlty8 |
+| S065 | DAHYdO3eSbE | https://canva.link/bnz1x74ktwpuo04 |
+| S066 | DAHYdAxMFVQ | https://canva.link/1rktadxxqadf63s |
+| S067 | DAHYdA78liY | https://canva.link/jbjg2h26uriqmkp |
+| S068 | DAHYdKZhpLI | https://canva.link/gpt4ixbuanabjnp |
+| S069 | DAHYdARIZx8 | https://canva.link/info05l6wrneyfw |
+| S070 | DAHYdCDTVgk | https://canva.link/re2h5ppjqatw3ry |
+| S071 | DAHYdAK7Y5k | https://canva.link/57wcg0lc45g48gk |
+| S072 | DAHYdQUAja0 | https://canva.link/68pex9ddnwxej9x |
+| S073 | DAHYdQTzGes | https://canva.link/osmqdtmkfype6pi |
+| S074 | DAHYddwExqQ | https://canva.link/vdh0zx0rwfqqt4u |
+| S075 | DAHYdbNWZqg | https://canva.link/vicef2j6n5i0xmk |
 
-Still to build: S051–S060, S065–S100.
+Still to build: S076–S100.
 
 To delete: old 9:16 S017 (DAHYcdhU_XI, titled "... | OLD 9x16 delete") in W2.
