@@ -84,7 +84,7 @@ Output: `research/competitor-ads/reports/<YYYY-MM-DD>-teardown.md` with:
 For each white-space angle (or the angles the user picks), produce a **creative pack**:
 
 ### 4a. Copy
-Run `meta-ads-strategist` Prompt 41 output step plus the hook rules from its section 5. Deliver per angle:
+Run `meta-ads-strategist` Prompt 41 output step plus the hook rules from its section 5. Pick a structure from `references/copy-structures.md` (rhode = object-first, Arrae = hook + stacked benefits) per concept. Deliver per angle:
 - 3 hooks (first line / first 3 seconds)
 - 2 primary-text variants (one short ≤125 chars, one long)
 - 3 headlines (≤40 chars), 1 description
