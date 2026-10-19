@@ -33,7 +33,7 @@ Load any deferred tool with ToolSearch before calling it. If the Meta Ads connec
 
 ## Stage 1: Pull
 
-1. **Start from the watchlist.** Read `references/competitors.md`. Use saved `page_id`s where present; page-id queries are far more precise than keyword queries.
+1. **Start from the watchlist.** Read `references/competitors.md`. Use saved `page_id`s where present; page-id queries are far more precise than keyword queries. `search_terms` matches ad body text, not page names: to find a new brand's page_id, search a word that appears in their ads (their domain, e.g. `twoislandsco`, or a product name) rather than the brand name.
 2. **Discovery queries** (when the watchlist is thin or the user asks "who's out there"): run `ads_library_search` with `ad_active_status: ACTIVE`, `limit: 50`, and `countries: ["NZ","AU"]` first. Keyword set, one call each:
    - `metabolic reset`, `metabolism support`, `blood sugar support`, `glucose`, `berberine`, `gut health supplement`, `bloating`, `GLP-1 natural`, `inositol`, `hormone belly`
    Only widen to `["US","GB"]` if NZ/AU returns fewer than ~15 relevant ads, and label those results as out-of-market.
@@ -63,7 +63,7 @@ Save enriched records to `research/competitor-ads/enriched/<YYYY-MM-DD>.md`, one
 
 ## Stage 3: Analyse
 
-1. **Rank.** Run `python3 scripts/rank_ads.py <raw json files...>` from this skill's directory. It scores each ad on days live and on how many sibling variants the same page launched around it, since both are rough signals that an advertiser keeps paying for it. Treat the score as a proxy, never as proof of performance. Say this in the output.
+1. **Rank.** Results come back newest first, so a 50-ad pull from a heavy spender may all be days old. When that happens, skip ranking and say so; read the batch pattern instead (how many ads launched together, how many share one headline). Otherwise run `python3 scripts/rank_ads.py <raw json files...>` from this skill's directory. It scores each ad on days live and on how many sibling variants the same page launched around it, since both are rough signals that an advertiser keeps paying for it. Treat the score as a proxy, never as proof of performance. Say this in the output.
 2. **Teardown** each enriched ad with the 8-question framework in `references/analysis-framework.md` (it's Prompt 41 from `meta-ads-strategist`, extended with a compliance risk grade).
 3. **Pattern map** across all ads: hook types, emotional triggers, visual archetypes, offer mechanics, claim levels. Use the tables in the framework file.
 4. **White space.** Find what no one is doing, especially where competitors break NZ/AU rules or rely on transformation and before/after imagery. Maison Belasi's clinical restraint is the differentiator, so gaps where restraint wins are the priority.
