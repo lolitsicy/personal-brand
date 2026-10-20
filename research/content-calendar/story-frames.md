@@ -10,3 +10,16 @@ These Stories were planned as several frames but first built as a single cover. 
 | S059 | a daily capsule. / formulated to support metabolism, blood sugar balance and gut health. | join the waitlist. / [sticker] | |
 | S065 | when? / 3 december. | how much? / [price] [CONFIRM] | where? / we ship to NZ and AU. |
 | S083 | metabolic reset. / formulated to support metabolism, blood sugar balance and gut health. | shop now. / [sticker] | |
+
+## Built 20 Oct 2026
+
+Pages 2+ were added to the existing designs (same titles, same week folders). The new pages use Canva's default sans for the main line, because the tools can't set a font. In Canva, use Copy style from page 1's headline onto each new page's headline.
+
+| id | design | pages | edit link |
+|---|---|---|---|
+| S004 | DAHYb_PCmzI | 4 | https://www.canva.com/d/2TX90EycaQ-H_3d |
+| S023 | DAHYbqG7WfQ | 4 | https://www.canva.com/d/WJjiAKV2AexSuIa |
+| S033 | DAHYb29fYxk | 4 | https://www.canva.com/d/1_ypQ_yo6Zl9cel |
+| S059 | DAHYdLnhzfI | 3 | https://www.canva.com/d/TuN6q2ro09zwfL4 |
+| S065 | DAHYdO3eSbE | 4 | https://www.canva.com/d/5EnAEbSuqH-FJgG |
+| S083 | DAHYdlIqCTo | 3 | https://www.canva.com/d/NV5_7UyJrTpe5dh |

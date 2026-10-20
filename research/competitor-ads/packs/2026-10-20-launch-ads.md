@@ -83,6 +83,8 @@ L4-06 is a template only. Do not run it until a real, verified review exists and
 | L1-06 | https://canva.link/6kzmso36gvc47lh | https://www.canva.com/d/3OqJiSwj9i_sD-x |
 | L1-07 | https://canva.link/w2vwbci6g4esbey | https://www.canva.com/d/WycFEuDSxn6JLsZ |
 | L1-08 | https://canva.link/56zs0a3ji1msqww | https://www.canva.com/d/Vgzzk9yrnGU4Rv0 |
+| L2-01 | https://www.canva.com/d/C4OOWmsozbq8kln | https://www.canva.com/d/haBrwdNPUV9Jngu |
+| L2-02 | https://www.canva.com/d/3onZ10ZePqgTMfo | https://www.canva.com/d/dKupZma6XoNFEI7 |
 | L2-03 | https://canva.link/e827ustxtqmb40c | https://www.canva.com/d/BoiwM5jdnt8I-Ck |
 | L2-04 | https://canva.link/86css2bcuetmaux | https://www.canva.com/d/eTIG5XMf8mOWeNw |
 | L3-01 | https://canva.link/6e2bppst6m7iuhx | https://www.canva.com/d/EgNoDC8VZ4y1l_d |
