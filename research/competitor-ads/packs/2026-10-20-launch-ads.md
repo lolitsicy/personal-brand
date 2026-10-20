@@ -63,3 +63,18 @@ The plan was to wait for C1 winners (~22 Nov). These are built now so launch isn
 | L4-06 | A | **"[review]"** / [first name], [city] [REVIEW] | Real words from a real customer [REVIEW]. Shop now ↓ | In her words | Light gradient |
 
 L4-06 is a template only. Do not run it until a real, verified review exists and the customer has agreed to its use.
+
+## Canva links
+
+| Ad | 9:16 | 4:5 |
+|---|---|---|
+| L1-01 | https://canva.link/1mhwi51dn9xkbil | https://www.canva.com/d/lkN4GAthdEUIRYb |
+| L1-02 | https://canva.link/ptr5ant8vsl4y4y | https://www.canva.com/d/c8knBnj3S0jV9Ad |
+| L1-03 | https://canva.link/pr43xkctobbcza9 | https://www.canva.com/d/ZwQwzVHtIFWJFMX |
+| L1-04 | https://canva.link/5phdnzj2wwyk2kh | https://www.canva.com/d/Z86CCw4muC_1O95 |
+| L1-05 | https://canva.link/mlhn5qnhfvw86m4 | https://www.canva.com/d/7Ue9zapvT8HPInV |
+| L1-06 | https://canva.link/6kzmso36gvc47lh | https://www.canva.com/d/3OqJiSwj9i_sD-x |
+| L1-07 | https://canva.link/w2vwbci6g4esbey | https://www.canva.com/d/WycFEuDSxn6JLsZ |
+| L1-08 | https://canva.link/56zs0a3ji1msqww | https://www.canva.com/d/Vgzzk9yrnGU4Rv0 |
+| L2-03 | https://canva.link/e827ustxtqmb40c | https://www.canva.com/d/BoiwM5jdnt8I-Ck |
+| L2-04 | https://canva.link/86css2bcuetmaux | https://www.canva.com/d/eTIG5XMf8mOWeNw |
