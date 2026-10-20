@@ -17,7 +17,7 @@ The plan was to wait for C1 winners (~22 Nov). These are built now so launch isn
 | Campaign | Canva folder | Audience | Ads | Flight |
 |---|---|---|---|---|
 | `LAUNCH \| L1 Announcement \| Sales` | FAHYbq6JN1I | Broad W25–45 NZ+AU | L1-01 to L1-08 | 3–20 Dec |
-| `LAUNCH \| L2 Formula reveal \| Sales` | FAHYbg70WaI | Cold + warm | existing 33, 34 + L2-03, L2-04 | 3–20 Dec |
+| `LAUNCH \| L2 Formula reveal \| Sales` | FAHYbg70WaI | Cold + warm | L2-01 to L2-04 | 3–20 Dec |
 | `LAUNCH \| L3 Waitlist to buyer \| Sales` | FAHYbnaFLtg | Waitlist custom audience | L3-01 to L3-05 | 2–13 Dec |
 | `LAUNCH \| L4 Visitors and cart \| Sales` | FAHYbp0BPBY | Site visitors 14d + ATC, excl. purchasers | L4-01 to L4-06 | 4–20 Dec |
 
@@ -34,7 +34,14 @@ The plan was to wait for C1 winners (~22 Nov). These are built now so launch isn
 | L1-07 | R | **the newest thing on your vanity.** | metabolic reset. formulated to support metabolism, blood sugar balance and gut health. shop now. | new on the vanity | Capsules on mirror |
 | L1-08 | A | **Now shipping to NZ and AU.** / [price] · [shipping offer] [CONFIRM] | Metabolic Reset is live. Ships across NZ and AU. Shop now ↓ | Now shipping | Inside the bag |
 
-## L2 · Formula reveal · additions (existing 33, 34 already in folder: swap their CTA to "shop now")
+## L2 · Formula reveal
+
+Ads 33 and 34 were moved from pre-launch. They are renamed L2-01 and L2-02, "[HOLD]" is removed from the image (L2 only runs from 3 Dec, after the 30 Nov formula reveal), and the copy is rewritten for launch. The old 34 copy said "three ingredients", but the formula has four, so that line is fixed.
+
+| # | Str | On-image | Primary text | Headline | Image |
+|---|---|---|---|---|---|
+| L2-01 (was 33) | R | **look closer.** | every ingredient chosen on purpose. see the full formula. shop now. | see the formula | Bottle from beneath clear glass |
+| L2-02 (was 34) | R | **ginger. green tea. barberry.** | ingredients you know, every dose on the label [CONFIRM]. shop now. | chosen on purpose | Ingredients on chrome spoon |
 
 | # | Str | On-image | Primary text | Headline | Image |
 |---|---|---|---|---|---|

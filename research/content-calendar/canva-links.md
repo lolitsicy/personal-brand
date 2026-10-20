@@ -108,6 +108,6 @@ Text-only layouts on a flat #E4EDF4 shape. To add a photo, delete the shape or u
 
 All 100 built.
 
-To delete (titled "... | OLD 9x16 delete"): S017 DAHYcdhU_XI (W2), S081 DAHYdVk0pxs and S099 DAHYd-DDbO8 (Canva root).
+Old wrong-size copies of S017, S081 and S099 are in "_ARCHIVE | old wrong-size copies | safe to delete" (https://www.canva.com/folder/FAHYkUNVRQU). Delete that folder whenever you like.
 
 Fix by hand: headline serif varies across slides in carousels S053, S060, S071, S085, S091, S096 (select all headlines, set one font). Tight letter spacing on S074, S098, S099.
