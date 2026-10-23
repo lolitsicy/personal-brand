@@ -1,0 +1,306 @@
+<title>Metabolic Reset Creative Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a run sheet. Facts the team owes at the top, then one dense table of every creative, grouped by week or campaign. */
+:root {
+  --bg: #eef3f7;
+  --panel: #f8fbfd;
+  --ink: #0f1b26;
+  --muted: #5a6a78;
+  --line: #cfdbe5;
+  --chrome: #b9c6d2;
+  --accent: #2f5f8a;
+  --ok: #2c7a4b;
+  --ok-bg: #dcefe3;
+  --warn: #8a5a12;
+  --warn-bg: #f6e8cc;
+  --bad: #9b2f2f;
+  --bad-bg: #f5dcdc;
+  --info: #2f5f8a;
+  --info-bg: #dce8f3;
+  --display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1820; --panel: #15212c; --ink: #e4edf4; --muted: #94a6b6; --line: #273746; --chrome: #3b4d5e; --accent: #8fb8de;
+    --ok: #7fcf9c; --ok-bg: #173323; --warn: #e3b866; --warn-bg: #3a2c12; --bad: #ee9a9a; --bad-bg: #3d1c1c; --info: #8fb8de; --info-bg: #19304a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1820; --panel: #15212c; --ink: #e4edf4; --muted: #94a6b6; --line: #273746; --chrome: #3b4d5e; --accent: #8fb8de;
+  --ok: #7fcf9c; --ok-bg: #173323; --warn: #e3b866; --warn-bg: #3a2c12; --bad: #ee9a9a; --bad-bg: #3d1c1c; --info: #8fb8de; --info-bg: #19304a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 em { font-style: italic; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 68ch; margin: 0; }
+.notice { font-size: 13px; color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 6px; }
+
+.summary { display: flex; flex-wrap: wrap; gap: 10px; }
+.stat { display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); min-width: 120px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.stat[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.stat b { font-family: var(--mono); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.bar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: var(--line); }
+.bar i { display: block; height: 100%; }
+
+section { display: grid; gap: 12px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.fact { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.fact label { font-weight: 600; font-size: 13px; }
+.fact .q { font-size: 12px; color: var(--muted); }
+.fact .uses { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.fact input { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); width: 100%; }
+.fact.done { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); }
+.fact .state { font-family: var(--mono); font-size: 11px; }
+.fact.done .state { color: var(--ok); }
+.fact:not(.done) .state { color: var(--bad); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters select, .filters input[type=search] { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); }
+.filters input[type=search] { flex: 1 1 200px; min-width: 0; }
+.count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 980px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--panel); position: sticky; top: 0; }
+tr.group td { font-family: var(--display); font-size: 17px; background: color-mix(in srgb, var(--chrome) 22%, var(--panel)); padding-top: 12px; }
+tr.group td small { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: 8px; }
+td.id { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+td.title { min-width: 200px; }
+td.title .meta { font-size: 12px; color: var(--muted); }
+.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.s-missing { background: var(--bad-bg); color: var(--bad); }
+.s-facts { background: var(--warn-bg); color: var(--warn); }
+.s-photo, .s-font, .s-film { background: var(--info-bg); color: var(--info); }
+.s-review { background: color-mix(in srgb, var(--chrome) 40%, var(--panel)); color: var(--ink); }
+.s-ready { background: var(--ok-bg); color: var(--ok); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.tag { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); }
+.tag.open { border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); color: var(--bad); }
+.links { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.links a { color: var(--accent); text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+td.chk { text-align: center; }
+td.chk input { width: 17px; height: 17px; accent-color: var(--accent); }
+td.chk .na { color: var(--muted); font-size: 12px; }
+.issues { font-size: 12px; color: var(--muted); margin: 4px 0 0; padding-left: 16px; }
+td.notes input { font: inherit; font-size: 12px; width: 100%; min-width: 160px; padding: 5px 7px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--ink); }
+td.notes input:hover, td.notes input:focus { border-color: var(--line); background: var(--bg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Maison Belasi · Metabolic Reset · go-live Thu 3 Dec 2026</div>
+    <h1>Creative <em>tracker</em></h1>
+    <p class="lede">Every organic post, Reel script and Meta ad from waitlist to launch, and what each one still needs before it can run. Tick items off as you finish them in Canva. Fill a fact once and every creative that uses it unblocks.</p>
+    <div class="notice" id="ro" hidden>You can view this tracker but not edit it. Ask the owner for edit access to tick items off.</div>
+  </header>
+
+  <section aria-labelledby="sumh">
+    <h2 id="sumh">Where it stands</h2>
+    <div class="bar" id="bar" aria-hidden="true"></div>
+    <div class="summary" id="summary"></div>
+    <div class="legend">
+      <span><b>Missing</b>: not built yet</span>
+      <span><b>Needs facts</b>: a [placeholder] is still on it</span>
+      <span><b>Needs photo / film</b>: shoot asset not added</span>
+      <span><b>Font fix</b>: set one font by hand in Canva</span>
+      <span><b>Review</b>: everything done, needs your sign-off</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="facth">
+    <h2 id="facth">Facts we still need from you</h2>
+    <p class="lede">These are the bracketed placeholders across the designs. Type the confirmed answer and press Enter. Claude reads these and replaces the brackets in Canva.</p>
+    <div class="facts" id="facts"><div class="empty">Loading the facts list…</div></div>
+  </section>
+
+  <section aria-labelledby="listh">
+    <h2 id="listh">Every creative</h2>
+    <div class="filters">
+      <select id="f-area" aria-label="Area"><option value="">All areas</option></select>
+      <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
+      <input type="search" id="f-q" placeholder="Search id, title, issue" aria-label="Search">
+      <span class="count" id="count"></span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ID</th><th>Creative</th><th>Status</th><th>Canva</th><th>Photo</th><th>Font</th><th>Approved</th><th>Notes</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">Loading creatives. If this stays empty, the tracker hasn't been filled yet.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const STATUS = [
+  ["missing", "Missing"], ["facts", "Needs facts"], ["film", "Needs filming"], ["photo", "Needs photo"],
+  ["font", "Font fix"], ["review", "Review"], ["ready", "Ready"]
+];
+const STATUS_LABEL = Object.fromEntries(STATUS);
+const BAR_COLOR = { missing: "var(--bad)", facts: "var(--warn)", film: "var(--info)", photo: "var(--info)", font: "var(--chrome)", review: "var(--muted)", ready: "var(--ok)" };
+let items = [], facts = {}, db = null, canWrite = true;
+const filt = { area: "", status: "", q: "" };
+const $ = s => document.querySelector(s);
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800); }
+
+function openFacts(it) { return (it.facts || []).filter(k => !(facts[k] && String(facts[k].value || "").trim())); }
+function statusOf(it) {
+  if (!it.built) return "missing";
+  if (openFacts(it).length) return "facts";
+  if (it.film_needed && !it.film_done) return "film";
+  if (it.photo_needed && !it.photo_done) return "photo";
+  if (it.font_fix && !it.font_done) return "font";
+  if (!it.approved) return "review";
+  return "ready";
+}
+
+function renderSummary() {
+  const c = Object.fromEntries(STATUS.map(([k]) => [k, 0]));
+  items.forEach(it => c[statusOf(it)]++);
+  const total = items.length || 1;
+  $("#bar").innerHTML = STATUS.map(([k]) => c[k] ? `<i style="width:${c[k] / total * 100}%;background:${BAR_COLOR[k]}"></i>` : "").join("");
+  const s = $("#summary"); s.textContent = "";
+  const mk = (key, n, label) => { const b = document.createElement("button"); b.className = "stat"; b.type = "button"; b.setAttribute("aria-pressed", String(filt.status === key)); b.innerHTML = `<b>${n}</b><span></span>`; b.querySelector("span").textContent = label; b.onclick = () => { filt.status = filt.status === key ? "" : key; $("#f-status").value = filt.status; render(); }; s.appendChild(b); };
+  mk("", items.length, "Creatives tracked");
+  STATUS.forEach(([k, l]) => mk(k, c[k], l));
+}
+
+function renderFacts() {
+  const box = $("#facts");
+  const keys = Object.keys(facts).sort((a, b) => (facts[a].order ?? 99) - (facts[b].order ?? 99));
+  if (!keys.length) { box.innerHTML = `<div class="empty">No facts listed yet.</div>`; return; }
+  const uses = {}; items.forEach(it => (it.facts || []).forEach(k => (uses[k] = uses[k] || []).push(it.id)));
+  box.textContent = "";
+  keys.forEach(k => {
+    const f = facts[k]; const done = !!String(f.value || "").trim();
+    const d = document.createElement("div"); d.className = "fact" + (done ? " done" : "");
+    const id = "fact-" + k;
+    d.innerHTML = `<label for="${id}"></label><div class="q"></div><input id="${id}" type="text"><div class="uses"></div><div class="state"></div>`;
+    d.querySelector("label").textContent = f.label || k;
+    d.querySelector(".q").textContent = f.question || "";
+    const inp = d.querySelector("input"); inp.value = f.value || ""; inp.placeholder = "Not confirmed yet"; inp.disabled = !canWrite;
+    const u = uses[k] || []; d.querySelector(".uses").textContent = u.length ? `Used in ${u.length}: ${u.slice(0, 8).join(", ")}${u.length > 8 ? "…" : ""}` : "Not used in any creative";
+    d.querySelector(".state").textContent = done ? "Confirmed" : "Blocking";
+    const save = async () => { const v = inp.value.trim(); if (v === (f.value || "")) return; await write(`facts/${k}`, { value: v }, done ? "Fact updated" : "Fact saved"); };
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+    inp.addEventListener("change", save);
+    box.appendChild(d);
+  });
+}
+
+function renderRows() {
+  const tb = $("#rows");
+  const q = filt.q.toLowerCase();
+  const list = items.filter(it => (!filt.area || it.area === filt.area) && (!filt.status || statusOf(it) === filt.status) &&
+    (!q || [it.id, it.title, it.group, ...(it.issues || []), it.notes || ""].join(" ").toLowerCase().includes(q)));
+  $("#count").textContent = `${list.length} of ${items.length}`;
+  if (!items.length) { tb.innerHTML = `<tr><td colspan="8" class="empty">No creatives yet. Claude adds them here.</td></tr>`; return; }
+  if (!list.length) { tb.innerHTML = `<tr><td colspan="8" class="empty">Nothing matches these filters.</td></tr>`; return; }
+  tb.textContent = "";
+  let lastGroup = null;
+  list.forEach(it => {
+    if (it.group !== lastGroup) {
+      lastGroup = it.group;
+      const g = document.createElement("tr"); g.className = "group";
+      const n = list.filter(x => x.group === it.group).length;
+      g.innerHTML = `<td colspan="8"></td>`; g.firstChild.textContent = it.group || "Other";
+      const sm = document.createElement("small"); sm.textContent = `${it.area} · ${n}`; g.firstChild.appendChild(sm);
+      tb.appendChild(g);
+    }
+    const st = statusOf(it);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="id"></td><td class="title"><div class="t"></div><div class="meta"></div><div class="tags"></div><ul class="issues"></ul></td>
+      <td><span class="pill s-${st}"></span></td><td><div class="links"></div></td>
+      <td class="chk" data-k="photo"></td><td class="chk" data-k="font"></td><td class="chk" data-k="approved"></td><td class="notes"><input type="text" aria-label="Notes"></td>`;
+    tr.querySelector(".id").textContent = it.id;
+    tr.querySelector(".t").textContent = it.title || "";
+    tr.querySelector(".meta").textContent = [it.date, it.kind, it.formats].filter(Boolean).join(" · ");
+    const tags = tr.querySelector(".tags"); const open = openFacts(it);
+    (it.facts || []).forEach(k => { const s = document.createElement("span"); s.className = "tag" + (open.includes(k) ? " open" : ""); s.textContent = (facts[k] && facts[k].label) || k; tags.appendChild(s); });
+    const ul = tr.querySelector(".issues"); (it.issues || []).forEach(x => { const li = document.createElement("li"); li.textContent = x; ul.appendChild(li); }); if (!ul.children.length) ul.remove();
+    tr.querySelector(".pill").textContent = STATUS_LABEL[st];
+    const lk = tr.querySelector(".links"); (it.links || []).forEach(l => { if (!/^https:\/\//.test(l.url || "")) return; const a = document.createElement("a"); a.href = l.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = l.label || "open"; lk.appendChild(a); });
+    if (!lk.children.length) lk.innerHTML = `<span class="na">none</span>`;
+    const chk = (cell, needKey, doneKey, label) => {
+      if (needKey && !it[needKey]) { cell.innerHTML = `<span class="na">n/a</span>`; return; }
+      const c = document.createElement("input"); c.type = "checkbox"; c.id = `${doneKey}-${it.id}`; c.checked = !!it[doneKey]; c.disabled = !canWrite || !it.built; c.setAttribute("aria-label", `${label} for ${it.id}`);
+      c.onchange = () => write(`items/${it.id}`, { [doneKey]: c.checked }, c.checked ? `${it.id}: ${label} done` : `${it.id}: ${label} reopened`);
+      cell.appendChild(c);
+    };
+    chk(tr.querySelector('[data-k="photo"]'), it.film_needed ? "film_needed" : "photo_needed", it.film_needed ? "film_done" : "photo_done", it.film_needed ? "filmed" : "photo");
+    chk(tr.querySelector('[data-k="font"]'), "font_fix", "font_done", "font");
+    chk(tr.querySelector('[data-k="approved"]'), null, "approved", "approved");
+    const ni = tr.querySelector(".notes input"); ni.id = `notes-${it.id}`; ni.value = it.notes || ""; ni.placeholder = canWrite ? "Add a note" : ""; ni.disabled = !canWrite;
+    ni.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); ni.blur(); } });
+    ni.addEventListener("change", () => write(`items/${it.id}`, { notes: ni.value.trim() }, "Note saved"));
+    tb.appendChild(tr);
+  });
+}
+
+function fillFilters() {
+  const areas = [...new Set(items.map(i => i.area))];
+  const fa = $("#f-area"); const keep = fa.value;
+  fa.innerHTML = `<option value="">All areas</option>` + areas.map(a => `<option></option>`).join("");
+  areas.forEach((a, i) => { fa.options[i + 1].value = a; fa.options[i + 1].textContent = a; });
+  fa.value = keep;
+  const fs = $("#f-status");
+  if (fs.options.length === 1) STATUS.forEach(([k, l]) => { const o = document.createElement("option"); o.value = k; o.textContent = l; fs.appendChild(o); });
+}
+
+function render() { renderSummary(); renderFacts(); renderRows(); }
+
+async function write(path, data, msg) {
+  if (!db) return;
+  try { await db.doc(path).update(data); toast(msg); }
+  catch (e) {
+    if (e && (e.code === "not_granted" || e.code === "revoked")) { canWrite = false; $("#ro").hidden = false; render(); toast("You don't have edit access"); }
+    else toast("Couldn't save. Check your connection and try again.");
+  }
+}
+
+$("#f-area").onchange = e => { filt.area = e.target.value; render(); };
+$("#f-status").onchange = e => { filt.status = e.target.value; render(); };
+$("#f-q").oninput = e => { filt.q = e.target.value; renderRows(); };
+
+(async () => {
+  const cl = window.claude;
+  db = cl ? await cl.use("db") : null;
+  if (!db) {
+    $("#rows").innerHTML = `<tr><td colspan="8" class="empty">Sign in to claude.ai to load the tracker.</td></tr>`;
+    $("#facts").innerHTML = `<div class="empty">Sign in to see the facts list.</div>`;
+    return;
+  }
+  const user = await cl.use("user");
+  if (user) { const w = user.can ? user.can("data.write") : null; if (w === false) { canWrite = false; $("#ro").hidden = false; } }
+  db.collection("items").orderBy("order").onSnapshot(snap => {
+    items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    fillFilters(); render();
+  }, () => { $("#rows").innerHTML = `<tr><td colspan="8" class="empty">Couldn't load creatives. Reload the page to try again.</td></tr>`; });
+  db.collection("facts").onSnapshot(snap => {
+    facts = {}; snap.docs.forEach(d => facts[d.id] = d.data());
+    render();
+  }, () => {});
+})();
+</script>
