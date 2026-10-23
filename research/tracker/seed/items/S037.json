@@ -1,0 +1,28 @@
+{
+ "order": 37,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "under the glass BTS",
+ "date": "Wed 11 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcUEI9_w/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "studiovic_handle"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,28 @@
+{
+ "order": 52,
+ "area": "Organic social",
+ "group": "W5 \u00b7 Education and first creators",
+ "title": "creator takeover",
+ "date": "Thu 19 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc9XBh_s/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "creators"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

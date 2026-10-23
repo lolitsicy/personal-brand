@@ -1,0 +1,29 @@
+{
+ "order": 64,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "creator 3 post",
+ "date": "Thu 26 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYbsL_BO4/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "creators",
+  "creator_product_date"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

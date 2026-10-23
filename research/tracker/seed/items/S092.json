@@ -1,0 +1,29 @@
+{
+ "order": 92,
+ "area": "Organic social",
+ "group": "W8 \u00b7 Launch week",
+ "title": "creator it arrived",
+ "date": "Tue 08 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdwgrq8U/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "creators",
+  "creator_product_date"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

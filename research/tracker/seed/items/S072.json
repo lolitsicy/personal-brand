@@ -1,0 +1,28 @@
+{
+ "order": 72,
+ "area": "Organic social",
+ "group": "W7 \u00b7 Formula reveal and countdown",
+ "title": "chrome spoon ingredients",
+ "date": "Mon 30 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdQUAja0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "ingredient4"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

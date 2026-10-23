@@ -1,0 +1,34 @@
+{
+ "order": 177,
+ "area": "Launch ads",
+ "group": "L4 Visitors and cart",
+ "title": "\"\"",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgsax58k/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgiSmZas/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "review"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Template only. Don't run until a real, verified review exists and the customer agrees."
+ ],
+ "notes": ""
+}

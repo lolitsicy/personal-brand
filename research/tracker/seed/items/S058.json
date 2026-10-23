@@ -1,0 +1,26 @@
+{
+ "order": 58,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "meet metabolic reset",
+ "date": "Mon 23 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcz2Cetw/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

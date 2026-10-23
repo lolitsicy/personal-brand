@@ -1,0 +1,26 @@
+{
+ "order": 20,
+ "area": "Organic social",
+ "group": "W2 \u00b7 The gap: doing everything right",
+ "title": "three systems card",
+ "date": "Sun 01 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcbohYz4/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,26 @@
+{
+ "order": 11,
+ "area": "Organic social",
+ "group": "W2 \u00b7 The gap: doing everything right",
+ "title": "the gap",
+ "date": "Mon 26 Oct",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-5",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcG_6uFA/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

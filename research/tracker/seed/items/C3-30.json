@@ -1,0 +1,32 @@
+{
+ "order": 130,
+ "area": "Pre-launch ads",
+ "group": "C3 Problem to Fix",
+ "title": "Before you buy another supplement, read this.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbLgu0ZU/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbNoEzy0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "label_disclosure"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

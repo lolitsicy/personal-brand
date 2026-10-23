@@ -1,0 +1,33 @@
+{
+ "order": 173,
+ "area": "Launch ads",
+ "group": "L4 Visitors and cart",
+ "title": "Still thinking about it?",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgoZtRu0/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgunamLQ/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "ingredient4",
+  "label_disclosure"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,28 @@
+{
+ "order": 77,
+ "area": "Organic social",
+ "group": "W7 \u00b7 Formula reveal and countdown",
+ "title": "waitlist first",
+ "date": "Wed 02 Dec",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdeAMFUM/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "early_access_date"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

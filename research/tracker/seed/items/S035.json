@@ -1,0 +1,26 @@
+{
+ "order": 35,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "handle with tweezers",
+ "date": "Tue 10 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcd2ccnY/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

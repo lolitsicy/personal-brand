@@ -1,0 +1,28 @@
+{
+ "order": 53,
+ "area": "Organic social",
+ "group": "W5 \u00b7 Education and first creators",
+ "title": "metabolism myths",
+ "date": "Fri 20 Nov",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-5",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc5xhbbo/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Headline serif changes from slide to slide: set one font."
+ ],
+ "notes": ""
+}

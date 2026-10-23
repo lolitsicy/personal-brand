@@ -1,0 +1,30 @@
+{
+ "order": 105,
+ "area": "Pre-launch ads",
+ "group": "C1 Hook Test",
+ "title": "biohacking, but make it fashion.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbNn6LUc/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbDzf2vA/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

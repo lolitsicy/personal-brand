@@ -1,0 +1,30 @@
+{
+ "order": 128,
+ "area": "Pre-launch ads",
+ "group": "C3 Problem to Fix",
+ "title": "Made for women who already do everything right.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbKIaZ_A/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbPYFD5Y/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,28 @@
+{
+ "order": 3,
+ "area": "Organic social",
+ "group": "W1 \u00b7 Tease: the world of maison belasi",
+ "title": "biohacking dressed up film",
+ "date": "Sun 25 Oct",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYb5yXBJk/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Moved from 22 Oct (missed) to 25 Oct."
+ ],
+ "notes": ""
+}

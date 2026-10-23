@@ -1,0 +1,30 @@
+{
+ "order": 156,
+ "area": "Launch ads",
+ "group": "L1 Announcement",
+ "title": "You eat well. You train. You're still tired by 3pm.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgOhVSnQ/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgF2b2zE/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

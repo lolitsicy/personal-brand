@@ -1,0 +1,28 @@
+{
+ "order": 19,
+ "area": "Organic social",
+ "group": "W2 \u00b7 The gap: doing everything right",
+ "title": "scariest thing in your drawer",
+ "date": "Sat 31 Oct",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcVOarWc/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "label_disclosure"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

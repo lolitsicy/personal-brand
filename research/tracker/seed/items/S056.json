@@ -1,0 +1,26 @@
+{
+ "order": 56,
+ "area": "Organic social",
+ "group": "W5 \u00b7 Education and first creators",
+ "title": "first look sunday",
+ "date": "Sun 22 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc-YD0-Y/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

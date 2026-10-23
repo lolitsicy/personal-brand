@@ -1,0 +1,30 @@
+{
+ "order": 99,
+ "area": "Organic social",
+ "group": "W9 \u00b7 First edition and gifting",
+ "title": "last order date",
+ "date": "Thu 17 Dec",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYd37MAKg/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "shipping_cutoffs"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Tight letter spacing in 'order for'. Nudge by hand."
+ ],
+ "notes": ""
+}

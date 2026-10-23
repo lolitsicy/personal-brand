@@ -1,0 +1,30 @@
+{
+ "order": 23,
+ "area": "Organic social",
+ "group": "W3 \u00b7 What we stand for",
+ "title": "founder Q&A",
+ "date": "Mon 02 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYbqG7WfQ/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "founder_qa"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Pages 2 to 4 use the default sans, and the wordmark is centred while page 1's is left-aligned."
+ ],
+ "notes": ""
+}

@@ -1,0 +1,26 @@
+{
+ "order": 13,
+ "area": "Organic social",
+ "group": "W2 \u00b7 The gap: doing everything right",
+ "title": "three systems in 20 seconds",
+ "date": "Tue 27 Oct",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcC5DLTE/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,32 @@
+{
+ "order": 85,
+ "area": "Organic social",
+ "group": "LAUNCH \u00b7 Launch day",
+ "title": "everything you need to know",
+ "date": "Thu 03 Dec",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-6",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdpsN55Y/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "price",
+  "dose",
+  "policies"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Headline serif changes on all 6 pages: set one font."
+ ],
+ "notes": ""
+}

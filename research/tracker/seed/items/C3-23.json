@@ -1,0 +1,32 @@
+{
+ "order": 123,
+ "area": "Pre-launch ads",
+ "group": "C3 Problem to Fix",
+ "title": "3 things we left out of Metabolic Reset.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbE-Z44Y/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbN4pjW0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "label_disclosure"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,1224 @@
+[
+ [
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S001",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S001.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S002",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S002.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S003",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S003.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S004",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S004.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S005",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S005.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S006",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S006.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S007",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S007.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S008",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S008.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S009",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S009.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S010",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S010.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S011",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S011.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S012",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S012.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S013",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S013.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S014",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S014.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S015",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S015.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S016",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S016.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S017",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S017.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S018",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S018.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S019",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S019.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S020",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S020.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S021",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S021.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S022",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S022.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S023",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S023.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S024",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S024.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S025",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S025.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S026",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S026.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S027",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S027.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S028",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S028.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S029",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S029.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S030",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S030.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S031",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S031.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S032",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S032.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S033",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S033.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S034",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S034.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S035",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S035.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S036",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S036.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S037",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S037.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S038",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S038.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S039",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S039.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S040",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S040.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S041",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S041.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S042",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S042.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S043",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S043.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S044",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S044.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S045",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S045.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S046",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S046.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S047",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S047.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S048",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S048.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S049",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S049.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S050",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S050.json"
+  }
+ ],
+ [
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S051",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S051.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S052",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S052.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S053",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S053.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S054",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S054.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S055",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S055.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S056",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S056.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S057",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S057.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S058",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S058.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S059",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S059.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S060",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S060.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S061",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S061.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S062",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S062.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S063",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S063.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S064",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S064.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S065",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S065.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S066",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S066.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S067",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S067.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S068",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S068.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S069",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S069.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S070",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S070.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S071",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S071.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S072",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S072.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S073",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S073.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S074",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S074.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S075",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S075.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S076",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S076.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S077",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S077.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S078",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S078.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S079",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S079.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S080",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S080.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S081",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S081.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S082",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S082.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S083",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S083.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S084",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S084.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S085",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S085.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S086",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S086.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S087",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S087.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S088",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S088.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S089",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S089.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S090",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S090.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S091",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S091.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S092",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S092.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S093",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S093.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S094",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S094.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S095",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S095.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S096",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S096.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S097",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S097.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S098",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S098.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S099",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S099.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "S100",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/S100.json"
+  }
+ ],
+ [
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-02.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-05",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-05.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-06",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-06.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-07",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-07.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-08",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-08.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-09",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-09.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C1-10",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C1-10.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-11",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-11.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-12",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-12.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-13",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-13.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-14",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-14.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-15",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-15.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-16",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-16.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-17",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-17.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-18",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-18.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-19",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-19.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C2-20",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C2-20.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-21",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-21.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-22",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-22.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-23",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-23.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-24",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-24.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-25",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-25.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-26",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-26.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-27",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-27.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-28",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-28.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-29",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-29.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C3-30",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C3-30.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-31",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-31.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-32",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-32.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-35",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-35.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-36",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-36.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-37",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-37.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-38",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-38.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-39",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-39.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C4-40",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C4-40.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-41",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-41.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-42",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-42.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-43",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-43.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-44",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-44.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-45",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-45.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-46",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-46.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-47",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-47.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-48",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-48.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-49",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-49.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "C5-50",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/C5-50.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-02.json"
+  }
+ ],
+ [
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-05",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-05.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "LEGACY-09",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/LEGACY-09.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-02.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-05",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-05.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-06",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-06.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-07",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-07.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L1-08",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L1-08.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L2-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L2-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L2-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L2-02.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L2-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L2-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L2-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L2-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L3-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L3-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L3-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L3-02.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L3-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L3-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L3-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L3-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L3-05",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L3-05.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-01",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-01.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-02",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-02.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-03",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-03.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-04",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-04.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-05",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-05.json"
+  },
+  {
+   "op": "set",
+   "collection": "items",
+   "doc_id": "L4-06",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/items/L4-06.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "price",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/price.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "dose",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/dose.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "ingredient4",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/ingredient4.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "label_disclosure",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/label_disclosure.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "run_size",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/run_size.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "shipping_offer",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/shipping_offer.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "policies",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/policies.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "subscription",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/subscription.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "founding_price",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/founding_price.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "early_access_date",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/early_access_date.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "waitlist_close_date",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/waitlist_close_date.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "shipping_cutoffs",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/shipping_cutoffs.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "third_perk",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/third_perk.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "founder_note",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/founder_note.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "founder_story",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/founder_story.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "name_story",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/name_story.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "founder_qa",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/founder_qa.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "creators",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/creators.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "creator_product_date",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/creator_product_date.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "gift_items",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/gift_items.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "box_contents",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/box_contents.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "packed_by_hand",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/packed_by_hand.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "real_product_on_set",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/real_product_on_set.json"
+  }
+ ],
+ [
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "studiovic_handle",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/studiovic_handle.json"
+  },
+  {
+   "op": "set",
+   "collection": "facts",
+   "doc_id": "review",
+   "file_path": "/home/user/personal-brand/research/tracker/seed/facts/review.json"
+  }
+ ]
+]

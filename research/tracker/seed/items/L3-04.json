@@ -1,0 +1,32 @@
+{
+ "order": 170,
+ "area": "Launch ads",
+ "group": "L3 Waitlist to buyer",
+ "title": "The first edition is limited.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgQ7txNc/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgTkK-dI/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "run_size"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

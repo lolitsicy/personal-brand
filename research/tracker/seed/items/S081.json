@@ -1,0 +1,26 @@
+{
+ "order": 81,
+ "area": "Organic social",
+ "group": "LAUNCH \u00b7 Launch day",
+ "title": "now available",
+ "date": "Thu 03 Dec",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdV8Ixqc/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

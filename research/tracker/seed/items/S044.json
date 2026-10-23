@@ -1,0 +1,28 @@
+{
+ "order": 44,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "behind shoot no 1",
+ "date": "Sun 15 Nov",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-6",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcgxYGyU/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Page 5 wordmark is in a different font from the other pages."
+ ],
+ "notes": ""
+}

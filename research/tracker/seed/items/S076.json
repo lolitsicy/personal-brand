@@ -1,0 +1,29 @@
+{
+ "order": 76,
+ "area": "Organic social",
+ "group": "W7 \u00b7 Formula reveal and countdown",
+ "title": "two days founder",
+ "date": "Tue 01 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdT0M-wA/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "dose",
+  "ingredient4"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,28 @@
+{
+ "order": 22,
+ "area": "Organic social",
+ "group": "W3 \u00b7 What we stand for",
+ "title": "why I started maison belasi",
+ "date": "Mon 02 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYblwTaLQ/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "founder_story"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

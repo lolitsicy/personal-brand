@@ -1,0 +1,26 @@
+{
+ "order": 82,
+ "area": "Organic social",
+ "group": "LAUNCH \u00b7 Launch day",
+ "title": "launch film",
+ "date": "Thu 03 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdm1II08/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

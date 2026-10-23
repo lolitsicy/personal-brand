@@ -1,0 +1,28 @@
+{
+ "order": 43,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "wrap",
+ "date": "Sat 14 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYckBtFZQ/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "The display font draws the straight apostrophe curly. The stored text is correct."
+ ],
+ "notes": ""
+}

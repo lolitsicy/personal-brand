@@ -1,0 +1,32 @@
+{
+ "order": 137,
+ "area": "Pre-launch ads",
+ "group": "C4 Ritual and Creators",
+ "title": "Why we made Metabolic Reset.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbDGeMtY/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbAW-rrg/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "founder_note"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

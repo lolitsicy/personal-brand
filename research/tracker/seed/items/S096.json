@@ -1,0 +1,30 @@
+{
+ "order": 96,
+ "area": "Organic social",
+ "group": "W9 \u00b7 First edition and gifting",
+ "title": "considered gift guide",
+ "date": "Sat 12 Dec",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-5",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYd3a4mwo/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "gift_items"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Headline face differs across pages: set one font."
+ ],
+ "notes": ""
+}

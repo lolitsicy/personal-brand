@@ -1,0 +1,26 @@
+{
+ "order": 69,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "goes with everything",
+ "date": "Sun 29 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdARIZx8/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

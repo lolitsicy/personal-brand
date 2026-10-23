@@ -1,0 +1,26 @@
+{
+ "order": 38,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "shot A or B",
+ "date": "Thu 12 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcfHBvwE/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,28 @@
+{
+ "order": 100,
+ "area": "Organic social",
+ "group": "W9 \u00b7 First edition and gifting",
+ "title": "thank you first edition",
+ "date": "Sat 19 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYd8Pide0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "founder_story"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

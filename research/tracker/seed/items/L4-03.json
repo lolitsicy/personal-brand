@@ -1,0 +1,33 @@
+{
+ "order": 174,
+ "area": "Launch ads",
+ "group": "L4 Visitors and cart",
+ "title": "how to take it: .",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgtykyDE/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYghPgCx8/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "dose",
+  "policies"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

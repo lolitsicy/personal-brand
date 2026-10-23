@@ -1,0 +1,26 @@
+{
+ "order": 63,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "chrome outside",
+ "date": "Wed 25 Nov",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYbuMdArM/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

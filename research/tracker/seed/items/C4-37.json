@@ -1,0 +1,31 @@
+{
+ "order": 135,
+ "area": "Pre-launch ads",
+ "group": "C4 Ritual and Creators",
+ "title": "\"The first supplement that looks like it belongs on my vanity.\" (creator)",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "9x16",
+ "links": [
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbGrv_d4/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "run_size",
+  "creators"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Partnership ad: needs the creator's Reel, filmed after they have product."
+ ],
+ "notes": ""
+}

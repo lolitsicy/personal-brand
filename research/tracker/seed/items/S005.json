@@ -1,0 +1,26 @@
+{
+ "order": 5,
+ "area": "Organic social",
+ "group": "W1 \u00b7 Tease: the world of maison belasi",
+ "title": "what is maison belasi",
+ "date": "Fri 23 Oct",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-4",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYb82hfgo/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

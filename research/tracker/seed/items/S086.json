@@ -1,0 +1,28 @@
+{
+ "order": 86,
+ "area": "Organic social",
+ "group": "W8 \u00b7 Launch week",
+ "title": "unboxing",
+ "date": "Fri 04 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdvsrPQc/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "box_contents"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

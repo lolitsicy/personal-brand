@@ -1,0 +1,32 @@
+{
+ "order": 166,
+ "area": "Launch ads",
+ "group": "L2 Formula reveal",
+ "title": "what's inside. all of it.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgY9DXyE/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgYpJ42I/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "label_disclosure"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

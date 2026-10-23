@@ -1,0 +1,30 @@
+{
+ "order": 4,
+ "area": "Organic social",
+ "group": "W1 \u00b7 Tease: the world of maison belasi",
+ "title": "behind the name",
+ "date": "Thu 22 Oct",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYb_PCmzI/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "name_story"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Pages 2 to 4 use Canva's default sans: Copy style from page 1's headline."
+ ],
+ "notes": ""
+}

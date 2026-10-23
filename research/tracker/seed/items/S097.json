@@ -1,0 +1,28 @@
+{
+ "order": 97,
+ "area": "Organic social",
+ "group": "W9 \u00b7 First edition and gifting",
+ "title": "wrapped in chrome",
+ "date": "Mon 14 Dec",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdw8ElfU/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "shipping_cutoffs"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

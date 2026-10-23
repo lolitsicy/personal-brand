@@ -1,0 +1,26 @@
+{
+ "order": 55,
+ "area": "Organic social",
+ "group": "W5 \u00b7 Education and first creators",
+ "title": "first look countdown",
+ "date": "Sat 21 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc-KKT4A/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

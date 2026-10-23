@@ -1,0 +1,28 @@
+{
+ "order": 33,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "off to new york",
+ "date": "Mon 09 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYb29fYxk/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Pages 2 to 4 use the default sans, and the wordmark is centred while page 1's is left-aligned."
+ ],
+ "notes": ""
+}

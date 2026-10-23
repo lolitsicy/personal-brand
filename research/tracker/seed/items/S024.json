@@ -1,0 +1,26 @@
+{
+ "order": 24,
+ "area": "Organic social",
+ "group": "W3 \u00b7 What we stand for",
+ "title": "chrome not clutter",
+ "date": "Tue 03 Nov",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-5",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYbsd5xp4/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

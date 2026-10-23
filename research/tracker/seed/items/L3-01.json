@@ -1,0 +1,32 @@
+{
+ "order": 167,
+ "area": "Launch ads",
+ "group": "L3 Waitlist to buyer",
+ "title": "you're on the list.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgWHKXSg/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgYMXZJw/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "early_access_date"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,26 @@
+{
+ "order": 61,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "first impressions",
+ "date": "Tue 24 Nov",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYbvhNELc/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

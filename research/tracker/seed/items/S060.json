@@ -1,0 +1,30 @@
+{
+ "order": 60,
+ "area": "Organic social",
+ "group": "W6 \u00b7 Product reveal",
+ "title": "in detail",
+ "date": "Tue 24 Nov",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-6",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdEqCgSc/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "dose"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Headline serif changes from slide to slide: set one font. [dose CONFIRM] is split over two text boxes."
+ ],
+ "notes": ""
+}

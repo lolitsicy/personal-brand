@@ -1,0 +1,32 @@
+{
+ "order": 154,
+ "area": "Pre-launch ads",
+ "group": "Legacy pre-launch ads",
+ "title": "09 first edition",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYbDYBtDQ/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYbBozwjs/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "run_size"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,32 @@
+{
+ "order": 168,
+ "area": "Launch ads",
+ "group": "L3 Waitlist to buyer",
+ "title": "Your early access is open.",
+ "date": "",
+ "kind": "Meta ad",
+ "formats": "4x5 + 9x16",
+ "links": [
+  {
+   "label": "4x5",
+   "url": "https://www.canva.com/design/DAHYgQQTWK4/edit"
+  },
+  {
+   "label": "9x16",
+   "url": "https://www.canva.com/design/DAHYgSTTxk0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "early_access_date"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

@@ -1,0 +1,26 @@
+{
+ "order": 1,
+ "area": "Organic social",
+ "group": "W1 \u00b7 Tease: the world of maison belasi",
+ "title": "something considered",
+ "date": "Wed 21 Oct",
+ "kind": "Feed post",
+ "formats": "FEED",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYb4NyzQg/edit"
+  }
+ ],
+ "built": true,
+ "facts": [],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

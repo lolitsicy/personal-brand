@@ -1,0 +1,30 @@
+{
+ "order": 42,
+ "area": "Organic social",
+ "group": "W4 \u00b7 Shoot week, New York",
+ "title": "shoot wrap montage",
+ "date": "Sat 14 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYcr7Xlrs/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "real_product_on_set"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "The display font draws the straight apostrophe curly. The stored text is correct."
+ ],
+ "notes": ""
+}

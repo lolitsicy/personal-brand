@@ -1,0 +1,30 @@
+{
+ "order": 98,
+ "area": "Organic social",
+ "group": "W9 \u00b7 First edition and gifting",
+ "title": "shipping cut-off",
+ "date": "Wed 16 Dec",
+ "kind": "Story",
+ "formats": "STORY",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYd8nqWAY/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "shipping_cutoffs"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Tight letter spacing in 'by [date]'. Nudge by hand."
+ ],
+ "notes": ""
+}

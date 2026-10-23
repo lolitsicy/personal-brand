@@ -1,0 +1,28 @@
+{
+ "order": 17,
+ "area": "Organic social",
+ "group": "W2 \u00b7 The gap: doing everything right",
+ "title": "how to read a supplement label",
+ "date": "Fri 30 Oct",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-6",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc9bCjNM/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "label_disclosure"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}

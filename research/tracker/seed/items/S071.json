@@ -1,0 +1,31 @@
+{
+ "order": 71,
+ "area": "Organic social",
+ "group": "W7 \u00b7 Formula reveal and countdown",
+ "title": "formula revealed",
+ "date": "Mon 30 Nov",
+ "kind": "Carousel",
+ "formats": "CAROUSEL-6",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYdAK7Y5k/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "dose",
+  "ingredient4"
+ ],
+ "film_needed": false,
+ "film_done": false,
+ "photo_needed": true,
+ "photo_done": false,
+ "font_fix": true,
+ "font_done": false,
+ "approved": false,
+ "issues": [
+  "Headline serif changes from slide to slide: set one font."
+ ],
+ "notes": ""
+}

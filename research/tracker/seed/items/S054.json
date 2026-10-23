@@ -1,0 +1,28 @@
+{
+ "order": 54,
+ "area": "Organic social",
+ "group": "W5 \u00b7 Education and first creators",
+ "title": "creator 2 waitlist spot",
+ "date": "Fri 20 Nov",
+ "kind": "Reel + TikTok",
+ "formats": "REEL \u00b7 script in reel-scripts.md",
+ "links": [
+  {
+   "label": "Canva",
+   "url": "https://www.canva.com/design/DAHYc0QS6C0/edit"
+  }
+ ],
+ "built": true,
+ "facts": [
+  "creators"
+ ],
+ "film_needed": true,
+ "film_done": false,
+ "photo_needed": false,
+ "photo_done": false,
+ "font_fix": false,
+ "font_done": false,
+ "approved": false,
+ "issues": [],
+ "notes": ""
+}
