@@ -1,14 +1,14 @@
 id,date,set,shot_no,duration_s,framing,action,props
-S003,2026-10-22,Pre-shoot: chrome texture (own props),1,1.5,ECU macro,"light sweeps across a chrome surface, glint flares","chrome platter or tray, LED wand"
-S003,2026-10-22,Pre-shoot: chrome texture (own props),2,2,macro,a single water droplet lands on frosted glass and spreads,"frosted glass sheet, pipette, water"
-S003,2026-10-22,Pre-shoot: chrome texture (own props),3,2.5,slow push-in,chrome tweezers rotate on a pale ice blue to white gradient,"chrome tweezers, turntable, ice blue paper sweep"
-S003,2026-10-22,Pre-shoot: chrome texture (own props),4,3,overhead close,hand in silver rings sets tweezers down on a chrome tray,"chrome tray, silver rings, tweezers"
-S003,2026-10-22,Canva: end card,5,3,full-frame graphic,end card,none
 S007,2026-10-24,Off-set: desk (phone),1,1.5,overhead POV,hand sets a third coffee cup beside two empty ones,"3 matching white or glass coffee cups, white desk"
 S007,2026-10-24,Off-set: desk (phone),2,2,close,laptop corner clock reads 3:00 pm; gym bag strap in frame edge,"laptop, gym bag"
 S007,2026-10-24,Off-set: desk (phone),3,2.5,"side, hand only","hand reaches for the cup, pauses, lifts it out of frame",coffee cup
 S007,2026-10-24,Off-set: desk (phone),4,2,overhead,empty cup ring left on the desk,none
 S007,2026-10-24,Canva: end card,5,2,full-frame graphic,end card,none
+S003,2026-10-25,Pre-shoot: chrome texture (own props),1,1.5,ECU macro,"light sweeps across a chrome surface, glint flares","chrome platter or tray, LED wand"
+S003,2026-10-25,Pre-shoot: chrome texture (own props),2,2,macro,a single water droplet lands on frosted glass and spreads,"frosted glass sheet, pipette, water"
+S003,2026-10-25,Pre-shoot: chrome texture (own props),3,2.5,slow push-in,chrome tweezers rotate on a pale ice blue to white gradient,"chrome tweezers, turntable, ice blue paper sweep"
+S003,2026-10-25,Pre-shoot: chrome texture (own props),4,3,overhead close,hand in silver rings sets tweezers down on a chrome tray,"chrome tray, silver rings, tweezers"
+S003,2026-10-25,Canva: end card,5,3,full-frame graphic,end card,none
 S013,2026-10-27,Canva: type animation,1,1.5,full-frame type,three words stack on beat,none
 S013,2026-10-27,Pre-shoot: chrome texture (own props),2,4.5,macro,slow ripple in a clear glass of water (B-roll under type),"clear glass, water"
 S013,2026-10-27,Pre-shoot: chrome texture (own props),3,4.5,macro,water level in a glass gently rises and settles,"clear glass, jug"
@@ -32,16 +32,16 @@ S022,2026-11-02,Off-set: drawer (phone),3,3,close insert,cluttered supplement dr
 S022,2026-11-02,Off-set: founder to camera,4,8,MCU,"founder speaks, line 2",none
 S022,2026-11-02,Off-set: founder to camera,5,5.5,MS,"founder speaks, line 3; touches the chrome tray",chrome tray
 S022,2026-11-02,Canva: end card,6,4,full-frame graphic,end card,none
-S025,2026-11-04,Off-set: drawer (phone),1,1.5,overhead,flat-lit pile of mismatched unbranded tubs,unbranded tubs
-S025,2026-11-04,Off-set: drawer (phone),2,2,overhead,"hand rummages, tubs knock together",unbranded tubs
-S025,2026-11-04,Off-set: drawer (phone),3,0.5,overhead,hand swipes across lens (transition),none
+S025,2026-11-04,Pre-shoot: chrome texture (own props),1,1.5,macro,light rakes across chrome tweezers on ice blue seamless,"chrome tweezers, ice blue seamless"
+S025,2026-11-04,Pre-shoot: chrome texture (own props),2,2,overhead,"generic unbranded lab-style objects (plain glass vial, measuring scoop) arranged in a neat grid","plain glass vial, scoop"
+S025,2026-11-04,Pre-shoot: chrome texture (own props),3,0.5,overhead,hand swipes across lens (transition),none
 S025,2026-11-04,Product & Essentials (vanity/chrome tray),4,3,overhead,"chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre","chrome tray, silver rings, glass"
 S025,2026-11-04,Canva: end card,5,3,full-frame graphic,end card,none
 S028,2026-11-06,Off-set: day-in-the-life (creator/founder),1,1.5,CU,6:00 alarm dismissed,phone
 S028,2026-11-06,Off-set: day-in-the-life (creator/founder),2,2.5,"crop, feet and hands",pilates reformer movement,reformer studio
 S028,2026-11-06,Off-set: day-in-the-life (creator/founder),3,2.5,close,green juice poured into a clear glass,"green juice, clear glass"
 S028,2026-11-06,Off-set: day-in-the-life (creator/founder),4,2.5,overhead,balanced lunch set down at a desk,lunch bowl
-S028,2026-11-06,Off-set: day-in-the-life (creator/founder),5,3,MS,"3pm at the desk, chin on hand, coffee cup lifted","laptop, coffee cup"
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),5,3,MS,"afternoon at the desk, hand sets down a glass of water by the laptop","laptop, glass of water"
 S028,2026-11-06,Canva: end card,6,3,full-frame graphic,end card,none
 S034,2026-11-10,BTS: prop packing,1,1.5,overhead,chrome martini cup set into foam case,"chrome martini cup, foam case"
 S034,2026-11-10,BTS: prop packing,2,2,CU,chrome tweezers wrapped in a cloth,"chrome tweezers, cloth"
@@ -80,10 +80,10 @@ S051,2026-11-19,Under the Glass,3,4,macro,droplets drawn across frosted glass,"f
 S051,2026-11-19,Gradient Backdrop,4,4,macro,soft light shifts across frosted glass,frosted glass
 S051,2026-11-19,Canva: type animation,5,3.5,full-frame type,line settles on ice blue,none
 S051,2026-11-19,Canva: end card,6,3,full-frame graphic,end card,none
-S054,2026-11-20,Product & Essentials (vanity/chrome tray),1,1.5,overhead,creator sweeps clutter off one corner of the tray,"creator's vanity, chrome tray"
+S054,2026-11-20,Off-set: creator self-shot,1,1.5,mirror reflection MCU,creator holds phone with the waitlist page up to the mirror,"creator's vanity, phone with waitlist page"
 S054,2026-11-20,Off-set: creator self-shot,2,4,mirror reflection MCU,"creator speaks, line 1",mirror
 S054,2026-11-20,Off-set: creator self-shot,3,4,mirror reflection MCU,"creator speaks, line 2",none
-S054,2026-11-20,Product & Essentials (vanity/chrome tray),4,3,overhead,"creator places a small ""reserved"" card on the empty spot","""reserved"" card"
+S054,2026-11-20,Product & Essentials (vanity/chrome tray),4,3,overhead,"creator places a small ""reserved"" card on an empty spot on her chrome tray","chrome tray, ""reserved"" card"
 S054,2026-11-20,Canva: end card,5,2.5,full-frame graphic,end card,none
 S057,2026-11-23,Chrome Platter,1,1.5,CU,"bottle set onto platter, glint","bottle, chrome platter"
 S057,2026-11-23,Chrome Platter,2,3,slow push-in,"bottle on platter, ice blue seamless","bottle, platter"
@@ -151,10 +151,10 @@ S092,2026-12-08,Off-set: creator self-shot,2,3,overhead,creator opens box on tab
 S092,2026-12-08,Off-set: creator self-shot,3,3,close,creator turns the bottle in the light,bottle
 S092,2026-12-08,Off-set: creator self-shot,4,4,MCU,creator speaks,bottle
 S092,2026-12-08,Canva: end card,5,3.5,full-frame graphic,end card,none
-S095,2026-12-10,Inside the bag,1,1.5,"CU, tracking",hand pulls bottle from bag while walking,"handbag, bottle"
-S095,2026-12-10,Product & Essentials (vanity/chrome tray),2,2.5,overhead,"bag contents laid on chrome tray: passport, headphones, lipstick, bottle","passport, headphones, lipstick, chrome tray"
-S095,2026-12-10,Inside the bag,3,3,side,bottle dropped back in with headphones,"bottle, headphones"
-S095,2026-12-10,Inside the bag,4,2.5,MS,"bag clasp closes, carried out of frame",handbag
+S095,2026-12-10,Inside the bag,1,1.5,overhead,passport drops into an open carry-on,"carry-on bag, passport"
+S095,2026-12-10,Product & Essentials (vanity/chrome tray),2,2.5,overhead,"travel kit laid on chrome tray: passport, headphones, bottle","passport, headphones, bottle, chrome tray"
+S095,2026-12-10,Inside the bag,3,3,side,bottle placed in beside the headphones,"bottle, headphones"
+S095,2026-12-10,Inside the bag,4,2.5,MS,bag zipped and wheeled out of frame,carry-on bag
 S095,2026-12-10,Canva: end card,5,2.5,full-frame graphic,end card,none
 S097,2026-12-14,Off-set: gift wrap,1,1.5,CU,hands fold mirror-silver paper over a box,"box, mirror-silver paper"
 S097,2026-12-14,Off-set: gift wrap,2,3,close,ice blue ribbon tied,ice blue ribbon

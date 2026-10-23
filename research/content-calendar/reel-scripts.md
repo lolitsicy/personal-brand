@@ -18,12 +18,33 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 - No before/after bodies, measuring tapes, scales, stomach pinching, pill-spill, or identifiable competitor products.
 - No invented testimonials, stats, doses, prices or ingredients. Placeholders stay until confirmed: [dose], [price], [ingredient 4], [CONFIRM]. A Reel with a placeholder on screen does not post until it is filled.
 - CTA: before 3 Dec "join the waitlist"; from 3 Dec "shop now".
-- Creators: no results, energy or body claims. Paid partnership label plus #ad when paid or gifted.
+- Creators: no results, energy or body claims, and nothing implying use before they received the product. Paid partnership label; disclose: #ad if paid, #gifted if gifted product.
 - Any Reel that names the product's function carries the footer in its caption: *Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.*
 
 ---
 
-## S003 · 2026-10-22 · biohacking dressed up film
+## S007 · 2026-10-24 · POV 3pm crash
+
+**Length:** 10s  
+**Hook (0 to 1.5s):** Overhead POV: a hand sets down a third coffee cup beside two empties. Text: "POV: you eat well,"
+
+| # | dur | framing | action | set | on-screen text |
+|---|---|---|---|---|---|
+| 1 | 1.5s | overhead POV | hand sets a third coffee cup beside two empty ones | Off-set: desk (phone) | POV: you eat well, |
+| 2 | 2s | close | laptop corner clock reads 3:00 pm; gym bag strap in frame edge | Off-set: desk (phone) | you train, |
+| 3 | 2.5s | side, hand only | hand reaches for the cup, pauses, lifts it out of frame | Off-set: desk (phone) | and it's still 3pm |
+| 4 | 2s | overhead | empty cup ring left on the desk | Off-set: desk (phone) | on coffee number three. |
+| 5 | 2s | full-frame graphic | end card | Canva: end card | we designed for the rises and falls. / join the waitlist. |
+
+**VO:** no VO  
+**Audio:** dry, deadpan lo-fi beat; a tick-tock or clock-hit sound effect on the 3:00 pm frame  
+**End card + CTA:** "we designed for the rises and falls." / "join the waitlist."  
+**TikTok:** Native POV format: shoot vertical on phone, no grade. Text in the centre band (TikTok's bottom caption area covers the desk edge). Optional creator voice: "3pm. coffee number three. again."  
+**Props:** 3 matching coffee cups, laptop with visible clock, gym bag, clean white desk, cool window light (no warm golden tones)
+
+> Note: Do not show or imply the product fixes energy or the crash. End card frames design intent only (blood sugar rises and falls), never a fix. Calendar caption says "formulated to support blood sugar balance" and carries the footer.
+
+## S003 · 2026-10-25 · biohacking dressed up film
 
 **Length:** 12s  
 **Hook (0 to 1.5s):** "biohacking," snaps on screen as a hard specular glint rakes across polished chrome.
@@ -42,28 +63,7 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Cut shot 1 to 1s. Keep text in the centre band, clear of the bottom caption and right-side buttons. Native caption: "the science of feeling good, with better taste."  
 **Props:** chrome tray or platter, chrome tweezers, frosted glass sheet, pipette, silver rings, ice blue paper sweep, small turntable, LED wand
 
-> Note: Calendar date (22 Oct) has passed: post as soon as cut, or re-slot. Pre-shoot, so no product: own chrome props on a phone macro lens, or animate the type over a chrome texture in Canva. Never render or mock up a bottle.
-
-## S007 · 2026-10-24 · POV 3pm crash
-
-**Length:** 10s  
-**Hook (0 to 1.5s):** Overhead POV: a hand sets down a third coffee cup beside two empties. Text: "POV: you eat well,"
-
-| # | dur | framing | action | set | on-screen text |
-|---|---|---|---|---|---|
-| 1 | 1.5s | overhead POV | hand sets a third coffee cup beside two empty ones | Off-set: desk (phone) | POV: you eat well, |
-| 2 | 2s | close | laptop corner clock reads 3:00 pm; gym bag strap in frame edge | Off-set: desk (phone) | you train, |
-| 3 | 2.5s | side, hand only | hand reaches for the cup, pauses, lifts it out of frame | Off-set: desk (phone) | and it's still 3pm |
-| 4 | 2s | overhead | empty cup ring left on the desk | Off-set: desk (phone) | on coffee number three. |
-| 5 | 2s | full-frame graphic | end card | Canva: end card | if this is you, we made something for you. / join the waitlist. |
-
-**VO:** no VO  
-**Audio:** dry, deadpan lo-fi beat; a tick-tock or clock-hit sound effect on the 3:00 pm frame  
-**End card + CTA:** "if this is you, we made something for you." / "join the waitlist."  
-**TikTok:** Native POV format: shoot vertical on phone, no grade. Text in the centre band (TikTok's bottom caption area covers the desk edge). Optional creator voice: "3pm. coffee number three. again."  
-**Props:** 3 matching coffee cups, laptop with visible clock, gym bag, clean white desk, cool window light (no warm golden tones)
-
-> Note: Do not show or imply the product fixes energy or the crash. End card stays an invitation, not a solution.
+> Note: Moved from Thu 22 Oct (date passed) to Sun 25 Oct, the next W1 day with no other Reel. Pre-shoot, so no product: own chrome props on a phone macro lens, or animate the type over a chrome texture in Canva. Never render or mock up a bottle.
 
 ## S013 · 2026-10-27 · three systems in 20 seconds
 
@@ -152,26 +152,26 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 
 > Note: Calendar asks 30 to 45s; capped at 30s per brief. No product on screen (pre-shoot). No personal health outcomes in the founder's story. Add the footer to the caption.
 
-## S025 · 2026-11-04 · biohacking then and now
+## S025 · 2026-11-04 · biohacking redesigned
 
 **Length:** 10s  
-**Hook (0 to 1.5s):** Harsh overhead on a cluttered pile of tubs. Text: "biohacking used to look like this."
+**Hook (0 to 1.5s):** A chrome tweezer tip glints on ice blue seamless. Text: "biohacking, redesigned."
 
 | # | dur | framing | action | set | on-screen text |
 |---|---|---|---|---|---|
-| 1 | 1.5s | overhead | flat-lit pile of mismatched unbranded tubs | Off-set: drawer (phone) | biohacking used to look like this. |
-| 2 | 2s | overhead | hand rummages, tubs knock together | Off-set: drawer (phone) | biohacking used to look like this. |
-| 3 | 0.5s | overhead | hand swipes across lens (transition) | Off-set: drawer (phone) | none |
-| 4 | 3s | overhead | chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre | Product & Essentials (vanity/chrome tray) | now it looks like this. |
-| 5 | 3s | full-frame graphic | end card | Canva: end card | same science. better taste. / join the waitlist. |
+| 1 | 1.5s | macro | light rakes across chrome tweezers on ice blue seamless | Pre-shoot: chrome texture (own props) | biohacking, redesigned. |
+| 2 | 2s | overhead | generic unbranded lab-style objects (plain glass vial, measuring scoop) arranged in a neat grid | Pre-shoot: chrome texture (own props) | the look of the category, |
+| 3 | 0.5s | overhead | hand swipes across lens (transition) | Pre-shoot: chrome texture (own props) | none |
+| 4 | 3s | overhead | chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre | Product & Essentials (vanity/chrome tray) | reconsidered as an object. |
+| 5 | 3s | full-frame graphic | end card | Canva: end card | biohacking, redesigned. / join the waitlist. |
 
 **VO:** no VO  
-**Audio:** hand-swipe transition trend vibe: muffled, messy first half, then a crisp beat drop on the chrome  
-**End card + CTA:** "same science. better taste." / "join the waitlist."  
+**Audio:** minimal, glassy beat; one crisp hit on the swipe to the chrome tray  
+**End card + CTA:** "biohacking, redesigned." / "join the waitlist."  
 **TikTok:** Hand-swipe transition is TikTok-native; land it exactly on the beat. Text centre band.  
-**Props:** unbranded tubs, chrome tray, silver rings, clear glass, ice blue seamless
+**Props:** chrome tweezers, plain glass vial, measuring scoop, chrome tray, silver rings, clear glass, ice blue seamless
 
-> Note: Objects only, no bodies. Pre-shoot, so the tray stays product-free (empty space centre). No competitor branding visible.
+> Note: Objects only, no bodies. Not a then/now or before/after: both halves are styled, nothing is shown as worse. No competitor products, tubs or logos. Never say "same science" or imply equivalence to other products. Pre-shoot, so the tray stays product-free (empty space centre).
 
 ## S028 · 2026-11-06 · day in the life
 
@@ -184,16 +184,16 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 | 2 | 2.5s | crop, feet and hands | pilates reformer movement | Off-set: day-in-the-life (creator/founder) | 6am pilates. |
 | 3 | 2.5s | close | green juice poured into a clear glass | Off-set: day-in-the-life (creator/founder) | green juice. |
 | 4 | 2.5s | overhead | balanced lunch set down at a desk | Off-set: day-in-the-life (creator/founder) | a proper lunch. |
-| 5 | 3s | MS | 3pm at the desk, chin on hand, coffee cup lifted | Off-set: day-in-the-life (creator/founder) | 3pm crash. |
-| 6 | 3s | full-frame graphic | end card | Canva: end card | sound familiar? / join the waitlist. |
+| 5 | 3s | MS | afternoon at the desk, hand sets down a glass of water by the laptop | Off-set: day-in-the-life (creator/founder) | blood sugar rises and falls through the day. |
+| 6 | 3s | full-frame graphic | end card | Canva: end card | we designed for that. / join the waitlist. |
 
-**VO:** no VO (optional creator voiceover, suggested wording: "6am pilates. green juice. and still.")  
-**Audio:** upbeat, polished "day in the life" vlog beat that stalls on the 3pm shot  
-**End card + CTA:** "sound familiar?" / "join the waitlist."  
+**VO:** no VO (optional creator voiceover, suggested wording: "6am pilates. green juice. a proper lunch.")  
+**Audio:** upbeat, polished "day in the life" vlog beat that eases on the afternoon shot  
+**End card + CTA:** "we designed for that." / "join the waitlist."  
 **TikTok:** Faster cuts (about 1.5s each); "day in the life" is a native TikTok format. Text centre band.  
-**Props:** phone, pilates studio access, green juice, clear glass, lunch bowl, laptop, coffee cup
+**Props:** phone, pilates studio access, green juice, clear glass, lunch bowl, laptop, glass of water
 
-> Note: No stock frustration acting, no stomach touching. Do not link the product to energy.
+> Note: No stock frustration acting, no stomach touching, no 3pm crash beat. Do not link the product to energy or a fix. Pre-reveal, so no product on screen. Calendar caption says "formulated to support blood sugar balance" and carries the footer. If a creator films it: disclose: #ad if paid, #gifted if gifted product.
 
 ## S034 · 2026-11-10 · packing the chrome
 
@@ -304,7 +304,7 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Post natively from the creator's account (or Spark/collab). Keep the creator's own captions style; brand end card optional. Text centre band.  
 **Props:** creator's phone showing waitlist page, shoot B-roll (no product)
 
-> Note: Creator may not claim results, energy or body changes. Paid partnership label and #ad if paid or gifted. Footer in caption. Approve the script before filming.
+> Note: Creator may not claim results, energy or body changes. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Pre-reveal, so no product on screen. Footer in caption. Approve the script before filming.
 
 ## S051 · 2026-11-19 · gut health minus the hype
 
@@ -326,28 +326,28 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Add "in 20 seconds" to the native caption to match S013. Text centre band.  
 **Props:** chrome tweezers, glittery "hype" acrylic tile, glasses, frosted glass, mister
 
-> Note: Have the gut lines checked [CONFIRM]. No cartoon gut graphics. Calendar caption has no footer: add it.
+> Note: Have the gut lines checked [CONFIRM]. No cartoon gut graphics. Footer in caption.
 
-## S054 · 2026-11-20 · creator 2 vanity
+## S054 · 2026-11-20 · creator 2 waitlist spot
 
 **Length:** 15s  
-**Hook (0 to 1.5s):** Creator clears a space on her chrome vanity tray in one sweep. Text: "the first supplement that looks like it belongs on my vanity."
+**Hook (0 to 1.5s):** At her vanity, the creator holds her phone up to the mirror showing the waitlist page. Text: "saving my spot on the waitlist."
 
 | # | dur | framing | action | set | on-screen text |
 |---|---|---|---|---|---|
-| 1 | 1.5s | overhead | creator sweeps clutter off one corner of the tray | Product & Essentials (vanity/chrome tray) | "the first supplement that looks like it belongs on my vanity." |
+| 1 | 1.5s | mirror reflection MCU | creator holds phone with the waitlist page up to the mirror | Off-set: creator self-shot | "saving my spot on the waitlist." |
 | 2 | 4s | mirror reflection MCU | creator speaks, line 1 | Off-set: creator self-shot | supplements never made the cut. |
 | 3 | 4s | mirror reflection MCU | creator speaks, line 2 | Off-set: creator self-shot | launching 3 december. |
-| 4 | 3s | overhead | creator places a small "reserved" card on the empty spot | Product & Essentials (vanity/chrome tray) | saving a spot. |
+| 4 | 3s | overhead | creator places a small "reserved" card on an empty spot on her chrome tray | Product & Essentials (vanity/chrome tray) | saving a spot. |
 | 5 | 2.5s | full-frame graphic | end card | Canva: end card | join the waitlist. |
 
-**VO:** creator to camera. Suggested wording only: (1) "my vanity is very curated. supplements never made the cut." (2) "this one is chrome, it's formulated to support metabolism, blood sugar balance and gut health, and it launches 3 december."  
+**VO:** creator to camera. Suggested wording only: (1) "my vanity is very curated. supplements never made the cut." (2) "this one is formulated to support metabolism, blood sugar balance and gut health. it launches 3 december, so I'm saving my spot on the waitlist."  
 **Audio:** soft, chic get-ready-with-me beat  
 **End card + CTA:** "join the waitlist."  
 **TikTok:** GRWM framing is native: let her do one makeup step while talking. Text centre band.  
-**Props:** creator's vanity, chrome tray, lipstick, jewelry, "reserved" card
+**Props:** creator's vanity, chrome tray, lipstick, jewelry, phone with waitlist page, "reserved" card
 
-> Note: Posts 20 Nov, before the 23 Nov reveal, so no product on screen (hence the "reserved" spot). If product reaches her and the reveal moves earlier, swap shot 4 for her placing the bottle. Paid partnership label and #ad if paid or gifted. Footer in caption.
+> Note: Posts 20 Nov, before the 23 Nov reveal: no product, bottle or capsule on screen, and nothing implying she has used it. Do not swap in the bottle even if product reaches her early. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.
 
 ## S057 · 2026-11-23 · product reveal
 
@@ -412,7 +412,7 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Post from the creator's account; let her caption it in her own words. Text centre band.  
 **Props:** bottle, chrome martini cup, creator's phone, styled table
 
-> Note: Creator needs product in hand by 26 Nov [CONFIRM]. Paid partnership label and #ad if paid or gifted. No results claims. Footer in caption.
+> Note: Creator needs product in hand before filming [CONFIRM]; no use or results claims. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.
 
 ## S068 · 2026-11-28 · mirror mirror
 
@@ -433,7 +433,7 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Make it loop: end on the empty mirror so it flows back into shot 1. Text centre band.  
 **Props:** round vanity mirror, capsule, chrome tweezers, bottle
 
-> Note: Show one capsule only, so the frame implies no dose. Calendar caption has no CTA: add "join the waitlist."
+> Note: Show one capsule only, so the frame implies no dose. CTA "join the waitlist." is in the calendar caption.
 
 ## S072 · 2026-11-30 · chrome spoon ingredients
 
@@ -452,10 +452,10 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **VO:** no VO  
 **Audio:** crisp, minimal, one clean hit per ingredient  
 **End card + CTA:** "full formula in our latest post." / "join the waitlist."  
-**TikTok:** "full formula in our latest post" does not work on TikTok (no carousel): change to "full formula at the link in bio." Text centre band.  
+**TikTok:** TikTok has no carousel: caption reads "full formula in our latest post (TikTok: link in bio)." and the TikTok end card reads "full formula: link in bio." Text centre band.  
 **Props:** 4 chrome spoons, ginger root, green tea leaves, barberries, frosted glass, chrome platter, ice blue gradient
 
-> Note: Marked [HOLD] in the ad pack: post only after the S071 formula carousel is confirmed and live [CONFIRM full formula]. Never use or caption bismuth as chromium. No doses on screen unless confirmed ([dose]). No per-ingredient benefit claims. Calendar caption has no CTA: add "join the waitlist."
+> Note: Marked [HOLD] in the ad pack: post only after the S071 formula carousel is confirmed and live [CONFIRM full formula]. Never use or caption bismuth as chromium. No doses on screen unless confirmed ([dose]). No per-ingredient benefit claims. CTA "join the waitlist." is in the calendar caption.
 
 ## S076 · 2026-12-01 · two days founder
 
@@ -478,9 +478,9 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Talking-head first, inserts second. Countdown framing is native; use TikTok's countdown sticker if available. Text centre band.  
 **Props:** bottle, S072 spoon footage, lav mic, styled chrome tray backdrop
 
-> Note: Every ingredient line depends on [dose] and a confirmed, permitted reason [CONFIRM]. Calendar caption has no CTA: add "join the waitlist."
+> Note: Every ingredient line depends on [dose] and a confirmed, permitted reason [CONFIRM]. CTA "join the waitlist." and footer are in the calendar caption.
 
-## S079 · 2026-12-02 · the night before
+## S079 · 2026-12-02 · first edition packed by hand
 
 **Length:** 15s  
 **Hook (0 to 1.5s):** Under a desk lamp, hands fold tissue over a bottle in a box. Text: "the night before."
@@ -500,7 +500,7 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Keep natural sound up (packing ASMR). Native caption: "tomorrow." Text centre band.  
 **Props:** shipping boxes, tissue, bottles, insert cards, stickers, desk lamp
 
-> Note: Calendar caption says "first orders": there are no orders before launch unless pre-orders exist [CONFIRM]. On-screen text uses "the first edition, packed by hand" instead. "packed by hand" must be true [CONFIRM]. Add CTA to caption.
+> Note: Cover reads "the first edition, packed by hand." There are no orders before launch: never say "orders" on screen or in caption. "packed by hand" must be true [CONFIRM]. CTA "join the waitlist." is in the calendar caption.
 
 ## S082 · 2026-12-03 · launch film
 
@@ -589,28 +589,28 @@ Built 23 Oct 2026 from `posts.csv` (every row where format = REEL; 29 Reels). Ea
 **TikTok:** Post from the creator's account; raw handheld. Text centre band.  
 **Props:** shipping box, bottle (creator's own space)
 
-> Note: First impressions only: no results, no "after a week", no body talk. Disclose #ad or paid partnership if paid or gifted. Footer in caption.
+> Note: First impressions only: no results, no "after a week", no body talk. Film only after the product arrives. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.
 
-## S095 · 2026-12-10 · packed with intention product
+## S095 · 2026-12-10 · travel with metabolic reset
 
 **Length:** 12s  
-**Hook (0 to 1.5s):** Mid-stride, a hand dips into a handbag and pulls out the bottle. Text: "the new bag essential."
+**Hook (0 to 1.5s):** Overhead into an open carry-on: a passport drops in on the beat. Text: "travel with metabolic reset."
 
 | # | dur | framing | action | set | on-screen text |
 |---|---|---|---|---|---|
-| 1 | 1.5s | CU, tracking | hand pulls bottle from bag while walking | Inside the bag | the new bag essential. |
-| 2 | 2.5s | overhead | bag contents laid on chrome tray: passport, headphones, lipstick, bottle | Product & Essentials (vanity/chrome tray) | passport. headphones. lipstick. |
-| 3 | 3s | side | bottle dropped back in with headphones | Inside the bag | metabolic reset. |
-| 4 | 2.5s | MS | bag clasp closes, carried out of frame | Inside the bag | packed with intention. |
+| 1 | 1.5s | overhead | passport drops into an open carry-on | Inside the bag | travel with metabolic reset. |
+| 2 | 2.5s | overhead | travel kit laid on chrome tray: passport, headphones, bottle | Product & Essentials (vanity/chrome tray) | passport. headphones. |
+| 3 | 3s | side | bottle placed in beside the headphones | Inside the bag | metabolic reset. |
+| 4 | 2.5s | MS | bag zipped and wheeled out of frame | Inside the bag | goes where you go. |
 | 5 | 2.5s | full-frame graphic | end card | Canva: end card | shop now. |
 
 **VO:** no VO  
 **Audio:** travel-ready, upbeat walking-tempo beat  
 **End card + CTA:** "shop now."  
-**TikTok:** Lean into a travel or holiday angle (December). Text centre band.  
-**Props:** handbag, bottle, passport, headphones, lipstick, chrome tray
+**TikTok:** Lean into the December travel and holiday angle. Text centre band.  
+**Props:** carry-on bag, passport, headphones, bottle, chrome tray
 
-> Note: Reworked toward travel so it does not repeat S062.
+> Note: Travel angle (passport, headphones) so it does not repeat S062 ("in her bag": lipstick, headphones, keys). Check Shoot No. 1 footage covers a travel bag, else reshoot off-set with the real bottle.
 
 ## S097 · 2026-12-14 · wrapped in chrome
 

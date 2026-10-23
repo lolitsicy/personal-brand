@@ -31,7 +31,7 @@ R = []
 def reel(**k):
     R.append(k)
 
-reel(id="S003", date="2026-10-22", title="biohacking dressed up film", length=12,
+reel(id="S003", date="2026-10-25", title="biohacking dressed up film", length=12,
      hook='"biohacking," snaps on screen as a hard specular glint rakes across polished chrome.',
      shots=[
         (1.5, "ECU macro", "light sweeps across a chrome surface, glint flares", TEXTURE, "biohacking,", "chrome platter or tray, LED wand"),
@@ -45,7 +45,7 @@ reel(id="S003", date="2026-10-22", title="biohacking dressed up film", length=12
      end='"maison belasi." / "join the waitlist."',
      tiktok="Cut shot 1 to 1s. Keep text in the centre band, clear of the bottom caption and right-side buttons. Native caption: \"the science of feeling good, with better taste.\"",
      props="chrome tray or platter, chrome tweezers, frosted glass sheet, pipette, silver rings, ice blue paper sweep, small turntable, LED wand",
-     notes="Calendar date (22 Oct) has passed: post as soon as cut, or re-slot. Pre-shoot, so no product: own chrome props on a phone macro lens, or animate the type over a chrome texture in Canva. Never render or mock up a bottle.")
+     notes="Moved from Thu 22 Oct (date passed) to Sun 25 Oct, the next W1 day with no other Reel. Pre-shoot, so no product: own chrome props on a phone macro lens, or animate the type over a chrome texture in Canva. Never render or mock up a bottle.")
 
 reel(id="S007", date="2026-10-24", title="POV 3pm crash", length=10,
      hook='Overhead POV: a hand sets down a third coffee cup beside two empties. Text: "POV: you eat well,"',
@@ -54,14 +54,14 @@ reel(id="S007", date="2026-10-24", title="POV 3pm crash", length=10,
         (2, "close", "laptop corner clock reads 3:00 pm; gym bag strap in frame edge", DESK, "you train,", "laptop, gym bag"),
         (2.5, "side, hand only", "hand reaches for the cup, pauses, lifts it out of frame", DESK, "and it's still 3pm", "coffee cup"),
         (2, "overhead", "empty cup ring left on the desk", DESK, "on coffee number three.", "none"),
-        (2, "full-frame graphic", "end card", END, "if this is you, we made something for you. / join the waitlist.", "none"),
+        (2, "full-frame graphic", "end card", END, "we designed for the rises and falls. / join the waitlist.", "none"),
      ],
      vo="no VO",
      audio="dry, deadpan lo-fi beat; a tick-tock or clock-hit sound effect on the 3:00 pm frame",
-     end='"if this is you, we made something for you." / "join the waitlist."',
+     end='"we designed for the rises and falls." / "join the waitlist."',
      tiktok="Native POV format: shoot vertical on phone, no grade. Text in the centre band (TikTok's bottom caption area covers the desk edge). Optional creator voice: \"3pm. coffee number three. again.\"",
      props="3 matching coffee cups, laptop with visible clock, gym bag, clean white desk, cool window light (no warm golden tones)",
-     notes="Do not show or imply the product fixes energy or the crash. End card stays an invitation, not a solution.")
+     notes="Do not show or imply the product fixes energy or the crash. End card frames design intent only (blood sugar rises and falls), never a fix. Calendar caption says \"formulated to support blood sugar balance\" and carries the footer.")
 
 reel(id="S013", date="2026-10-27", title="three systems in 20 seconds", length=20,
      hook='Three words stack fast on an ice blue gradient: "metabolism. blood sugar. gut health." then "in 20 seconds."',
@@ -130,21 +130,21 @@ reel(id="S022", date="2026-11-02", title="why I started maison belasi", length=3
      props="chrome tray, silver jewelry, ice blue or white backdrop, lav mic, S019 drawer footage",
      notes="Calendar asks 30 to 45s; capped at 30s per brief. No product on screen (pre-shoot). No personal health outcomes in the founder's story. Add the footer to the caption.")
 
-reel(id="S025", date="2026-11-04", title="biohacking then and now", length=10,
-     hook='Harsh overhead on a cluttered pile of tubs. Text: "biohacking used to look like this."',
+reel(id="S025", date="2026-11-04", title="biohacking redesigned", length=10,
+     hook='A chrome tweezer tip glints on ice blue seamless. Text: "biohacking, redesigned."',
      shots=[
-        (1.5, "overhead", "flat-lit pile of mismatched unbranded tubs", DRAWER, "biohacking used to look like this.", "unbranded tubs"),
-        (2, "overhead", "hand rummages, tubs knock together", DRAWER, "biohacking used to look like this.", "unbranded tubs"),
-        (0.5, "overhead", "hand swipes across lens (transition)", DRAWER, "none", "none"),
-        (3, "overhead", "chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre", PE, "now it looks like this.", "chrome tray, silver rings, glass"),
-        (3, "full-frame graphic", "end card", END, "same science. better taste. / join the waitlist.", "none"),
+        (1.5, "macro", "light rakes across chrome tweezers on ice blue seamless", TEXTURE, "biohacking, redesigned.", "chrome tweezers, ice blue seamless"),
+        (2, "overhead", "generic unbranded lab-style objects (plain glass vial, measuring scoop) arranged in a neat grid", TEXTURE, "the look of the category,", "plain glass vial, scoop"),
+        (0.5, "overhead", "hand swipes across lens (transition)", TEXTURE, "none", "none"),
+        (3, "overhead", "chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre", PE, "reconsidered as an object.", "chrome tray, silver rings, glass"),
+        (3, "full-frame graphic", "end card", END, "biohacking, redesigned. / join the waitlist.", "none"),
      ],
      vo="no VO",
-     audio="hand-swipe transition trend vibe: muffled, messy first half, then a crisp beat drop on the chrome",
-     end='"same science. better taste." / "join the waitlist."',
+     audio="minimal, glassy beat; one crisp hit on the swipe to the chrome tray",
+     end='"biohacking, redesigned." / "join the waitlist."',
      tiktok="Hand-swipe transition is TikTok-native; land it exactly on the beat. Text centre band.",
-     props="unbranded tubs, chrome tray, silver rings, clear glass, ice blue seamless",
-     notes="Objects only, no bodies. Pre-shoot, so the tray stays product-free (empty space centre). No competitor branding visible.")
+     props="chrome tweezers, plain glass vial, measuring scoop, chrome tray, silver rings, clear glass, ice blue seamless",
+     notes="Objects only, no bodies. Not a then/now or before/after: both halves are styled, nothing is shown as worse. No competitor products, tubs or logos. Never say \"same science\" or imply equivalence to other products. Pre-shoot, so the tray stays product-free (empty space centre).")
 
 reel(id="S028", date="2026-11-06", title="day in the life", length=15,
      hook='Phone alarm reads 6:00, a manicured hand swipes it off. Text: "a day in the life of a woman who does everything right."',
@@ -153,15 +153,15 @@ reel(id="S028", date="2026-11-06", title="day in the life", length=15,
         (2.5, "crop, feet and hands", "pilates reformer movement", LIFE, "6am pilates.", "reformer studio"),
         (2.5, "close", "green juice poured into a clear glass", LIFE, "green juice.", "green juice, clear glass"),
         (2.5, "overhead", "balanced lunch set down at a desk", LIFE, "a proper lunch.", "lunch bowl"),
-        (3, "MS", "3pm at the desk, chin on hand, coffee cup lifted", LIFE, "3pm crash.", "laptop, coffee cup"),
-        (3, "full-frame graphic", "end card", END, "sound familiar? / join the waitlist.", "none"),
+        (3, "MS", "afternoon at the desk, hand sets down a glass of water by the laptop", LIFE, "blood sugar rises and falls through the day.", "laptop, glass of water"),
+        (3, "full-frame graphic", "end card", END, "we designed for that. / join the waitlist.", "none"),
      ],
-     vo="no VO (optional creator voiceover, suggested wording: \"6am pilates. green juice. and still.\")",
-     audio="upbeat, polished \"day in the life\" vlog beat that stalls on the 3pm shot",
-     end='"sound familiar?" / "join the waitlist."',
+     vo="no VO (optional creator voiceover, suggested wording: \"6am pilates. green juice. a proper lunch.\")",
+     audio="upbeat, polished \"day in the life\" vlog beat that eases on the afternoon shot",
+     end='"we designed for that." / "join the waitlist."',
      tiktok="Faster cuts (about 1.5s each); \"day in the life\" is a native TikTok format. Text centre band.",
-     props="phone, pilates studio access, green juice, clear glass, lunch bowl, laptop, coffee cup",
-     notes="No stock frustration acting, no stomach touching. Do not link the product to energy.")
+     props="phone, pilates studio access, green juice, clear glass, lunch bowl, laptop, glass of water",
+     notes="No stock frustration acting, no stomach touching, no 3pm crash beat. Do not link the product to energy or a fix. Pre-reveal, so no product on screen. Calendar caption says \"formulated to support blood sugar balance\" and carries the footer. If a creator films it: disclose: #ad if paid, #gifted if gifted product.")
 
 reel(id="S034", date="2026-11-10", title="packing the chrome", length=12,
      hook='Overhead: a chrome martini cup is laid into a foam-lined case. Text: "packing the chrome."',
@@ -247,7 +247,7 @@ reel(id="S048", date="2026-11-17", title="creator 1 waitlist", length=20,
      end='"join the waitlist."',
      tiktok="Post natively from the creator's account (or Spark/collab). Keep the creator's own captions style; brand end card optional. Text centre band.",
      props="creator's phone showing waitlist page, shoot B-roll (no product)",
-     notes="Creator may not claim results, energy or body changes. Paid partnership label and #ad if paid or gifted. Footer in caption. Approve the script before filming.")
+     notes="Creator may not claim results, energy or body changes. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Pre-reveal, so no product on screen. Footer in caption. Approve the script before filming.")
 
 reel(id="S051", date="2026-11-19", title="gut health minus the hype", length=20,
      hook='"gut health," appears, then chrome tweezers pluck a glittery "hype" tile away, leaving "minus the hype."',
@@ -264,23 +264,23 @@ reel(id="S051", date="2026-11-19", title="gut health minus the hype", length=20,
      end='"no hype." / "join the waitlist."',
      tiktok="Add \"in 20 seconds\" to the native caption to match S013. Text centre band.",
      props="chrome tweezers, glittery \"hype\" acrylic tile, glasses, frosted glass, mister",
-     notes="Have the gut lines checked [CONFIRM]. No cartoon gut graphics. Calendar caption has no footer: add it.")
+     notes="Have the gut lines checked [CONFIRM]. No cartoon gut graphics. Footer in caption.")
 
-reel(id="S054", date="2026-11-20", title="creator 2 vanity", length=15,
-     hook='Creator clears a space on her chrome vanity tray in one sweep. Text: "the first supplement that looks like it belongs on my vanity."',
+reel(id="S054", date="2026-11-20", title="creator 2 waitlist spot", length=15,
+     hook='At her vanity, the creator holds her phone up to the mirror showing the waitlist page. Text: "saving my spot on the waitlist."',
      shots=[
-        (1.5, "overhead", "creator sweeps clutter off one corner of the tray", PE, "\"the first supplement that looks like it belongs on my vanity.\"", "creator's vanity, chrome tray"),
+        (1.5, "mirror reflection MCU", "creator holds phone with the waitlist page up to the mirror", CREATOR, "\"saving my spot on the waitlist.\"", "creator's vanity, phone with waitlist page"),
         (4, "mirror reflection MCU", "creator speaks, line 1", CREATOR, "supplements never made the cut.", "mirror"),
         (4, "mirror reflection MCU", "creator speaks, line 2", CREATOR, "launching 3 december.", "none"),
-        (3, "overhead", "creator places a small \"reserved\" card on the empty spot", PE, "saving a spot.", "\"reserved\" card"),
+        (3, "overhead", "creator places a small \"reserved\" card on an empty spot on her chrome tray", PE, "saving a spot.", "chrome tray, \"reserved\" card"),
         (2.5, "full-frame graphic", "end card", END, "join the waitlist.", "none"),
      ],
-     vo="creator to camera. Suggested wording only: (1) \"my vanity is very curated. supplements never made the cut.\" (2) \"this one is chrome, it's formulated to support metabolism, blood sugar balance and gut health, and it launches 3 december.\"",
+     vo="creator to camera. Suggested wording only: (1) \"my vanity is very curated. supplements never made the cut.\" (2) \"this one is formulated to support metabolism, blood sugar balance and gut health. it launches 3 december, so I'm saving my spot on the waitlist.\"",
      audio="soft, chic get-ready-with-me beat",
      end='"join the waitlist."',
      tiktok="GRWM framing is native: let her do one makeup step while talking. Text centre band.",
-     props="creator's vanity, chrome tray, lipstick, jewelry, \"reserved\" card",
-     notes="Posts 20 Nov, before the 23 Nov reveal, so no product on screen (hence the \"reserved\" spot). If product reaches her and the reveal moves earlier, swap shot 4 for her placing the bottle. Paid partnership label and #ad if paid or gifted. Footer in caption.")
+     props="creator's vanity, chrome tray, lipstick, jewelry, phone with waitlist page, \"reserved\" card",
+     notes="Posts 20 Nov, before the 23 Nov reveal: no product, bottle or capsule on screen, and nothing implying she has used it. Do not swap in the bottle even if product reaches her early. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.")
 
 reel(id="S057", date="2026-11-23", title="product reveal", length=15,
      hook='A hand sets the bottle down onto the chrome platter, a hard glint flares. Text: "meet"',
@@ -330,7 +330,7 @@ reel(id="S064", date="2026-11-26", title="creator 3 post", length=15,
      end='"join the waitlist."',
      tiktok="Post from the creator's account; let her caption it in her own words. Text centre band.",
      props="bottle, chrome martini cup, creator's phone, styled table",
-     notes="Creator needs product in hand by 26 Nov [CONFIRM]. Paid partnership label and #ad if paid or gifted. No results claims. Footer in caption.")
+     notes="Creator needs product in hand before filming [CONFIRM]; no use or results claims. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.")
 
 reel(id="S068", date="2026-11-28", title="mirror mirror", length=10,
      hook='Tweezers set one capsule onto a round mirror; it doubles in the reflection. Text: "mirror, mirror."',
@@ -346,7 +346,7 @@ reel(id="S068", date="2026-11-28", title="mirror mirror", length=10,
      end='"launching 3 december." / "join the waitlist."',
      tiktok="Make it loop: end on the empty mirror so it flows back into shot 1. Text centre band.",
      props="round vanity mirror, capsule, chrome tweezers, bottle",
-     notes="Show one capsule only, so the frame implies no dose. Calendar caption has no CTA: add \"join the waitlist.\"")
+     notes="Show one capsule only, so the frame implies no dose. CTA \"join the waitlist.\" is in the calendar caption.")
 
 reel(id="S072", date="2026-11-30", title="chrome spoon ingredients", length=12,
      hook='A chrome spoon slides into frame carrying a slice of ginger root. Text: "ginger."',
@@ -361,9 +361,9 @@ reel(id="S072", date="2026-11-30", title="chrome spoon ingredients", length=12,
      vo="no VO",
      audio="crisp, minimal, one clean hit per ingredient",
      end='"full formula in our latest post." / "join the waitlist."',
-     tiktok="\"full formula in our latest post\" does not work on TikTok (no carousel): change to \"full formula at the link in bio.\" Text centre band.",
+     tiktok="TikTok has no carousel: caption reads \"full formula in our latest post (TikTok: link in bio).\" and the TikTok end card reads \"full formula: link in bio.\" Text centre band.",
      props="4 chrome spoons, ginger root, green tea leaves, barberries, frosted glass, chrome platter, ice blue gradient",
-     notes="Marked [HOLD] in the ad pack: post only after the S071 formula carousel is confirmed and live [CONFIRM full formula]. Never use or caption bismuth as chromium. No doses on screen unless confirmed ([dose]). No per-ingredient benefit claims. Calendar caption has no CTA: add \"join the waitlist.\"")
+     notes="Marked [HOLD] in the ad pack: post only after the S071 formula carousel is confirmed and live [CONFIRM full formula]. Never use or caption bismuth as chromium. No doses on screen unless confirmed ([dose]). No per-ingredient benefit claims. CTA \"join the waitlist.\" is in the calendar caption.")
 
 reel(id="S076", date="2026-12-01", title="two days founder", length=25,
      hook='Founder lifts the bottle into frame. Text: "two days."',
@@ -381,9 +381,9 @@ reel(id="S076", date="2026-12-01", title="two days founder", length=25,
      end='"launching 3 december." / "join the waitlist."',
      tiktok="Talking-head first, inserts second. Countdown framing is native; use TikTok's countdown sticker if available. Text centre band.",
      props="bottle, S072 spoon footage, lav mic, styled chrome tray backdrop",
-     notes="Every ingredient line depends on [dose] and a confirmed, permitted reason [CONFIRM]. Calendar caption has no CTA: add \"join the waitlist.\"")
+     notes="Every ingredient line depends on [dose] and a confirmed, permitted reason [CONFIRM]. CTA \"join the waitlist.\" and footer are in the calendar caption.")
 
-reel(id="S079", date="2026-12-02", title="the night before", length=15,
+reel(id="S079", date="2026-12-02", title="first edition packed by hand", length=15,
      hook='Under a desk lamp, hands fold tissue over a bottle in a box. Text: "the night before."',
      shots=[
         (1.5, "CU", "tissue folded over bottle in box", DISPATCH, "the night before.", "box, tissue, bottle"),
@@ -398,7 +398,7 @@ reel(id="S079", date="2026-12-02", title="the night before", length=15,
      end='"see you tomorrow." / "join the waitlist."',
      tiktok="Keep natural sound up (packing ASMR). Native caption: \"tomorrow.\" Text centre band.",
      props="shipping boxes, tissue, bottles, insert cards, stickers, desk lamp",
-     notes="Calendar caption says \"first orders\": there are no orders before launch unless pre-orders exist [CONFIRM]. On-screen text uses \"the first edition, packed by hand\" instead. \"packed by hand\" must be true [CONFIRM]. Add CTA to caption.")
+     notes="Cover reads \"the first edition, packed by hand.\" There are no orders before launch: never say \"orders\" on screen or in caption. \"packed by hand\" must be true [CONFIRM]. CTA \"join the waitlist.\" is in the calendar caption.")
 
 reel(id="S082", date="2026-12-03", title="launch film", length=20,
      hook='The bottle lands on the chrome platter, light flares. Text: "it\'s here."',
@@ -467,23 +467,23 @@ reel(id="S092", date="2026-12-08", title="creator it arrived", length=15,
      end='"shop now."',
      tiktok="Post from the creator's account; raw handheld. Text centre band.",
      props="shipping box, bottle (creator's own space)",
-     notes="First impressions only: no results, no \"after a week\", no body talk. Disclose #ad or paid partnership if paid or gifted. Footer in caption.")
+     notes="First impressions only: no results, no \"after a week\", no body talk. Film only after the product arrives. Paid partnership label; disclose: #ad if paid, #gifted if gifted product. Footer in caption.")
 
-reel(id="S095", date="2026-12-10", title="packed with intention product", length=12,
-     hook='Mid-stride, a hand dips into a handbag and pulls out the bottle. Text: "the new bag essential."',
+reel(id="S095", date="2026-12-10", title="travel with metabolic reset", length=12,
+     hook='Overhead into an open carry-on: a passport drops in on the beat. Text: "travel with metabolic reset."',
      shots=[
-        (1.5, "CU, tracking", "hand pulls bottle from bag while walking", IB, "the new bag essential.", "handbag, bottle"),
-        (2.5, "overhead", "bag contents laid on chrome tray: passport, headphones, lipstick, bottle", PE, "passport. headphones. lipstick.", "passport, headphones, lipstick, chrome tray"),
-        (3, "side", "bottle dropped back in with headphones", IB, "metabolic reset.", "bottle, headphones"),
-        (2.5, "MS", "bag clasp closes, carried out of frame", IB, "packed with intention.", "handbag"),
+        (1.5, "overhead", "passport drops into an open carry-on", IB, "travel with metabolic reset.", "carry-on bag, passport"),
+        (2.5, "overhead", "travel kit laid on chrome tray: passport, headphones, bottle", PE, "passport. headphones.", "passport, headphones, bottle, chrome tray"),
+        (3, "side", "bottle placed in beside the headphones", IB, "metabolic reset.", "bottle, headphones"),
+        (2.5, "MS", "bag zipped and wheeled out of frame", IB, "goes where you go.", "carry-on bag"),
         (2.5, "full-frame graphic", "end card", END, "shop now.", "none"),
      ],
      vo="no VO",
      audio="travel-ready, upbeat walking-tempo beat",
      end='"shop now."',
-     tiktok="Lean into a travel or holiday angle (December). Text centre band.",
-     props="handbag, bottle, passport, headphones, lipstick, chrome tray",
-     notes="Reworked toward travel so it does not repeat S062.")
+     tiktok="Lean into the December travel and holiday angle. Text centre band.",
+     props="carry-on bag, passport, headphones, bottle, chrome tray",
+     notes="Travel angle (passport, headphones) so it does not repeat S062 (\"in her bag\": lipstick, headphones, keys). Check Shoot No. 1 footage covers a travel bag, else reshoot off-set with the real bottle.")
 
 reel(id="S097", date="2026-12-14", title="wrapped in chrome", length=15,
      hook='Hands fold mirror-silver paper over a box. Text: "gift it in chrome."',
@@ -532,6 +532,18 @@ for r in R:
         errs.append(f"{r['id']} pre-launch CTA missing")
     if not pre and "shop now" not in endtxt:
         errs.append(f"{r['id']} launch CTA missing")
+# ---------- sync with posts.csv ----------
+with open(f"{OUT_DIR}/posts.csv") as f:
+    cal = {row["id"]: row for row in csv.DictReader(f) if row["format"] == "REEL"}
+ids = {r["id"] for r in R}
+for cid in sorted(set(cal) - ids):
+    errs.append(f"{cid} is a REEL in posts.csv but has no script")
+for r in R:
+    c = cal.get(r["id"])
+    if not c:
+        errs.append(f"{r['id']} has a script but is not a REEL in posts.csv")
+    elif (c["date"], c["title"]) != (r["date"], r["title"]):
+        errs.append(f"{r['id']} out of sync with posts.csv: {c['date']} {c['title']!r} vs {r['date']} {r['title']!r}")
 R.sort(key=lambda r: (r["date"], r["id"]))
 if errs:
     print("\n".join(errs)); sys.exit(1)
@@ -561,7 +573,7 @@ L.append(f"- Structure/function only: \"{CLAIM}\" Never cure, treat, prevent, de
 L.append("- No before/after bodies, measuring tapes, scales, stomach pinching, pill-spill, or identifiable competitor products.")
 L.append("- No invented testimonials, stats, doses, prices or ingredients. Placeholders stay until confirmed: [dose], [price], [ingredient 4], [CONFIRM]. A Reel with a placeholder on screen does not post until it is filled.")
 L.append("- CTA: before 3 Dec \"join the waitlist\"; from 3 Dec \"shop now\".")
-L.append("- Creators: no results, energy or body claims. Paid partnership label plus #ad when paid or gifted.")
+L.append("- Creators: no results, energy or body claims, and nothing implying use before they received the product. Paid partnership label; disclose: #ad if paid, #gifted if gifted product.")
 L.append(f"- Any Reel that names the product's function carries the footer in its caption: *{FOOTER}*")
 L.append("")
 L.append("---")

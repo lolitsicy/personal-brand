@@ -1,11 +1,13 @@
 id,date,day,week,theme,phase,format,platforms,pillar,title,on_image,caption,needs
 S001,2026-10-21,Wed,W1,Tease: the world of maison belasi,PRE-LAUNCH,FEED,Instagram feed,Brand,something considered,something considered is coming.,"biohacking, made fashionable. the waitlist is open. link in bio.",
 S002,2026-10-21,Wed,W1,Tease: the world of maison belasi,PRE-LAUNCH,STORY,Instagram Stories,Waitlist,waitlist open,the waitlist is open.,link sticker: join the waitlist,
-S003,2026-10-22,Thu,W1,Tease: the world of maison belasi,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Brand,biohacking dressed up film,"biohacking, dressed up.","the science of feeling good, with better taste. join the waitlist.",abstract chrome/glass footage or type animation
+S003,2026-10-25,Sun,W1,Tease: the world of maison belasi,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Brand,biohacking dressed up film,"biohacking, dressed up.","the science of feeling good, with better taste. join the waitlist.","abstract chrome/glass footage or type animation. moved from Thu 22 Oct (date passed) to Sun 25 Oct, the next W1 day with no Reel"
 S004,2026-10-22,Thu,W1,Tease: the world of maison belasi,PRE-LAUNCH,STORY,Instagram Stories,Brand,behind the name,maison belasi. / why the name?,"3 frames: what maison means to us, what belasi means, the promise",founder to confirm name story
 S005,2026-10-23,Fri,W1,Tease: the world of maison belasi,PRE-LAUNCH,CAROUSEL-4,Instagram feed,Brand,what is maison belasi,what is maison belasi?,clinical by design. fashionable by nature. our first product is metabolic reset. join the waitlist.,
 S006,2026-10-23,Fri,W1,Tease: the world of maison belasi,PRE-LAUNCH,STORY,Instagram Stories,Community,3pm poll,your 3pm is: / coffee / snack / push through,poll sticker,
-S007,2026-10-24,Sat,W1,Tease: the world of maison belasi,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Problem,POV 3pm crash,"POV: you eat well, you train, and it's still 3pm on coffee number three.","if this is you, we made something for you. join the waitlist.",phone footage of desk/coffee
+S007,2026-10-24,Sat,W1,Tease: the world of maison belasi,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Problem,POV 3pm crash,"POV: you eat well, you train, and it's still 3pm on coffee number three.","if this is you, you're not alone. blood sugar rises and falls through the day, and we designed for that. metabolic reset is formulated to support blood sugar balance. join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","phone footage of desk/coffee. no product, no fix or energy claim"
 S008,2026-10-24,Sat,W1,Tease: the world of maison belasi,PRE-LAUNCH,STORY,Instagram Stories,Community,supplement drawer question,what's in your supplement drawer?,question sticker,
 S009,2026-10-25,Sun,W1,Tease: the world of maison belasi,PRE-LAUNCH,FEED,Instagram feed,Brand,precision not promises,"precision, not promises.",we'd rather show you than tell you. join the waitlist.,
 S010,2026-10-25,Sun,W1,Tease: the world of maison belasi,PRE-LAUNCH,STORY,Instagram Stories,Waitlist,repost precision,"precision, not promises. / join the waitlist",reshare feed post + link sticker,
@@ -24,15 +26,19 @@ S020,2026-11-01,Sun,W2,The gap: doing everything right,PRE-LAUNCH,FEED,Instagram
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",
 S021,2026-11-01,Sun,W2,The gap: doing everything right,PRE-LAUNCH,STORY,Instagram Stories,Community,ask us anything,ask us anything about metabolic health.,"question sticker. answer with general education only, never personal advice.",
-S022,2026-11-02,Mon,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Founder,why I started maison belasi,why I started maison belasi.,a note from our founder. join the waitlist.,"founder to camera, 30 to 45s [founder script]"
+S022,2026-11-02,Mon,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Founder,why I started maison belasi,why I started maison belasi.,"a note from our founder. join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","founder to camera, 30 to 45s [founder script]"
 S023,2026-11-02,Mon,W3,What we stand for,PRE-LAUNCH,STORY,Instagram Stories,Founder,founder Q&A,you asked. our founder answers.,3 frames answering questions from 1 Nov,founder answers
 S024,2026-11-03,Tue,W3,What we stand for,PRE-LAUNCH,CAROUSEL-5,Instagram feed,Brand,chrome not clutter,"chrome, not clutter.","our design philosophy, in five slides. join the waitlist.",
-S025,2026-11-04,Wed,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Brand,biohacking then and now,biohacking used to look like this. / now it looks like this.,same science. better taste. join the waitlist.,footage: cluttered tubs vs chrome tray
+S025,2026-11-04,Wed,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Brand,biohacking redesigned,"biohacking, redesigned.","the category, reconsidered as an object. chrome, glass and nothing you'd hide in a drawer. join the waitlist.","footage: objects only. no bodies, no competitor products or logos, no then/now or before/after split"
 S026,2026-11-04,Wed,W3,What we stand for,PRE-LAUNCH,STORY,Instagram Stories,Community,this or that,this or that: / powder or capsule / gym bag or handbag,poll stickers,
 S027,2026-11-05,Thu,W3,What we stand for,PRE-LAUNCH,FEED,Instagram feed,Brand,not a miracle,not a fat burner. not a detox. not a miracle.,"just a daily capsule formulated to support metabolism, blood sugar balance and gut health. join the waitlist.
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",
-S028,2026-11-06,Fri,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Problem,day in the life,a day in the life of a woman who does everything right.,6am pilates. green juice. 3pm crash. sound familiar? join the waitlist.,creator or founder footage
+S028,2026-11-06,Fri,W3,What we stand for,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Problem,day in the life,a day in the life of a woman who does everything right.,"6am pilates. green juice. a proper lunch. blood sugar still rises and falls through the day, and we designed for that. metabolic reset is formulated to support blood sugar balance. join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","creator or founder footage. no product on screen (pre-reveal), no energy or fix claim. if a creator: disclose: #ad if paid, #gifted if gifted product"
 S029,2026-11-06,Fri,W3,What we stand for,PRE-LAUNCH,STORY,Instagram Stories,Waitlist,waitlist reminder,on the list yet?,link sticker: join the waitlist,
 S030,2026-11-07,Sat,W3,What we stand for,PRE-LAUNCH,CAROUSEL-5,Instagram feed,Brand,what we left out,what we left out of metabolic reset.,no proprietary blends. no fillers we don't need. no promises we can't keep. [CONFIRM] join the waitlist.,CONFIRM no proprietary blends
 S031,2026-11-08,Sun,W3,What we stand for,PRE-LAUNCH,STORY,Instagram Stories,Community,jewelry poll,would you take a supplement that looks this good?,poll sticker,
@@ -54,13 +60,19 @@ S046,2026-11-16,Mon,W5,Education and first creators,PRE-LAUNCH,CAROUSEL-5,Instag
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",
 S047,2026-11-16,Mon,W5,Education and first creators,PRE-LAUNCH,STORY,Instagram Stories,Education,blood sugar quiz,quick quiz: what can affect blood sugar balance?,"quiz sticker: meals, sleep, stress, all of the above (answer: all)",
-S048,2026-11-17,Tue,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 1 waitlist,"""I joined a waitlist for a supplement. let me explain.""",[creator] is on the list. are you? join the waitlist. #ad if paid,creator 1 video
+S048,2026-11-17,Tue,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 1 waitlist,"""I joined a waitlist for a supplement. let me explain.""","[creator] is on the list. are you? join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","creator 1 video, no product shown (pre-reveal). disclose: #ad if paid, #gifted if gifted product"
 S049,2026-11-18,Wed,W5,Education and first creators,PRE-LAUNCH,FEED,Instagram feed,Product,morning ritual teaser,"a morning ritual, refined.",coming soon to your morning. join the waitlist.,
 S050,2026-11-18,Wed,W5,Education and first creators,PRE-LAUNCH,STORY,Instagram Stories,Community,morning or night,morning routine or night routine?,poll sticker,
-S051,2026-11-19,Thu,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Education,gut health minus the hype,"gut health, minus the hype.","what your gut actually does, in 20 seconds. join the waitlist.",type animation
-S052,2026-11-19,Thu,W5,Education and first creators,PRE-LAUNCH,STORY,Instagram Stories,Creator,creator takeover,takeover: [creator],creator story frames,creator content
+S051,2026-11-19,Thu,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Education,gut health minus the hype,"gut health, minus the hype.","what your gut actually does, in 20 seconds. join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",type animation
+S052,2026-11-19,Thu,W5,Education and first creators,PRE-LAUNCH,STORY,Instagram Stories,Creator,creator takeover,takeover: [creator],creator story frames,"creator content, no product shown (pre-reveal). disclose: #ad if paid, #gifted if gifted product"
 S053,2026-11-20,Fri,W5,Education and first creators,PRE-LAUNCH,CAROUSEL-5,Instagram feed,Education,metabolism myths,"metabolism myths, retired.","five things you've probably heard about metabolism, and what's actually true. join the waitlist.",fact-check each slide
-S054,2026-11-20,Fri,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 2 vanity,"""the first supplement that looks like it belongs on my vanity.""",[creator] is on the list. join the waitlist. #ad if paid,creator 2 video
+S054,2026-11-20,Fri,W5,Education and first creators,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 2 waitlist spot,"""saving my spot on the waitlist.""","[creator] is saving a spot. are you? join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","creator 2 video, no product shown (posts before the 23 Nov reveal). disclose: #ad if paid, #gifted if gifted product"
 S055,2026-11-21,Sat,W5,Education and first creators,PRE-LAUNCH,STORY,Instagram Stories,Waitlist,first look countdown,first look: sunday.,countdown sticker to 23 Nov,
 S056,2026-11-22,Sun,W5,Education and first creators,PRE-LAUNCH,FEED,Instagram feed,Product,first look sunday,"first look, tomorrow.",the waitlist sees it first. link in bio.,
 S057,2026-11-23,Mon,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,product reveal,meet metabolic reset.,"a daily capsule formulated to support metabolism, blood sugar balance and gut health. launching 3 december. join the waitlist.
@@ -76,28 +88,30 @@ Always read the label and follow the directions for use. If symptoms persist, se
 S061,2026-11-24,Tue,W6,Product reveal,PRE-LAUNCH,STORY,Instagram Stories,Community,first impressions,first impressions?,emoji slider,
 S062,2026-11-25,Wed,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,in her bag,packed with intention.,lipstick. headphones. keys. metabolic reset. join the waitlist.,shoot film: bag
 S063,2026-11-25,Wed,W6,Product reveal,PRE-LAUNCH,FEED,Instagram feed,Product,chrome outside,chrome on the outside. considered on the inside.,launching 3 december. join the waitlist.,shoot still
-S064,2026-11-26,Thu,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 3 post,"""biohacking, but something I'd actually post.""",[creator] is on the list. join the waitlist. #ad if paid,creator 3 video
+S064,2026-11-26,Thu,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator 3 post,"""biohacking, but something I'd actually post.""","[creator] is on the list. join the waitlist.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","creator 3 video. product in hand before filming [CONFIRM], no use or results claims. disclose: #ad if paid, #gifted if gifted product"
 S065,2026-11-26,Thu,W6,Product reveal,PRE-LAUNCH,STORY,Instagram Stories,Product,FAQ when how much,"when? how much? / your questions, answered.","3 frames: launch date, price [CONFIRM], where we ship","CONFIRM price, shipping"
 S066,2026-11-27,Fri,W6,Product reveal,PRE-LAUNCH,FEED,Instagram feed,Launch,not doing black friday,we're not doing black friday.,we're doing a first edition instead. waitlist members get founding pricing on 2 december. [CONFIRM] join the waitlist.,CONFIRM founding pricing
 S067,2026-11-27,Fri,W6,Product reveal,PRE-LAUNCH,STORY,Instagram Stories,Launch,not doing black friday story,no black friday. just first in line.,link sticker,CONFIRM founding pricing
-S068,2026-11-28,Sat,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,mirror mirror,"mirror, mirror.",the most considered thing on your vanity. launching 3 december.,shoot film: mirror
+S068,2026-11-28,Sat,W6,Product reveal,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,mirror mirror,"mirror, mirror.",the most considered thing on your vanity. launching 3 december. join the waitlist.,shoot film: mirror
 S069,2026-11-29,Sun,W6,Product reveal,PRE-LAUNCH,FEED,Instagram feed,Product,goes with everything,goes with everything.,"silver, chrome and a daily capsule. launching 3 december.",shoot still: tray + jewelry
 S070,2026-11-29,Sun,W6,Product reveal,PRE-LAUNCH,STORY,Instagram Stories,Launch,4 days,4 days.,countdown sticker to 3 Dec,
 S071,2026-11-30,Mon,W7,Formula reveal and countdown,PRE-LAUNCH,CAROUSEL-6,Instagram feed,Product,formula revealed,"the formula, revealed.","every ingredient, every dose, and why it's there. [CONFIRM full formula]
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",CONFIRM formula is public
-S072,2026-11-30,Mon,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,chrome spoon ingredients,ginger. green tea. barberry.,"chosen on purpose. full formula in our latest post.
+S072,2026-11-30,Mon,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Product,chrome spoon ingredients,ginger. green tea. barberry.,"chosen on purpose. full formula in our latest post (TikTok: link in bio). join the waitlist.
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",shoot film: ingredients
 S073,2026-11-30,Mon,W7,Formula reveal and countdown,PRE-LAUNCH,STORY,Instagram Stories,Launch,3 days,3 days.,countdown sticker,
 S074,2026-12-01,Tue,W7,Formula reveal and countdown,PRE-LAUNCH,FEED,Instagram feed,Launch,countdown 2,2.,"two days. waitlist, check your inbox tomorrow.",
 S075,2026-12-01,Tue,W7,Formula reveal and countdown,PRE-LAUNCH,STORY,Instagram Stories,Launch,early access tomorrow,waitlist: early access opens tomorrow. [CONFIRM],link sticker,CONFIRM early access
-S076,2026-12-01,Tue,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Founder,two days founder,two days. here's what's in the bottle and why.,"our founder on the formula.
+S076,2026-12-01,Tue,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,Founder,two days founder,two days. here's what's in the bottle and why.,"our founder on the formula. join the waitlist.
 
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",founder video
 S077,2026-12-02,Wed,W7,Formula reveal and countdown,PRE-LAUNCH,FEED,Instagram feed,Launch,waitlist first,"waitlist, you're in first.",early access is open for waitlist members. everyone else: tomorrow. [CONFIRM],CONFIRM early access
 S078,2026-12-02,Wed,W7,Formula reveal and countdown,PRE-LAUNCH,STORY,Instagram Stories,Launch,early access link,early access is open.,link sticker to waitlist access page,CONFIRM
-S079,2026-12-02,Wed,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,BTS,the night before,the night before.,"first orders, packed by hand. see you tomorrow.",BTS: packing
+S079,2026-12-02,Wed,W7,Formula reveal and countdown,PRE-LAUNCH,REEL,Instagram Reels + TikTok,BTS,first edition packed by hand,"the first edition, packed by hand.","the night before. the first edition, packed by hand. see you tomorrow. join the waitlist.",BTS: packing. no orders exist before launch: never say orders. CONFIRM packed by hand is true
 S080,2026-12-02,Wed,W7,Formula reveal and countdown,PRE-LAUNCH,STORY,Instagram Stories,Launch,tomorrow,tomorrow.,countdown sticker,
 S081,2026-12-03,Thu,LAUNCH,Launch day,LAUNCH DAY,FEED,Instagram feed,Launch,now available,metabolic reset. now available.,"a daily capsule formulated to support metabolism, blood sugar balance and gut health. shop via link in bio.
 
@@ -120,10 +134,12 @@ S089,2026-12-06,Sun,W8,Launch week,LAUNCH,REEL,Instagram Reels + TikTok,Product,
 Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.",footage: glass + capsule
 S090,2026-12-06,Sun,W8,Launch week,LAUNCH,STORY,Instagram Stories,Community,launch Q&A,you asked: launch week edition.,answer top questions,
 S091,2026-12-07,Mon,W8,Launch week,LAUNCH,CAROUSEL-5,Instagram feed,Launch,launch FAQ,launch FAQ.,"shipping, subscriptions, dose and returns. [CONFIRM all]",CONFIRM policies
-S092,2026-12-08,Tue,W8,Launch week,LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator it arrived,"""it arrived.""",[creator] unboxes the first edition. #ad if paid,"creator video, no results claims"
+S092,2026-12-08,Tue,W8,Launch week,LAUNCH,REEL,Instagram Reels + TikTok,Creator,creator it arrived,"""it arrived.""","[creator] unboxes the first edition. shop now via link in bio.
+
+Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.","creator video, filmed after the product arrives, no results claims. disclose: #ad if paid, #gifted if gifted product"
 S093,2026-12-09,Wed,W8,Launch week,LAUNCH,FEED,Instagram feed,Launch,first edition limited,"first edition, limited run.","when it's gone, it's gone. [CONFIRM real]",CONFIRM limited run
 S094,2026-12-10,Thu,W8,Launch week,LAUNCH,STORY,Instagram Stories,Community,how do you take yours,how do you take yours?,poll: morning / with breakfast / on the go,
-S095,2026-12-10,Thu,W8,Launch week,LAUNCH,REEL,Instagram Reels + TikTok,Product,packed with intention product,the new bag essential.,packed with intention. shop via link in bio.,shoot film: bag
+S095,2026-12-10,Thu,W8,Launch week,LAUNCH,REEL,Instagram Reels + TikTok,Product,travel with metabolic reset,travel with metabolic reset.,passport. headphones. metabolic reset. shop now via link in bio.,"shoot film: bag + travel (passport, headphones). check Shoot No. 1 footage covers it, else reshoot. must not repeat S062"
 S096,2026-12-12,Sat,W9,First edition and gifting,LAUNCH,CAROUSEL-5,Instagram feed,Launch,considered gift guide,the considered gift guide.,for the woman who does everything right. shop via link in bio.,styled stills
 S097,2026-12-14,Mon,W9,First edition and gifting,LAUNCH,REEL,Instagram Reels + TikTok,Launch,wrapped in chrome,gift it in chrome.,the most considered gift under the tree. shop via link in bio.,gift wrap footage
 S098,2026-12-16,Wed,W9,First edition and gifting,LAUNCH,STORY,Instagram Stories,Launch,shipping cut-off,order by [date] for christmas.,link sticker,CONFIRM shipping cut-off

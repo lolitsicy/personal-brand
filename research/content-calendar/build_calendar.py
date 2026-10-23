@@ -29,7 +29,7 @@ ADS = [
 
 MILESTONES = [
     ("2026-10-21", "Waitlist opens, first post"),
-    ("2026-11-11", "Shoot starts, New York (11–14 Nov)"),
+    ("2026-11-11", "Shoot starts, New York (11 to 14 Nov)"),
     ("2026-11-22", "Final shoot photos due"),
     ("2026-11-23", "Product reveal"),
     ("2026-11-27", "Black Friday: costs spike, don't scale"),
