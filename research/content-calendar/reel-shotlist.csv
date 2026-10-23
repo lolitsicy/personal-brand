@@ -1,0 +1,169 @@
+id,date,set,shot_no,duration_s,framing,action,props
+S003,2026-10-22,Pre-shoot: chrome texture (own props),1,1.5,ECU macro,"light sweeps across a chrome surface, glint flares","chrome platter or tray, LED wand"
+S003,2026-10-22,Pre-shoot: chrome texture (own props),2,2,macro,a single water droplet lands on frosted glass and spreads,"frosted glass sheet, pipette, water"
+S003,2026-10-22,Pre-shoot: chrome texture (own props),3,2.5,slow push-in,chrome tweezers rotate on a pale ice blue to white gradient,"chrome tweezers, turntable, ice blue paper sweep"
+S003,2026-10-22,Pre-shoot: chrome texture (own props),4,3,overhead close,hand in silver rings sets tweezers down on a chrome tray,"chrome tray, silver rings, tweezers"
+S003,2026-10-22,Canva: end card,5,3,full-frame graphic,end card,none
+S007,2026-10-24,Off-set: desk (phone),1,1.5,overhead POV,hand sets a third coffee cup beside two empty ones,"3 matching white or glass coffee cups, white desk"
+S007,2026-10-24,Off-set: desk (phone),2,2,close,laptop corner clock reads 3:00 pm; gym bag strap in frame edge,"laptop, gym bag"
+S007,2026-10-24,Off-set: desk (phone),3,2.5,"side, hand only","hand reaches for the cup, pauses, lifts it out of frame",coffee cup
+S007,2026-10-24,Off-set: desk (phone),4,2,overhead,empty cup ring left on the desk,none
+S007,2026-10-24,Canva: end card,5,2,full-frame graphic,end card,none
+S013,2026-10-27,Canva: type animation,1,1.5,full-frame type,three words stack on beat,none
+S013,2026-10-27,Pre-shoot: chrome texture (own props),2,4.5,macro,slow ripple in a clear glass of water (B-roll under type),"clear glass, water"
+S013,2026-10-27,Pre-shoot: chrome texture (own props),3,4.5,macro,water level in a glass gently rises and settles,"clear glass, jug"
+S013,2026-10-27,Pre-shoot: chrome texture (own props),4,4.5,macro,droplets bead and run on frosted glass,"frosted glass, mister"
+S013,2026-10-27,Canva: type animation,5,2.5,full-frame type,three words lock together in one line,none
+S013,2026-10-27,Canva: end card,6,2.5,full-frame graphic,end card,none
+S016,2026-10-29,Pre-shoot: chrome texture (own props),1,1.5,overhead,"tray of 4 clear acrylic word tiles, tweezers enter frame","chrome tray, 4 acrylic tiles, chrome tweezers"
+S016,2026-10-29,Pre-shoot: chrome texture (own props),2,1.5,overhead close,"tweezers lift the ""cure."" tile out of frame",tile: cure.
+S016,2026-10-29,Pre-shoot: chrome texture (own props),3,1.5,overhead close,"tweezers lift ""detox."" out",tile: detox.
+S016,2026-10-29,Pre-shoot: chrome texture (own props),4,1.5,overhead close,"tweezers lift ""miracle."" out",tile: miracle.
+S016,2026-10-29,Pre-shoot: chrome texture (own props),5,1.5,overhead close,"tweezers lift ""melt."" out; tray is empty",tile: melt.
+S016,2026-10-29,Canva: end card,6,1.5,full-frame graphic,end card,none
+S019,2026-10-31,Off-set: drawer (phone),1,1.5,"front, low","drawer slides open in the dark, torch beam on","drawer, phone torch, unbranded tubs"
+S019,2026-10-31,Off-set: drawer (phone),2,2,"close, handheld",torch scans tubs; all labels turned away or blank,unbranded tubs
+S019,2026-10-31,Off-set: drawer (phone),3,2.5,ECU,hand turns one tub: a plain mock label with no doses listed,"generic mock label (made in-house, no real brand)"
+S019,2026-10-31,Off-set: drawer (phone),4,2,front,"drawer slides shut, torch clicks off",none
+S019,2026-10-31,Canva: end card,5,2,full-frame graphic,"end card, dark gradient",none
+S022,2026-11-02,Off-set: founder to camera,1,1.5,MCU,founder looks up to camera,"chrome tray, silver jewelry"
+S022,2026-11-02,Off-set: founder to camera,2,8,MCU,"founder speaks, line 1",none
+S022,2026-11-02,Off-set: drawer (phone),3,3,close insert,cluttered supplement drawer (reuse S019 footage),S019 footage
+S022,2026-11-02,Off-set: founder to camera,4,8,MCU,"founder speaks, line 2",none
+S022,2026-11-02,Off-set: founder to camera,5,5.5,MS,"founder speaks, line 3; touches the chrome tray",chrome tray
+S022,2026-11-02,Canva: end card,6,4,full-frame graphic,end card,none
+S025,2026-11-04,Off-set: drawer (phone),1,1.5,overhead,flat-lit pile of mismatched unbranded tubs,unbranded tubs
+S025,2026-11-04,Off-set: drawer (phone),2,2,overhead,"hand rummages, tubs knock together",unbranded tubs
+S025,2026-11-04,Off-set: drawer (phone),3,0.5,overhead,hand swipes across lens (transition),none
+S025,2026-11-04,Product & Essentials (vanity/chrome tray),4,3,overhead,"chrome tray on ice blue seamless: silver rings, glass of water, clean empty space centre","chrome tray, silver rings, glass"
+S025,2026-11-04,Canva: end card,5,3,full-frame graphic,end card,none
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),1,1.5,CU,6:00 alarm dismissed,phone
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),2,2.5,"crop, feet and hands",pilates reformer movement,reformer studio
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),3,2.5,close,green juice poured into a clear glass,"green juice, clear glass"
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),4,2.5,overhead,balanced lunch set down at a desk,lunch bowl
+S028,2026-11-06,Off-set: day-in-the-life (creator/founder),5,3,MS,"3pm at the desk, chin on hand, coffee cup lifted","laptop, coffee cup"
+S028,2026-11-06,Canva: end card,6,3,full-frame graphic,end card,none
+S034,2026-11-10,BTS: prop packing,1,1.5,overhead,chrome martini cup set into foam case,"chrome martini cup, foam case"
+S034,2026-11-10,BTS: prop packing,2,2,CU,chrome tweezers wrapped in a cloth,"chrome tweezers, cloth"
+S034,2026-11-10,BTS: prop packing,3,2,overhead,chrome platter slid into a sleeve,"chrome platter, sleeve"
+S034,2026-11-10,BTS: prop packing,4,2,CU,glass sheets wrapped and stacked,"glass sheets, bubble wrap"
+S034,2026-11-10,BTS: prop packing,5,2,overhead,"case lid closes, latches click",case
+S034,2026-11-10,Canva: end card,6,2.5,full-frame graphic,end card,none
+S037,2026-11-11,Under the Glass,1,1.5,"low angle, up through glass",hand places a prop on the glass sheet,"glass sheet, prop"
+S037,2026-11-11,BTS: on set,2,3,wide BTS,"glass sheet on stands, camera on the floor pointing up","stands, glass sheet"
+S037,2026-11-11,BTS: on set,3,3,CU,"camera on the floor, lens up",camera rig
+S037,2026-11-11,BTS: on set,4,3,close,crew mists water droplets on the glass,mister
+S037,2026-11-11,BTS: on set,5,2,CU,tethered monitor shows the final frame,monitor
+S037,2026-11-11,Canva: end card,6,2.5,full-frame graphic,end card,none
+S040,2026-11-13,Under the Glass,1,1.5,"low angle, up through glass",tweezers lower one capsule,"glass sheet, chrome tweezers, capsule"
+S040,2026-11-13,Under the Glass,2,2,"low angle, up through glass","capsule lands, droplets shiver","capsule, water"
+S040,2026-11-13,BTS: on set,3,2.5,wide BTS,camera rig under the glass,camera rig
+S040,2026-11-13,BTS: on set,4,2,CU,monitor shows the hero frame,monitor
+S040,2026-11-13,Canva: end card,5,2,full-frame graphic,end card,none
+S042,2026-11-14,Chrome Platter,1,1.5,close,"chrome platter spins, flare","chrome platter, turntable"
+S042,2026-11-14,Under the Glass,2,2,low angle,under-the-glass rig,glass rig
+S042,2026-11-14,Gradient Backdrop,3,2,wide,gradient backdrop lit,backdrop
+S042,2026-11-14,Product & Essentials (vanity/chrome tray),4,2,overhead,styled vanity tray,"chrome tray, jewelry"
+S042,2026-11-14,Inside the bag,5,2,overhead,open handbag set,handbag
+S042,2026-11-14,capsules on mirror,6,2,close,capsules on mirror set,"mirror, capsules"
+S042,2026-11-14,BTS: on set,7,1.5,wide,lights switch off,none
+S042,2026-11-14,Canva: end card,8,2,full-frame graphic,end card,none
+S048,2026-11-17,Off-set: creator self-shot,1,1.5,MCU,creator raises phone to lens,phone with waitlist page
+S048,2026-11-17,Off-set: creator self-shot,2,5,MCU,"creator speaks, line 1",none
+S048,2026-11-17,Chrome Platter,3,3,B-roll,brand chrome B-roll from shoot (no product),shoot B-roll
+S048,2026-11-17,Off-set: creator self-shot,4,5,MCU,"creator speaks, line 2",none
+S048,2026-11-17,Off-set: creator self-shot,5,3,MCU,"creator speaks, line 3, small shrug",none
+S048,2026-11-17,Canva: end card,6,2.5,full-frame graphic,end card,none
+S051,2026-11-19,capsules + tweezers,1,1.5,overhead,"tweezers lift the ""hype"" tile out of frame","chrome tweezers, acrylic tile"
+S051,2026-11-19,Under the Glass,2,4,macro,slow ripple in a glass of water,"glass, water"
+S051,2026-11-19,Under the Glass,3,4,macro,droplets drawn across frosted glass,"frosted glass, mister"
+S051,2026-11-19,Gradient Backdrop,4,4,macro,soft light shifts across frosted glass,frosted glass
+S051,2026-11-19,Canva: type animation,5,3.5,full-frame type,line settles on ice blue,none
+S051,2026-11-19,Canva: end card,6,3,full-frame graphic,end card,none
+S054,2026-11-20,Product & Essentials (vanity/chrome tray),1,1.5,overhead,creator sweeps clutter off one corner of the tray,"creator's vanity, chrome tray"
+S054,2026-11-20,Off-set: creator self-shot,2,4,mirror reflection MCU,"creator speaks, line 1",mirror
+S054,2026-11-20,Off-set: creator self-shot,3,4,mirror reflection MCU,"creator speaks, line 2",none
+S054,2026-11-20,Product & Essentials (vanity/chrome tray),4,3,overhead,"creator places a small ""reserved"" card on the empty spot","""reserved"" card"
+S054,2026-11-20,Canva: end card,5,2.5,full-frame graphic,end card,none
+S057,2026-11-23,Chrome Platter,1,1.5,CU,"bottle set onto platter, glint","bottle, chrome platter"
+S057,2026-11-23,Chrome Platter,2,3,slow push-in,"bottle on platter, ice blue seamless","bottle, platter"
+S057,2026-11-23,Under the Glass,3,3,"low angle, up through glass",bottle silhouette from beneath,"bottle, glass sheet"
+S057,2026-11-23,capsules + tweezers,4,3,macro,tweezers lift a single capsule,"capsule, chrome tweezers"
+S057,2026-11-23,Gradient Backdrop,5,2,MS,bottle turns slowly on gradient,"bottle, turntable"
+S057,2026-11-23,Canva: end card,6,2.5,full-frame graphic,end card,none
+S062,2026-11-25,Inside the bag,1,1.5,overhead,lipstick drops into open bag,"handbag, lipstick"
+S062,2026-11-25,Inside the bag,2,2,overhead,headphones drop in,headphones
+S062,2026-11-25,Inside the bag,3,2,overhead,keys drop in,keys
+S062,2026-11-25,Inside the bag,4,2.5,overhead,"bottle placed in, beat lands",bottle
+S062,2026-11-25,Inside the bag,5,1.5,close,clasp snaps shut,handbag
+S062,2026-11-25,Canva: end card,6,2.5,full-frame graphic,end card,none
+S064,2026-11-26,Off-set: creator self-shot,1,1.5,MS,"creator styles bottle next to martini cup, phone up","bottle, chrome martini cup, phone"
+S064,2026-11-26,Off-set: creator self-shot,2,4,MCU,"creator speaks, line 1",none
+S064,2026-11-26,Off-set: creator self-shot,3,3,over the shoulder,her phone screen shows the shot she is taking,phone
+S064,2026-11-26,Off-set: creator self-shot,4,4,MCU,"creator speaks, line 2",none
+S064,2026-11-26,Canva: end card,5,2.5,full-frame graphic,end card,none
+S068,2026-11-28,capsules on mirror,1,1.5,overhead,tweezers place one capsule on mirror,"round mirror, capsule, tweezers"
+S068,2026-11-28,capsules on mirror,2,2.5,low angle across mirror,bottle and its reflection,"bottle, mirror"
+S068,2026-11-28,capsules on mirror,3,2.5,rack focus,focus pulls from reflection to bottle,bottle
+S068,2026-11-28,capsules on mirror,4,1.5,close,hand lifts bottle out of frame,bottle
+S068,2026-11-28,Canva: end card,5,2,full-frame graphic,end card,none
+S072,2026-11-30,Gradient Backdrop,1,1.5,macro,spoon with ginger root slides in,"chrome spoon, ginger root"
+S072,2026-11-30,Gradient Backdrop,2,2,macro,spoon with green tea leaves,"chrome spoon, green tea leaves"
+S072,2026-11-30,Gradient Backdrop,3,2,macro,spoon with barberries,"chrome spoon, barberries"
+S072,2026-11-30,Under the Glass,4,2,macro,"spoon under frosted glass (fourth ingredient, if public)","chrome spoon, frosted glass"
+S072,2026-11-30,Chrome Platter,5,2,overhead,all spoons lined up on the chrome platter,"chrome platter, spoons"
+S072,2026-11-30,Canva: end card,6,2.5,full-frame graphic,end card,none
+S076,2026-12-01,Off-set: founder to camera,1,1.5,MCU,founder raises bottle to lens,bottle
+S076,2026-12-01,Off-set: founder to camera,2,4,MCU,"founder speaks, intro line",bottle
+S076,2026-12-01,Gradient Backdrop,3,4,macro insert,"spoon of ginger root (S072 footage), founder VO",S072 footage
+S076,2026-12-01,Gradient Backdrop,4,4,macro insert,"spoon of green tea leaves, founder VO",S072 footage
+S076,2026-12-01,Gradient Backdrop,5,4,macro insert,"spoon of barberries, founder VO",S072 footage
+S076,2026-12-01,Gradient Backdrop,6,4,macro insert,"fourth ingredient, founder VO",S072 footage
+S076,2026-12-01,Canva: end card,7,3.5,full-frame graphic,end card,none
+S079,2026-12-02,Off-set: dispatch packing,1,1.5,CU,tissue folded over bottle in box,"box, tissue, bottle"
+S079,2026-12-02,Off-set: dispatch packing,2,3,overhead,stack of boxes on a table,boxes
+S079,2026-12-02,Off-set: dispatch packing,3,3,CU,a card tucked into a box,insert card
+S079,2026-12-02,Off-set: dispatch packing,4,3,CU,box sealed with a sticker,sticker
+S079,2026-12-02,Off-set: dispatch packing,5,2,wide,"room of boxes, lamp clicks off",lamp
+S079,2026-12-02,Canva: end card,6,2.5,full-frame graphic,end card,none
+S082,2026-12-03,Chrome Platter,1,1.5,CU,"bottle lands on platter, flare","bottle, chrome platter"
+S082,2026-12-03,Under the Glass,2,2.5,"low angle, up through glass",bottle from beneath,"bottle, glass sheet"
+S082,2026-12-03,capsules + tweezers,3,3,macro,tweezers lift a capsule,"capsule, tweezers"
+S082,2026-12-03,Product & Essentials (vanity/chrome tray),4,3,overhead,bottle on vanity tray among jewelry,"bottle, chrome tray, jewelry"
+S082,2026-12-03,Inside the bag,5,3,overhead,bottle dropped into handbag,"bottle, handbag"
+S082,2026-12-03,capsules on mirror,6,2.5,close,"capsule on mirror, reflection","capsule, mirror"
+S082,2026-12-03,Canva: end card,7,4.5,full-frame graphic,end card on gradient,none
+S086,2026-12-04,Product & Essentials (vanity/chrome tray),1,1.5,overhead,hand pulls box tab,shipping box
+S086,2026-12-04,Product & Essentials (vanity/chrome tray),2,3,overhead,"lid lifts, tissue parts","box, tissue"
+S086,2026-12-04,Product & Essentials (vanity/chrome tray),3,3,close,bottle lifted into the light,bottle
+S086,2026-12-04,Product & Essentials (vanity/chrome tray),4,3,overhead,insert card shown,insert card
+S086,2026-12-04,Product & Essentials (vanity/chrome tray),5,3,overhead,bottle set on chrome tray beside jewelry,"chrome tray, jewelry"
+S086,2026-12-04,capsules + tweezers,6,3,macro,"cap off, tweezers lift one capsule","capsule, tweezers"
+S086,2026-12-04,Canva: end card,7,3.5,full-frame graphic,end card,none
+S089,2026-12-06,Product & Essentials (vanity/chrome tray),1,1.5,close,glass set down beside bottle,"clear glass, bottle, chrome tray"
+S089,2026-12-06,capsules + tweezers,2,3,macro,tweezers place capsule(s) beside the glass,"capsules, tweezers"
+S089,2026-12-06,Product & Essentials (vanity/chrome tray),3,3,close,water poured into glass,"jug, water"
+S089,2026-12-06,Product & Essentials (vanity/chrome tray),4,3,close,hand lifts glass,glass
+S089,2026-12-06,Product & Essentials (vanity/chrome tray),5,2,ECU,label on bottle,bottle
+S089,2026-12-06,Canva: end card,6,2.5,full-frame graphic,end card,none
+S092,2026-12-08,Off-set: creator self-shot,1,1.5,MCU,creator holds box up at the door,shipping box
+S092,2026-12-08,Off-set: creator self-shot,2,3,overhead,creator opens box on table,box
+S092,2026-12-08,Off-set: creator self-shot,3,3,close,creator turns the bottle in the light,bottle
+S092,2026-12-08,Off-set: creator self-shot,4,4,MCU,creator speaks,bottle
+S092,2026-12-08,Canva: end card,5,3.5,full-frame graphic,end card,none
+S095,2026-12-10,Inside the bag,1,1.5,"CU, tracking",hand pulls bottle from bag while walking,"handbag, bottle"
+S095,2026-12-10,Product & Essentials (vanity/chrome tray),2,2.5,overhead,"bag contents laid on chrome tray: passport, headphones, lipstick, bottle","passport, headphones, lipstick, chrome tray"
+S095,2026-12-10,Inside the bag,3,3,side,bottle dropped back in with headphones,"bottle, headphones"
+S095,2026-12-10,Inside the bag,4,2.5,MS,"bag clasp closes, carried out of frame",handbag
+S095,2026-12-10,Canva: end card,5,2.5,full-frame graphic,end card,none
+S097,2026-12-14,Off-set: gift wrap,1,1.5,CU,hands fold mirror-silver paper over a box,"box, mirror-silver paper"
+S097,2026-12-14,Off-set: gift wrap,2,3,close,ice blue ribbon tied,ice blue ribbon
+S097,2026-12-14,Off-set: gift wrap,3,3,close,"tag written: ""for you.""","gift tag, pen"
+S097,2026-12-14,Chrome Platter,4,3,overhead,gift placed on chrome platter beside silver jewelry,"chrome platter, jewelry"
+S097,2026-12-14,Chrome Platter,5,2,overhead,box opens to show the bottle,bottle
+S097,2026-12-14,Canva: end card,6,2.5,full-frame graphic,end card,none
+S100,2026-12-19,Off-set: founder to camera,1,1.5,MCU,founder holds card to lens,handwritten card
+S100,2026-12-19,Off-set: founder to camera,2,6,MCU,"founder speaks, line 1",none
+S100,2026-12-19,Off-set: dispatch packing,3,3,B-roll,packing footage (reuse S079),S079 footage
+S100,2026-12-19,Off-set: founder to camera,4,6,MCU,"founder speaks, line 2",none
+S100,2026-12-19,Canva: end card,5,3.5,full-frame graphic,end card,none
