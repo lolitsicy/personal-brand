@@ -60,7 +60,7 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 | S036 | Wed 11-11 | STORY | BTS | shoot day 1. | BTS frames from set | BTS from JCHQ/StudioVIC |
 | S037 | Wed 11-11 | REEL | BTS | how we shot under the glass. | day 1 on set with studiovic. join the waitlist. | BTS footage |
 | S038 | Thu 11-12 | STORY | BTS | which shot? A or B | poll sticker with two BTS stills | BTS stills |
-| S039 | Thu 11-12 | FEED | BTS | on set. | shoot no. 1, new york. first look goes to the waitlist. | phone BTS still |
+| S039 | Thu 11-12 | FEED | BTS | on set. | shoot no. 1, new york. first look goes to the waitlist. join the waitlist. | phone BTS still |
 | S040 | Fri 11-13 | REEL | BTS | a capsule, from beneath the glass. | the shot we're most excited about. join the waitlist. | BTS footage |
 | S041 | Fri 11-13 | STORY | BTS | shoot day 3. | BTS frames | BTS |
 | S042 | Sat 11-14 | REEL | BTS | that's a wrap. | four days, one bottle, a lot of chrome. join the waitlist. | BTS montage |
