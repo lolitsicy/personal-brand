@@ -89,9 +89,9 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 | ID | Date | Format | Pillar | On-image | Caption | Needs |
 |---|---|---|---|---|---|---|
 | S057 | Mon 11-23 | REEL | Product | meet metabolic reset. | a daily capsule formulated to support metabolism, blood sugar balance and gut health. launching 3 december. join the waitlist. + footer | shoot film |
-| S058 | Mon 11-23 | FEED | Product | meet metabolic reset. | chrome on the outside. considered on the inside. launching 3 december. + footer | hero shot: chrome platter |
+| S058 | Mon 11-23 | FEED | Product | meet metabolic reset. | chrome on the outside. considered on the inside. launching 3 december. join the waitlist. + footer | hero shot: chrome platter |
 | S059 | Mon 11-23 | STORY | Product | meet metabolic reset. / 3 december | 3 frames + link sticker | shoot stills |
-| S060 | Tue 11-24 | CAROUSEL-6 | Product | metabolic reset, in detail. | the bottle, the capsule, the ritual and what it's designed to support. formula reveal on 30 november. + footer | shoot stills |
+| S060 | Tue 11-24 | CAROUSEL-6 | Product | metabolic reset, in detail. | the bottle, the capsule, the ritual and what it's designed to support. formula reveal on 30 november. join the waitlist. + footer | shoot stills |
 | S061 | Tue 11-24 | STORY | Community | first impressions? | emoji slider |  |
 | S062 | Wed 11-25 | REEL | Product | packed with intention. | lipstick. headphones. keys. metabolic reset. join the waitlist. | shoot film: bag |
 | S063 | Wed 11-25 | FEED | Product | chrome on the outside. considered on the inside. | launching 3 december. join the waitlist. | shoot still |
@@ -100,14 +100,14 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 | S066 | Fri 11-27 | FEED | Launch | we're not doing black friday. | we're doing a first edition instead. waitlist members get founding pricing on 2 december. [CONFIRM] join the waitlist. | CONFIRM founding pricing |
 | S067 | Fri 11-27 | STORY | Launch | no black friday. just first in line. | link sticker | CONFIRM founding pricing |
 | S068 | Sat 11-28 | REEL | Product | mirror, mirror. | the most considered thing on your vanity. launching 3 december. join the waitlist. | shoot film: mirror |
-| S069 | Sun 11-29 | FEED | Product | goes with everything. | silver, chrome and a daily capsule. launching 3 december. | shoot still: tray + jewelry |
+| S069 | Sun 11-29 | FEED | Product | goes with everything. | silver, chrome and a daily capsule. launching 3 december. join the waitlist. | shoot still: tray + jewelry |
 | S070 | Sun 11-29 | STORY | Launch | 4 days. | countdown sticker to 3 Dec |  |
 
 ## W7: Formula reveal and countdown
 
 | ID | Date | Format | Pillar | On-image | Caption | Needs |
 |---|---|---|---|---|---|---|
-| S071 | Mon 11-30 | CAROUSEL-6 | Product | the formula, revealed. | every ingredient, every dose, and why it's there. [CONFIRM full formula] + footer | CONFIRM formula is public |
+| S071 | Mon 11-30 | CAROUSEL-6 | Product | the formula, revealed. | every ingredient, every dose, and why it's there. [CONFIRM full formula] join the waitlist. + footer | CONFIRM formula is public |
 | S072 | Mon 11-30 | REEL | Product | ginger. green tea. barberry. | chosen on purpose. full formula in our latest post (TikTok: link in bio). join the waitlist. + footer | shoot film: ingredients |
 | S073 | Mon 11-30 | STORY | Launch | 3 days. | countdown sticker |  |
 | S074 | Tue 12-01 | FEED | Launch | 2. | two days. waitlist, check your inbox tomorrow. |  |
@@ -126,7 +126,7 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 | S082 | Thu 12-03 | REEL | Launch | it's here. | metabolic reset by maison belasi. shop via link in bio. + footer | launch film from shoot |
 | S083 | Thu 12-03 | STORY | Launch | it's here. / shop now | 3 frames + shop link sticker |  |
 | S084 | Thu 12-03 | STORY | Community | thank you, waitlist. | 1 frame |  |
-| S085 | Thu 12-03 | CAROUSEL-6 | Launch | everything you need to know. | what it is, how to take it, price, shipping across NZ and AU. [CONFIRM dose, price, shipping] + footer | CONFIRM details |
+| S085 | Thu 12-03 | CAROUSEL-6 | Launch | everything you need to know. | what it is, how to take it, price, shipping across NZ and AU. [CONFIRM dose, price, shipping] shop now via link in bio. + footer | CONFIRM details |
 
 ## W8: Launch week
 
@@ -134,12 +134,12 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 |---|---|---|---|---|---|---|
 | S086 | Fri 12-04 | REEL | Product | unboxing metabolic reset. | the first edition, opened. shop via link in bio. | unboxing footage |
 | S087 | Fri 12-04 | STORY | Community | your first orders. | reshare customer posts. no results claims in reposts. | real customer content only |
-| S088 | Sat 12-05 | FEED | Product | a morning ritual, refined. | water. capsules. thirty seconds. [CONFIRM dose] + footer | shoot still: glass + spoon |
-| S089 | Sun 12-06 | REEL | Product | how to take metabolic reset. | the 15-second guide. [CONFIRM dose] + footer | footage: glass + capsule |
+| S088 | Sat 12-05 | FEED | Product | a morning ritual, refined. | water. capsules. thirty seconds. [CONFIRM dose] shop now via link in bio. + footer | shoot still: glass + spoon |
+| S089 | Sun 12-06 | REEL | Product | how to take metabolic reset. | the 15-second guide. [CONFIRM dose] shop now via link in bio. + footer | footage: glass + capsule |
 | S090 | Sun 12-06 | STORY | Community | you asked: launch week edition. | answer top questions |  |
-| S091 | Mon 12-07 | CAROUSEL-5 | Launch | launch FAQ. | shipping, subscriptions, dose and returns. [CONFIRM all] | CONFIRM policies |
+| S091 | Mon 12-07 | CAROUSEL-5 | Launch | launch FAQ. | shipping, subscriptions, dose and returns. [CONFIRM all] shop now via link in bio. | CONFIRM policies |
 | S092 | Tue 12-08 | REEL | Creator | "it arrived." | [creator] unboxes the first edition. shop now via link in bio. + footer | creator video, filmed after the product arrives, no results claims. disclose: #ad if paid, #gifted if gifted product |
-| S093 | Wed 12-09 | FEED | Launch | first edition, limited run. | when it's gone, it's gone. [CONFIRM real] | CONFIRM limited run |
+| S093 | Wed 12-09 | FEED | Launch | first edition, limited run. | when it's gone, it's gone. [CONFIRM real] shop now via link in bio. | CONFIRM limited run |
 | S094 | Thu 12-10 | STORY | Community | how do you take yours? | poll: morning / with breakfast / on the go |  |
 | S095 | Thu 12-10 | REEL | Product | travel with metabolic reset. | passport. headphones. metabolic reset. shop now via link in bio. | shoot film: bag + travel (passport, headphones). check Shoot No. 1 footage covers it, else reshoot. must not repeat S062 |
 
@@ -150,8 +150,8 @@ Launch day: Thursday 3 December 2026. Generated from posts.py.
 | S096 | Sat 12-12 | CAROUSEL-5 | Launch | the considered gift guide. | for the woman who does everything right. shop via link in bio. | styled stills |
 | S097 | Mon 12-14 | REEL | Launch | gift it in chrome. | the most considered gift under the tree. shop via link in bio. | gift wrap footage |
 | S098 | Wed 12-16 | STORY | Launch | order by [date] for christmas. | link sticker | CONFIRM shipping cut-off |
-| S099 | Thu 12-17 | FEED | Launch | last order for christmas: [date]. | NZ and AU shipping cut-offs in our stories. [CONFIRM] | CONFIRM dates |
-| S100 | Sat 12-19 | REEL | Founder | thank you for the first edition. | a note from our founder. see you in 2027. | founder video |
+| S099 | Thu 12-17 | FEED | Launch | last order for christmas: [date]. | NZ and AU shipping cut-offs in our stories. [CONFIRM] shop now via link in bio. | CONFIRM dates |
+| S100 | Sat 12-19 | REEL | Founder | thank you for the first edition. | a note from our founder. see you in 2027. shop now via link in bio. | founder video |
 
 
 Footer ("+ footer"): Always read the label and follow the directions for use. If symptoms persist, see your healthcare professional. Dietary supplements are not a replacement for a balanced diet.
