@@ -67,7 +67,7 @@ P = [
     ("2026-11-11", "STORY", "BTS", "shoot day 1", "shoot day 1.", "BTS frames from set", "BTS from JCHQ/StudioVIC"),
     ("2026-11-11", "REEL", "BTS", "under the glass BTS", "how we shot under the glass.", "day 1 on set with studiovic. join the waitlist.", "BTS footage"),
     ("2026-11-12", "STORY", "BTS", "shot A or B", "which shot? A or B", "poll sticker with two BTS stills", "BTS stills"),
-    ("2026-11-12", "FEED", "BTS", "on set", "on set.", "shoot no. 1, new york. first look goes to the waitlist. join the waitlist.", "phone BTS still"),
+    ("2026-11-12", "FEED", "BTS", "on set", "on set.", "shoot no. 1, new york. first look goes to the waitlist. join via link in bio.", "phone BTS still"),
     ("2026-11-13", "REEL", "BTS", "capsule from beneath", "a capsule, from beneath the glass.", "the shot we're most excited about. join the waitlist.", "BTS footage"),
     ("2026-11-13", "STORY", "BTS", "shoot day 3", "shoot day 3.", "BTS frames", "BTS"),
     ("2026-11-14", "REEL", "BTS", "shoot wrap montage", "that's a wrap.", "four days, one bottle, a lot of chrome. join the waitlist.", "BTS montage"),
