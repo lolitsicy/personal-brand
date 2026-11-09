@@ -19,6 +19,11 @@ CREATE TABLE IF NOT EXISTS patients (
   phone TEXT,
   email TEXT,
   allergies TEXT NOT NULL DEFAULT '[]',
+  egfr REAL,
+  weight_kg REAL,
+  hepatic_impairment INTEGER NOT NULL DEFAULT 0,
+  preferred_language TEXT NOT NULL DEFAULT 'en',
+  external_meds TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -42,7 +47,31 @@ CREATE TABLE IF NOT EXISTS medicines (
   subsidy_cents INTEGER NOT NULL DEFAULT 0,
   patient_charge_cents INTEGER NOT NULL DEFAULT 500,
   controlled_class TEXT CHECK (controlled_class IN ('A','B','C')),
-  warnings TEXT NOT NULL DEFAULT '[]'
+  warnings TEXT NOT NULL DEFAULT '[]',
+  therapeutic_class TEXT,
+  allergy_class TEXT,
+  unit_mg REAL,
+  max_daily_mg REAL,
+  renal_adjust_egfr REAL,
+  renal_avoid_egfr REAL,
+  lasa TEXT NOT NULL DEFAULT '[]',
+  is_otc INTEGER NOT NULL DEFAULT 0,
+  price_cents INTEGER NOT NULL DEFAULT 0,
+  reorder_point INTEGER NOT NULL DEFAULT 0,
+  par_level INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS stock_ledger (
+  id INTEGER PRIMARY KEY,
+  medicine_id INTEGER NOT NULL REFERENCES medicines(id),
+  change INTEGER NOT NULL,
+  balance INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  job_id INTEGER,
+  sale_id INTEGER,
+  user_id INTEGER,
+  at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS stock (
@@ -71,6 +100,8 @@ CREATE TABLE IF NOT EXISTS prescription_items (
   quantity INTEGER NOT NULL CHECK (quantity > 0),
   repeats_authorised INTEGER NOT NULL DEFAULT 0 CHECK (repeats_authorised >= 0),
   period_days INTEGER,
+  dose_units REAL,
+  doses_per_day REAL,
   dispensings_count INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','completed','cancelled'))
 );
@@ -85,6 +116,7 @@ CREATE TABLE IF NOT EXISTS fulfilments (
   provider TEXT,
   tracking_ref TEXT,
   scheduled_for TEXT,
+  pickup_code TEXT UNIQUE,
   proof TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   completed_at TEXT
@@ -136,6 +168,45 @@ CREATE TABLE IF NOT EXISTS claims (
   batch_ref TEXT,
   response TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS screenings (
+  id INTEGER PRIMARY KEY,
+  job_id INTEGER NOT NULL REFERENCES dispense_jobs(id),
+  rules_version TEXT NOT NULL,
+  reviewer TEXT NOT NULL,
+  findings TEXT NOT NULL,
+  counselling TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','signed_off','superseded')),
+  decisions TEXT,
+  signed_off_by INTEGER REFERENCES users(id),
+  signed_off_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS sales (
+  id INTEGER PRIMARY KEY,
+  patient_id INTEGER REFERENCES patients(id),
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','paid','refunded','partially_refunded','void')),
+  total_cents INTEGER NOT NULL DEFAULT 0,
+  refunded_cents INTEGER NOT NULL DEFAULT 0,
+  payment_method TEXT,
+  payment_ref TEXT,
+  user_id INTEGER REFERENCES users(id),
+  paid_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS sale_lines (
+  id INTEGER PRIMARY KEY,
+  sale_id INTEGER NOT NULL REFERENCES sales(id),
+  kind TEXT NOT NULL CHECK (kind IN ('rx','otc')),
+  job_id INTEGER REFERENCES dispense_jobs(id),
+  medicine_id INTEGER REFERENCES medicines(id),
+  description TEXT NOT NULL,
+  quantity INTEGER NOT NULL,
+  unit_cents INTEGER NOT NULL,
+  refunded INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (

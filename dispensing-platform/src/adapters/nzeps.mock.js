@@ -20,8 +20,8 @@ const SAMPLES = [
     patient: { nhi: 'ZZZ0016', name: 'Aroha Ngata', dob: '1958-03-14', address: '12 Kauri St, Ponsonby, Auckland', phone: '021 555 0101' },
     prescriber: { cpn: '12ABCD', name: 'Dr Mere Tane', facilityHpi: 'F0A123-B', facilityName: 'Ponsonby Medical Centre' },
     items: [
-      { itemRef: '1', medicineCode: 'MET500', directions: 'Take ONE tablet twice daily with food', quantity: 60, repeats: 2, periodDays: 30 },
-      { itemRef: '2', medicineCode: 'ATO40', directions: 'Take ONE tablet at night', quantity: 30, repeats: 2, periodDays: 30 },
+      { itemRef: '1', medicineCode: 'MET500', directions: 'Take ONE tablet twice daily with food', quantity: 60, repeats: 2, periodDays: 30, doseUnits: 1, dosesPerDay: 2 },
+      { itemRef: '2', medicineCode: 'ATO40', directions: 'Take ONE tablet at night', quantity: 30, repeats: 2, periodDays: 30, doseUnits: 1, dosesPerDay: 1 },
     ],
   },
   {
@@ -29,7 +29,7 @@ const SAMPLES = [
     patient: { nhi: 'ZZZ0024', name: 'James Wilson', dob: '1990-11-02', address: '4 Rimu Rd, Mt Eden, Auckland', phone: '022 555 0199' },
     prescriber: { cpn: '34EFGH', name: 'Dr Sam Patel', facilityHpi: 'F0B456-C', facilityName: 'Mt Eden Family Doctors' },
     items: [
-      { itemRef: '1', medicineCode: 'AMX500', directions: 'Take ONE capsule three times daily until finished', quantity: 15, repeats: 0, periodDays: 5 },
+      { itemRef: '1', medicineCode: 'AMX500', directions: 'Take ONE capsule three times daily until finished', quantity: 15, repeats: 0, periodDays: 5, doseUnits: 1, dosesPerDay: 3 },
     ],
   },
   {
@@ -37,8 +37,8 @@ const SAMPLES = [
     patient: { nhi: 'ZZZ0032', name: 'Grace Lee', dob: '1972-06-21', address: '88 Queen St, Auckland CBD', phone: '027 555 0142' },
     prescriber: { cpn: '56JKLM', name: 'Dr Hana Kim', facilityHpi: 'F0C789-D', facilityName: 'City Health Clinic' },
     items: [
-      { itemRef: '1', medicineCode: 'OXY5', directions: 'Take ONE capsule every 6 hours when required for pain. Max 4 per day.', quantity: 20, repeats: 0, periodDays: 5 },
-      { itemRef: '2', medicineCode: 'PAR500', directions: 'Take TWO tablets four times daily when required', quantity: 100, repeats: 0, periodDays: 12 },
+      { itemRef: '1', medicineCode: 'OXY5', directions: 'Take ONE capsule every 6 hours when required for pain. Max 4 per day.', quantity: 20, repeats: 0, periodDays: 5, doseUnits: 1, dosesPerDay: 4 },
+      { itemRef: '2', medicineCode: 'PAR500', directions: 'Take TWO tablets four times daily when required', quantity: 100, repeats: 0, periodDays: 12, doseUnits: 2, dosesPerDay: 4 },
     ],
   },
 ];

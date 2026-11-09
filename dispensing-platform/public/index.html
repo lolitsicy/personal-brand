@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dispensary</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span><strong id="pharmacy-name">Dispensary</strong></div>
+    <nav id="tabs">
+      <button data-tab="queue" class="active">Queue</button>
+      <button data-tab="intake">Intake</button>
+      <button data-tab="prescriptions">Scripts</button>
+      <button data-tab="counter">Counter</button>
+      <button data-tab="fulfilment">Fulfilment</button>
+      <button data-tab="stock">Stock &amp; CD</button>
+      <button data-tab="claims">Claims</button>
+      <button data-tab="safety">Safety</button>
+      <button data-tab="audit">Audit</button>
+    </nav>
+    <label class="user">Acting as
+      <select id="user-select"></select>
+    </label>
+  </header>
+
+  <div class="prototype-banner">Prototype: NZePS, NHI, claims, payments and courier are simulated, and the clinical rules are demo values. Not for clinical use.</div>
+
+  <main>
+    <section id="tab-queue" class="tab active">
+      <div id="stats" class="stats"></div>
+      <div id="board" class="board"></div>
+    </section>
+
+    <section id="tab-intake" class="tab">
+      <div class="grid2">
+        <div class="card">
+          <h2>Scan or key an e-script</h2>
+          <p class="muted">Scan the NZePS barcode or type the 18-character SCID. I and O are read as 1 and 0.</p>
+          <form id="scid-form" class="row">
+            <input id="scid-input" placeholder="SCID" autocomplete="off" spellcheck="false" />
+            <button type="submit" class="primary">Fetch script</button>
+          </form>
+          <div id="scid-status" class="hint"></div>
+          <h3>Demo e-scripts on the mock broker</h3>
+          <ul id="demo-scripts" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>Manual / paper script</h2>
+          <form id="manual-form" class="stack">
+            <div class="row">
+              <select name="source"><option value="paper">Paper</option><option value="signature_exempt">Signature exempt</option><option value="fax">Fax</option><option value="phone">Phone order</option></select>
+              <input name="externalId" placeholder="SCID on paper copy (optional)" />
+            </div>
+            <fieldset><legend>Patient</legend>
+              <div class="row"><input name="nhi" placeholder="NHI" /><input name="pname" placeholder="Name" required /><input name="dob" type="date" /></div>
+              <input name="address" placeholder="Address" />
+            </fieldset>
+            <fieldset><legend>Prescriber</legend>
+              <div class="row"><input name="cpn" placeholder="CPN" /><input name="dname" placeholder="Name" required /></div>
+            </fieldset>
+            <fieldset><legend>Item</legend>
+              <div class="row"><select name="medicineCode" id="med-select"></select><input name="quantity" type="number" min="1" placeholder="Qty" required /><input name="repeats" type="number" min="0" value="0" title="Repeats" /></div>
+              <input name="directions" placeholder="Directions" required />
+            </fieldset>
+            <button class="primary">Add to queue</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-prescriptions" class="tab">
+      <div class="card">
+        <div class="row"><input id="rx-search" placeholder="Search patient, NHI or SCID" /></div>
+        <table id="rx-table"></table>
+      </div>
+      <div id="rx-detail"></div>
+    </section>
+
+    <section id="tab-counter" class="tab">
+      <div class="grid2">
+        <div class="card">
+          <div class="row space"><h2>Basket</h2><button id="new-sale">New basket</button></div>
+          <div id="sale-box" class="muted">No basket open.</div>
+        </div>
+        <div class="card">
+          <h2>Add to basket</h2>
+          <form id="pickup-form" class="row"><input id="pickup-code" placeholder="Pickup code" autocomplete="off" /><button>Add pickup</button></form>
+          <h3>Over the counter</h3>
+          <ul id="otc-list" class="list"></ul>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="row space"><h2>End of day</h2><a class="btn" href="/api/accounting.csv">Accounting export (CSV)</a></div><div id="eod"></div></div>
+        <div class="card"><h2>Recent sales</h2><table id="sales-table"></table></div>
+      </div>
+    </section>
+
+    <section id="tab-safety" class="tab">
+      <div class="card">
+        <h2>Override and acknowledgement log</h2>
+        <p class="muted">Every hard-stop override and every high-severity finding a pharmacist acknowledged, with their reason.</p>
+        <table id="overrides-table"></table>
+      </div>
+    </section>
+
+    <section id="tab-fulfilment" class="tab"><div id="fulfilment-list" class="cards"></div></section>
+
+    <section id="tab-stock" class="tab">
+      <div class="grid2">
+        <div class="card"><h2>Stock</h2><table id="stock-table"></table></div>
+        <div class="card"><h2>Controlled drug register</h2><table id="cd-table"></table></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="row space"><h2>Reorder draft</h2><a class="btn" href="/api/stock/reorder.csv">Download CSV</a></div><table id="reorder-table"></table></div>
+        <div class="card"><h2>Stock ledger</h2><table id="ledger-table"></table></div>
+      </div>
+    </section>
+
+    <section id="tab-claims" class="tab">
+      <div class="card">
+        <div class="row space"><h2>Claims</h2><div><a href="/api/claims.csv" class="btn">Export CSV</a> <button id="submit-claims" class="primary">Submit pending batch</button></div></div>
+        <table id="claims-table"></table>
+      </div>
+    </section>
+
+    <section id="tab-audit" class="tab">
+      <div class="card">
+        <div class="row space"><h2>Audit trail</h2><span id="audit-verify"></span></div>
+        <table id="audit-table"></table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="job-dialog"><div id="job-detail"></div></dialog>
+  <div id="toast"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

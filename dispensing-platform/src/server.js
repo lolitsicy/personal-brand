@@ -6,6 +6,7 @@ import { openDb } from './db.js';
 import { seed } from './seed.js';
 import { createMockAdapters } from './adapters/index.js';
 import { createPlatform } from './services/platform.js';
+import { createCounter } from './services/counter.js';
 import { validateScid } from './domain/scid.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
@@ -14,12 +15,14 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 export const DEFAULT_CONFIG = {
   pharmacy: { name: 'Demo Community Pharmacy', address: '1 Example St, Auckland', phone: '09 555 0100' },
   allowSelfCheck: false,
+  accounts: { rx: '200', otc: '201' }, // accounting codes for the export
 };
 
 export function createApp({ dbPath = ':memory:', adapters = createMockAdapters(), config = DEFAULT_CONFIG, withSeed = true } = {}) {
   const db = openDb(dbPath);
   if (withSeed) seed(db);
   const platform = createPlatform({ db, adapters, config });
+  const counter = createCounter({ db, platform, adapters, config });
 
   // ── tiny router ──
   const routes = [];
@@ -49,8 +52,30 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
 
   route('GET', '/api/queue', ({ query, user }) => platform.queue({ state: query.get('state') }, user));
   route('GET', '/api/jobs/:id', ({ params, user }) => platform.getJob(params.id, user));
+  route('POST', '/api/jobs/:id/screen', ({ params, user }) => platform.runScreening(params.id, user));
   route('POST', '/api/jobs/:id/supply-owing', ({ params, user }) => platform.supplyOwing(params.id, user));
   route('POST', '/api/jobs/:id/:action', ({ params, body, user }) => platform.transition(params.id, params.action.replace(/-/g, '_'), user, body));
+
+  route('GET', '/api/screening/overrides', () => platform.overridesLog());
+
+  route('GET', '/api/counter/products', () => counter.otcProducts());
+  route('GET', '/api/counter/sales', () => counter.listSales());
+  route('POST', '/api/counter/sales', ({ body, user }) => counter.openSale(user, body));
+  route('GET', '/api/counter/sales/:id', ({ params }) => counter.getSale(params.id));
+  route('POST', '/api/counter/sales/:id/lines', ({ params, body, user }) => counter.addLine(params.id, user, body));
+  route('POST', '/api/counter/sales/:id/pickup', ({ params, body, user }) => counter.addByPickupCode(params.id, user, body.code));
+  route('POST', '/api/counter/sales/:id/lines/:lineId/remove', ({ params, user }) => counter.removeLine(params.id, params.lineId, user));
+  route('POST', '/api/counter/sales/:id/pay', ({ params, body, user }) => counter.pay(params.id, user, body));
+  route('POST', '/api/counter/sales/:id/refund', ({ params, body, user }) => counter.refund(params.id, user, body));
+  route('GET', '/api/counter/end-of-day', ({ query }) => counter.endOfDay(query.get('date') ?? undefined));
+  route('GET', '/api/accounting.csv', ({ query }) => ({ __raw: counter.accountingCsv({ from: query.get('from'), to: query.get('to') }), type: 'text/csv' }));
+
+  route('GET', '/api/stock/ledger', ({ query }) => platform.stockLedger(query.get('medicineId')));
+  route('GET', '/api/stock/reorder', () => platform.reorderDraft());
+  route('GET', '/api/stock/reorder.csv', () => {
+    const d = platform.reorderDraft();
+    return { __raw: ['code,product,on_hand,packs,pack_size,units', ...d.lines.map((l) => [l.code, `"${l.name}"`, l.onHand, l.packs, l.packSize, l.units].join(','))].join('\n'), type: 'text/csv' };
+  });
 
   route('GET', '/api/fulfilments', ({ query }) => platform.listFulfilments({ status: query.get('status') }));
   route('GET', '/api/fulfilments/:id', ({ params }) => platform.getFulfilment(params.id));
@@ -90,7 +115,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
     }
   }
 
-  return { db, platform, handle, server: createServer(handle) };
+  return { db, platform, counter, handle, server: createServer(handle) };
 }
 
 function send(res, status, data) {

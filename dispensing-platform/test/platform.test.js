@@ -18,9 +18,19 @@ beforeEach(() => {
   ({ Priya: priya, Tom: tom, Lucy: lucy, Ben: ben } = byName);
 });
 
-async function runToChecked(jobId, { acknowledge = false } = {}) {
+/** Pharmacist decisions that clear every finding (overrides hard stops with prescriber confirmation). */
+function approveAll(jobId) {
+  const decisions = {};
+  for (const f of p.getJob(jobId, priya).warnings ?? []) {
+    if (f.severity === 'hard_stop') decisions[f.id] = { action: 'override', reason: 'Discussed with prescriber; benefit outweighs risk', prescriberConfirmed: true };
+    else if (f.severity === 'high') decisions[f.id] = { action: 'acknowledge', note: 'Reviewed' };
+  }
+  return { decisions };
+}
+
+async function runToChecked(jobId) {
   await p.transition(jobId, 'enter', lucy);
-  await p.transition(jobId, 'clinical_check', priya, { acknowledge });
+  await p.transition(jobId, 'clinical_check', priya, approveAll(jobId));
   await p.transition(jobId, 'assemble', lucy);
   return p.transition(jobId, 'final_check', priya);
 }
@@ -72,24 +82,32 @@ test('the person who assembled cannot also do the final check', async () => {
   const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
   const [jobId] = jobsOf(rx);
   await p.transition(jobId, 'enter', priya);
-  await p.transition(jobId, 'clinical_check', priya);
+  await p.transition(jobId, 'clinical_check', priya, approveAll(jobId));
   await p.transition(jobId, 'assemble', priya);
   await assert.rejects(p.transition(jobId, 'final_check', priya), /different person/);
   const ok = await p.transition(jobId, 'final_check', tom);
   assert.equal(ok.state, 'checked');
 });
 
-test('allergy warning blocks the clinical check until acknowledged', async () => {
+test('class allergy (penicillin -> amoxicillin) is a hard stop: acknowledging is not enough, override needs reason + prescriber contact', async () => {
   const rx = await p.intakeFromSource('nzeps', AMOX_SCID, lucy);
   const [jobId] = jobsOf(rx);
   await p.transition(jobId, 'enter', lucy);
   await assert.rejects(p.transition(jobId, 'clinical_check', priya), (err) => {
     assert.equal(err.status, 409);
-    assert.equal(err.details.warnings[0].code, 'ALLERGY');
+    assert.equal(err.details.findings[0].code, 'ALLERGY');
+    assert.equal(err.details.findings[0].severity, 'hard_stop');
     return true;
   });
-  const ok = await p.transition(jobId, 'clinical_check', priya, { acknowledge: true, note: 'Spoke to prescriber; rash only, proceed' });
+  await assert.rejects(p.transition(jobId, 'clinical_check', priya, { acknowledge: true, note: 'fine' }), /Hard stop/);
+  const id = p.getJob(jobId, priya).warnings[0].id;
+  await assert.rejects(p.transition(jobId, 'clinical_check', priya, { decisions: { [id]: { action: 'override', reason: 'x' } } }), /prescriber/);
+  const ok = await p.transition(jobId, 'clinical_check', priya, { decisions: { [id]: { action: 'override', reason: 'Prescriber confirmed: childhood rash only, tolerated cefalexin', prescriberConfirmed: true } } });
   assert.equal(ok.state, 'clinically_checked');
+  const log = p.overridesLog();
+  assert.equal(log[0].code, 'ALLERGY');
+  assert.equal(log[0].action, 'override');
+  assert.equal(log[0].prescriberConfirmed, true);
 });
 
 test('repeats: limited to authorised count, broker ends at Dispensed', async () => {
@@ -97,7 +115,7 @@ test('repeats: limited to authorised count, broker ends at Dispensed', async () 
   const itemId = rx.items[0].id;
   let jobId = rx.items[0].jobs[0].id;
   for (let supply = 0; supply < 3; supply++) {
-    await runToChecked(jobId, { acknowledge: true }); // repeats are early in a test -> EARLY_REPEAT warning
+    await runToChecked(jobId); // repeats are early in a test -> EARLY_REPEAT warning, approved by approveAll
     await p.transition(jobId, 'release', lucy, { method: 'pickup' });
     if (supply < 2) {
       await assert.rejects(Promise.resolve().then(() => p.requestRepeat(itemId, lucy)).then(() => p.requestRepeat(itemId, lucy)), /already has a supply in progress/);
@@ -115,8 +133,10 @@ test('early repeat triggers a warning', async () => {
   await p.transition(jobId, 'release', lucy, {});
   const repeat = p.requestRepeat(rx.items[0].id, lucy);
   await p.transition(repeat.id, 'enter', lucy);
-  await assert.rejects(p.transition(repeat.id, 'clinical_check', priya), (err) =>
-    err.details.warnings.some((w) => w.code === 'EARLY_REPEAT'));
+  const early = p.getJob(repeat.id, priya).warnings.find((w) => w.code === 'EARLY_REPEAT');
+  assert.equal(early.severity, 'high');
+  assert.ok(early.trace.inputs.daysSince === 0);
+  await assert.rejects(p.transition(repeat.id, 'clinical_check', priya), /EARLY|days after the last supply|must be reviewed/);
 });
 
 test('controlled drug: register tracks every movement and pickup needs proof of collection', async () => {
@@ -156,7 +176,7 @@ test('short stock creates an owing that can be supplied later', async () => {
   const amox = p.medicines().find((m) => m.code === 'AMX500'); // 10 in stock, script is for 15
   const rx = await p.intakeFromSource('nzeps', AMOX_SCID, lucy);
   const jobId = rx.items[0].jobs[0].id;
-  const checked = await runToChecked(jobId, { acknowledge: true });
+  const checked = await runToChecked(jobId);
   assert.equal(checked.quantity_supplied, 10);
   assert.equal(checked.owing, 5);
   await assert.rejects(Promise.resolve().then(() => p.supplyOwing(jobId, lucy)), /no stock/);
@@ -172,7 +192,7 @@ test('cancelling an assembled job returns stock (and CD register) ', async () =>
   const oxyId = p.medicines().find((m) => m.code === 'OXY5').id;
   const before = p.medicines().find((m) => m.id === oxyId).on_hand;
   await p.transition(jobId, 'enter', lucy);
-  await p.transition(jobId, 'clinical_check', priya);
+  await p.transition(jobId, 'clinical_check', priya, approveAll(jobId));
   await p.transition(jobId, 'assemble', lucy);
   await p.transition(jobId, 'hold', lucy, { reason: 'Patient query' });
   await p.transition(jobId, 'cancel', priya, { reason: 'Prescriber cancelled' });
@@ -236,6 +256,189 @@ test('HTTP API: intake and queue over the wire', async () => {
     assert.equal(noUser.status, 401);
     const html = await fetch(`${base}/`);
     assert.equal(html.status, 200);
+  } finally {
+    app.server.close();
+  }
+});
+
+// ───────────── screening + counter + stock ─────────────
+
+test('whole-list screening: renal, interaction with medication history, LASA and language — each with a reasoning trace', async () => {
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const [metJob, atoJob] = jobsOf(rx);
+  const met = p.getJob(metJob, priya).warnings;
+  const renal = met.find((f) => f.code === 'RENAL_ADJUST');
+  assert.equal(renal.severity, 'high');
+  assert.deepEqual(renal.trace.inputs, { egfr: 38, threshold: 45 });
+  assert.ok(met.some((f) => f.code === 'LASA' && /Metronidazole/.test(f.message)));
+  assert.ok(met.some((f) => f.code === 'LANGUAGE' && f.specialist === 'advocacy'));
+
+  const ato = p.getJob(atoJob, priya).warnings;
+  const ix = ato.find((f) => f.code === 'INTERACTION');
+  assert.equal(ix.specialist, 'pharmacology');
+  assert.match(ix.message, /clarithromycin/i);
+  assert.match(ix.trace.inputs.other.source, /another pharmacy/);
+});
+
+test('dose ceiling is a hard stop computed from structured dose', async () => {
+  const rx = await p.intakeManual({
+    source: 'paper',
+    patient: { nhi: 'ZZZ0032', name: 'Grace Lee', dob: '1972-06-21' },
+    prescriber: { cpn: '56JKLM', name: 'Dr Hana Kim' },
+    items: [{ medicineCode: 'PAR500', directions: 'Take THREE tablets four times daily', quantity: 100, doseUnits: 3, dosesPerDay: 4 }],
+  }, lucy);
+  const f = p.getJob(rx.items[0].jobs[0].id, priya).warnings.find((x) => x.code === 'DOSE_CEILING');
+  assert.equal(f.severity, 'hard_stop');
+  assert.equal(f.trace.inputs.dailyMg, 6000);
+});
+
+test('AI reviewer: receives de-identified case, adds findings, can never clear or downgrade rule findings', async () => {
+  let seen;
+  adapters.reviewer = {
+    name: 'test-reviewer',
+    async review(c) {
+      seen = c;
+      return {
+        findings: [
+          { specialist: 'pharma', severity: 'hard_stop', code: 'AI_TRY_HARD_STOP', message: 'AI tries to raise a hard stop', reasoning: 'r', sources: [] },
+          { specialist: 'pharmacology', severity: 'high', code: 'CYP', message: 'AI: additional CYP concern', reasoning: 'mechanism', sources: ['product data sheet'] },
+        ],
+        counselling: { language: 'mi', text: 'Kōrero tohutohu' },
+      };
+    },
+  };
+  app = createApp({ adapters });
+  p = app.platform;
+  const rx = await p.intakeFromSource('nzeps', AMOX_SCID, lucy);
+  const jobId = rx.items[0].jobs[0].id;
+  const s = await p.runScreening(jobId, lucy);
+
+  // de-identified: no name / NHI / address / dob
+  const blob = JSON.stringify(seen);
+  for (const pii of ['James', 'Wilson', 'ZZZ0024', 'Rimu', '1990-11-02']) assert.ok(!blob.includes(pii), `leaked ${pii}`);
+  assert.equal(seen.age_band, '30-39');
+
+  const ai = s.findings.filter((f) => f.origin === 'ai');
+  assert.equal(ai.find((f) => f.code === 'AI_TRY_HARD_STOP').severity, 'moderate', 'AI cannot raise hard stops');
+  assert.equal(ai.find((f) => f.code === 'CYP').trace.source, 'product data sheet');
+  assert.equal(s.counselling.language, 'mi');
+  assert.equal(s.findings[0].code, 'ALLERGY'); // rule finding still first and still a hard stop
+
+  await p.transition(jobId, 'enter', lucy);
+  // acknowledging AI "high" without overriding the rule hard stop still fails
+  await assert.rejects(p.transition(jobId, 'clinical_check', priya, { acknowledge: true }), /Hard stop/);
+  const ok = await p.transition(jobId, 'clinical_check', priya, approveAllWithAi(jobId));
+  assert.equal(ok.state, 'clinically_checked');
+  assert.equal(p.getJob(jobId, priya).screening.status, 'signed_off');
+});
+
+function approveAllWithAi(jobId) {
+  const job = p.getJob(jobId, priya);
+  const decisions = {};
+  for (const f of job.warnings) {
+    if (f.severity === 'hard_stop') decisions[f.id] = { action: 'override', reason: 'Prescriber confirmed', prescriberConfirmed: true };
+    else if (f.severity === 'high') decisions[f.id] = { action: 'acknowledge' };
+  }
+  return { decisions };
+}
+
+test('AI reviewer failure falls back to rules-only screening', async () => {
+  adapters.reviewer = { name: 'broken', async review() { throw new Error('network down'); } };
+  app = createApp({ adapters });
+  p = app.platform;
+  const rx = await p.intakeFromSource('nzeps', AMOX_SCID, lucy);
+  const s = await p.runScreening(rx.items[0].jobs[0].id, lucy);
+  assert.ok(s.findings.some((f) => f.code === 'ALLERGY'));
+  assert.ok(s.findings.some((f) => f.code === 'AI_STATUS' && /network down/.test(f.message)));
+});
+
+async function releasedPickup() {
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const ids = jobsOf(rx);
+  let last;
+  for (const id of ids) {
+    await runToChecked(id);
+    last = await p.transition(id, 'release', lucy, { method: 'pickup' });
+  }
+  return { ids, fulfilment: p.getFulfilment(last.fulfilment_id) };
+}
+
+test('counter: pickup code + OTC in one basket, card payment completes the pickup and decrements OTC stock', async () => {
+  const c = app.counter;
+  const { fulfilment, ids } = await releasedPickup();
+  assert.match(fulfilment.pickup_code, /^[A-Z2-9]{6}$/);
+  const ibu = c.otcProducts().find((m) => m.code === 'IBU-OTC24');
+
+  let sale = c.openSale(lucy);
+  sale = c.addByPickupCode(sale.id, lucy, fulfilment.pickup_code.toLowerCase());
+  assert.equal(sale.lines.length, 2);
+  assert.throws(() => c.addByPickupCode(sale.id, lucy, fulfilment.pickup_code), /already in a basket/);
+  sale = c.addLine(sale.id, lucy, { kind: 'otc', medicineId: ibu.id, quantity: 2 });
+  assert.equal(sale.total_cents, 500 + 500 + 899 * 2);
+  assert.equal(sale.gst_cents, Math.round((sale.total_cents * 3) / 23));
+
+  const paid = await c.pay(sale.id, lucy, { method: 'card' });
+  assert.equal(paid.status, 'paid');
+  assert.match(paid.payment_ref, /^pi_mock_/);
+  assert.equal(p.getFulfilment(fulfilment.id).status, 'completed');
+  for (const id of ids) assert.equal(p.getJob(id, lucy).state, 'completed');
+  assert.equal(c.otcProducts().find((m) => m.id === ibu.id).on_hand, ibu.on_hand - 2);
+});
+
+test('counter: refunds restock OTC but never prescription medicines; pharmacist only', async () => {
+  const c = app.counter;
+  const { fulfilment } = await releasedPickup();
+  const lor = c.otcProducts().find((m) => m.code === 'LOR-OTC30');
+  let sale = c.openSale(lucy);
+  c.addByPickupCode(sale.id, lucy, fulfilment.pickup_code);
+  sale = c.addLine(sale.id, lucy, { kind: 'otc', medicineId: lor.id, quantity: 1 });
+  await c.pay(sale.id, lucy, { method: 'cash' });
+  await assert.rejects(c.refund(sale.id, lucy, { reason: 'x' }), /pharmacist/);
+  const met = p.medicines().find((m) => m.code === 'MET500').on_hand;
+  const r = await c.refund(sale.id, priya, { reason: 'Customer changed mind' });
+  assert.equal(r.status, 'refunded');
+  assert.equal(c.otcProducts().find((m) => m.id === lor.id).on_hand, lor.on_hand);
+  assert.equal(p.medicines().find((m) => m.code === 'MET500').on_hand, met, 'Rx stock not restocked');
+  const eod = c.endOfDay();
+  assert.equal(eod.netCents, 0);
+  assert.match(c.accountingCsv(), /REFUND/);
+  assert.ok(!c.accountingCsv().includes('Aroha'), 'no patient names in the accounting export');
+});
+
+test('counter: controlled drug in basket requires proof of collection', async () => {
+  const c = app.counter;
+  const rx = await p.intakeFromSource('nzeps', OXY_SCID, lucy);
+  for (const id of jobsOf(rx)) { await runToChecked(id); await p.transition(id, 'release', lucy, { method: 'pickup' }); }
+  const f = p.listFulfilments().find((x) => x.method === 'pickup' && x.status === 'open');
+  const sale = c.openSale(lucy);
+  c.addByPickupCode(sale.id, lucy, f.pickup_code);
+  await assert.rejects(c.pay(sale.id, lucy, { method: 'card' }), /Controlled drug/);
+  const paid = await c.pay(sale.id, lucy, { method: 'card', proof: 'Patient, driver licence sighted' });
+  assert.equal(paid.status, 'paid');
+});
+
+test('stock ledger records every movement; reorder draft rounds to packs', async () => {
+  const amox = p.medicines().find((m) => m.code === 'AMX500'); // 10 on hand, reorder point 20, par 60
+  const draft = p.reorderDraft();
+  const line = draft.lines.find((l) => l.code === 'AMX500');
+  assert.equal(line.packs, 3); // need 50 -> 3 packs of 20
+  assert.equal(line.units, 60);
+  p.adjustStock(amox.id, 60, 'Wholesaler invoice 123', lucy);
+  assert.equal(p.stockLedger(amox.id)[0].kind, 'received');
+  assert.ok(!p.reorderDraft().lines.some((l) => l.code === 'AMX500'));
+});
+
+test('HTTP: screening route is reachable (not swallowed by the generic job action route)', async () => {
+  await new Promise((r) => app.server.listen(0, r));
+  const base = `http://localhost:${app.server.address().port}`;
+  try {
+    const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+    const id = rx.items[1].jobs[0].id;
+    const res = await fetch(`${base}/api/jobs/${id}/screen`, { method: 'POST', headers: { 'X-User-Id': String(lucy.id) } });
+    assert.equal(res.status, 200);
+    const s = await res.json();
+    assert.equal(s.status, 'pending');
+    assert.ok(s.counselling);
   } finally {
     app.server.close();
   }

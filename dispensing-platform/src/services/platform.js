@@ -1,7 +1,8 @@
 import { tx } from '../db.js';
 import { assertScid } from '../domain/scid.js';
 import { planTransition, availableActions } from '../domain/workflow.js';
-import { clinicalWarnings } from '../domain/clinical.js';
+import { screen, lasaFindings, sortFindings, validateDecisions, RULES_VERSION } from '../domain/screening.js';
+import { randomInt } from 'node:crypto';
 import { buildLabel } from '../domain/label.js';
 import { DomainError, notFound, forbidden, conflict } from '../domain/errors.js';
 import { createAudit } from './audit.js';
@@ -43,7 +44,7 @@ export function createPlatform({ db, adapters, config }) {
 
   // ─────────────────── stock + controlled drug register ───────────────────
 
-  function moveStock(medicineId, delta, { reason, jobId = null, userId = null }) {
+  function moveStock(medicineId, delta, { reason, jobId = null, userId = null, saleId = null, kind = 'adjustment' }) {
     const current = onHand(medicineId);
     const next = current + delta;
     if (next < 0) throw conflict(`Insufficient stock (on hand ${current}, need ${-delta})`);
@@ -52,6 +53,10 @@ export function createPlatform({ db, adapters, config }) {
        ON CONFLICT(medicine_id) DO UPDATE SET on_hand = excluded.on_hand`,
       medicineId,
       next,
+    );
+    run(
+      'INSERT INTO stock_ledger (medicine_id, change, balance, reason, kind, job_id, sale_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      medicineId, delta, next, reason, kind, jobId, saleId, userId,
     );
     const med = medicine(medicineId);
     if (med.controlled_class) {
@@ -72,7 +77,7 @@ export function createPlatform({ db, adapters, config }) {
       throw forbidden('Only a pharmacist can adjust controlled drug stock');
     }
     return tx(db, () => {
-      const balance = moveStock(med.id, delta, { reason: reason || 'Stock adjustment', userId: user.id });
+      const balance = moveStock(med.id, delta, { reason: reason || 'Stock adjustment', userId: user.id, kind: delta > 0 ? 'received' : 'adjustment' });
       audit.record({ userId: user.id, action: 'stock.adjust', entity: 'medicine', entityId: med.id, data: { delta, reason, balance } });
       return { medicineId: med.id, onHand: balance };
     });
@@ -135,8 +140,9 @@ export function createPlatform({ db, adapters, config }) {
 
       for (const [idx, { it, med }] of meds.entries()) {
         const item = run(
-          'INSERT INTO prescription_items (prescription_id, item_ref, medicine_id, directions, quantity, repeats_authorised, period_days) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO prescription_items (prescription_id, item_ref, medicine_id, directions, quantity, repeats_authorised, period_days, dose_units, doses_per_day) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           rxId, String(it.itemRef ?? idx + 1), med.id, it.directions, Number(it.quantity), Number(it.repeats ?? 0), it.periodDays ?? null,
+          it.doseUnits ?? null, it.dosesPerDay ?? null,
         );
         run(
           "INSERT INTO dispense_jobs (item_id, sequence, quantity, state) VALUES (?, 0, ?, 'queued')",
@@ -190,11 +196,14 @@ export function createPlatform({ db, adapters, config }) {
     });
   }
 
-  // ───────────────────────── clinical ─────────────────────────
+  // ───────────────────────── clinical screening ─────────────────────────
 
-  function warningsFor(job) {
-    const others = all(
-      `SELECT m.ingredient FROM dispense_jobs j
+  function screeningContext(job) {
+    const pat = patient(job.patient_id);
+    const otherMeds = all(
+      `SELECT DISTINCT m.ingredient, m.name, m.therapeutic_class,
+              CASE WHEN j.state IN ('released','completed') THEN 'supplied in last 90 days' ELSE 'in the dispensing queue' END AS source
+       FROM dispense_jobs j
        JOIN prescription_items i ON i.id = j.item_id
        JOIN prescriptions p ON p.id = i.prescription_id
        JOIN medicines m ON m.id = i.medicine_id
@@ -202,17 +211,139 @@ export function createPlatform({ db, adapters, config }) {
          AND (j.state IN (${OPEN_JOB_STATES.map(() => '?').join(',')})
               OR (j.state IN ('released','completed') AND j.updated_at >= datetime('now','-90 days')))`,
       job.patient_id, job.id, job.item_id, ...OPEN_JOB_STATES,
-    ).map((r) => r.ingredient);
+    );
+    for (const ext of JSON.parse(pat.external_meds || '[]')) {
+      const e = typeof ext === 'string' ? { ingredient: ext } : ext;
+      otherMeds.push({ ingredient: e.ingredient, name: e.name ?? e.ingredient, therapeutic_class: e.therapeutic_class ?? null, source: e.source ?? 'medication history' });
+    }
     const prev = one(
       "SELECT updated_at FROM dispense_jobs WHERE item_id = ? AND sequence < ? AND state IN ('released','completed') ORDER BY sequence DESC LIMIT 1",
       job.item_id, job.sequence,
     );
-    return clinicalWarnings({
+    return {
       medicine: medicine(job.medicine_id),
-      patient: patient(job.patient_id),
-      otherIngredients: others,
+      item: one('SELECT * FROM prescription_items WHERE id = ?', job.item_id),
+      patient: pat,
+      otherMeds,
       lastRelease: prev ? { at: prev.updated_at.replace(' ', 'T') + 'Z', periodDays: job.period_days } : null,
+    };
+  }
+
+  function ruleFindings(job) {
+    const ctx = screeningContext(job);
+    const formulary = all('SELECT * FROM medicines');
+    return { ctx, findings: [...screen(ctx), ...lasaFindings(ctx.medicine, formulary)].map((f) => ({ ...f, origin: 'rules' })) };
+  }
+
+  /** Strip direct identifiers before anything leaves the system. */
+  function deidentify(ctx, rules) {
+    const age = ctx.patient.dob ? Math.floor((Date.now() - Date.parse(ctx.patient.dob)) / 31_557_600_000) : null;
+    return {
+      age_band: age == null ? 'unknown' : `${Math.floor(age / 10) * 10}-${Math.floor(age / 10) * 10 + 9}`,
+      egfr: ctx.patient.egfr,
+      weight_kg: ctx.patient.weight_kg,
+      hepatic_impairment: !!ctx.patient.hepatic_impairment,
+      allergies: JSON.parse(ctx.patient.allergies || '[]'),
+      preferred_language: ctx.patient.preferred_language,
+      new_item: {
+        medicine: ctx.medicine.name, ingredient: ctx.medicine.ingredient, strength: ctx.medicine.strength, form: ctx.medicine.form,
+        directions: ctx.item.directions, quantity: ctx.item.quantity, dose_units: ctx.item.dose_units, doses_per_day: ctx.item.doses_per_day,
+        repeats: ctx.item.repeats_authorised,
+      },
+      medication_list: ctx.otherMeds.map((m) => ({ ingredient: m.ingredient, name: m.name, source: m.source })),
+      rule_findings: rules.map((f) => ({ code: f.code, severity: f.severity, message: f.message })),
+    };
+  }
+
+  function normaliseAiFindings(list, reviewerName) {
+    return (list ?? []).map((f, i) => ({
+      id: `ai:${String(f.code || 'note').toLowerCase()}:${i}`,
+      code: f.code || 'AI_NOTE',
+      severity: ['high', 'moderate', 'info'].includes(f.severity) ? f.severity : 'moderate', // AI can never raise a hard stop
+      specialist: ['pharma', 'pharmacology', 'regulatory', 'advocacy'].includes(f.specialist) ? f.specialist : 'pharma',
+      message: f.message,
+      origin: 'ai',
+      trace: { inputs: 'De-identified case (see screening record)', rule: f.reasoning, source: (f.sources ?? []).join('; ') || 'AI reviewer', reviewer: reviewerName },
+    }));
+  }
+
+  /** Full screening: deterministic rules + AI reviewer. Stores a pending screening awaiting pharmacist sign-off. */
+  async function runScreening(jobId, user) {
+    if (!user) throw new DomainError('Sign in required', { status: 401 });
+    const job = loadJob(jobId);
+    if (!['queued', 'entered'].includes(job.state)) throw conflict(`Screening runs before the clinical check (job is ${job.state})`);
+    const { ctx, findings: rules } = ruleFindings(job);
+    const reviewer = adapters.reviewer;
+    let ai = { findings: [], counselling: null };
+    let reviewerNote = null;
+    if (reviewer) {
+      try {
+        ai = await reviewer.review(deidentify(ctx, rules));
+        reviewerNote = ai.note ?? null;
+      } catch (err) {
+        reviewerNote = `AI reviewer unavailable: ${err.message}. Rules-only screening applies.`;
+      }
+    }
+    const findings = sortFindings([
+      ...rules,
+      ...normaliseAiFindings(ai.findings, reviewer?.name),
+      ...(reviewerNote ? [{ id: 'ai:status', code: 'AI_STATUS', severity: 'info', specialist: 'pharma', origin: 'ai', message: reviewerNote, trace: { inputs: {}, rule: 'Reviewer status', source: reviewer?.name ?? 'none' } }] : []),
+    ]);
+    return tx(db, () => {
+      run("UPDATE screenings SET status = 'superseded' WHERE job_id = ? AND status = 'pending'", job.id);
+      const r = run(
+        'INSERT INTO screenings (job_id, rules_version, reviewer, findings, counselling) VALUES (?, ?, ?, ?, ?)',
+        job.id, RULES_VERSION, reviewer?.name ?? 'none', JSON.stringify(findings), ai.counselling ? JSON.stringify(ai.counselling) : null,
+      );
+      const id = Number(r.lastInsertRowid);
+      audit.record({ userId: user.id, action: 'screening.run', entity: 'job', entityId: job.id, data: { screeningId: id, reviewer: reviewer?.name, counts: countBy(findings, 'severity') } });
+      return getScreening(id);
     });
+  }
+
+  function getScreening(id) {
+    const s = one('SELECT * FROM screenings WHERE id = ?', id);
+    if (!s) return null;
+    return { ...s, findings: JSON.parse(s.findings), counselling: s.counselling ? JSON.parse(s.counselling) : null, decisions: s.decisions ? JSON.parse(s.decisions) : null };
+  }
+
+  const latestScreening = (jobId) => {
+    const r = one("SELECT id FROM screenings WHERE job_id = ? AND status <> 'superseded' ORDER BY id DESC LIMIT 1", jobId);
+    return r ? getScreening(r.id) : null;
+  };
+
+  /** Rules are always re-run at sign-off so the safety floor reflects the current medication list. */
+  function findingsForSignOff(job) {
+    const rules = ruleFindings(job).findings;
+    const stored = latestScreening(job.id);
+    const ai = stored?.status === 'pending' ? stored.findings.filter((f) => f.origin === 'ai') : [];
+    return { stored, findings: sortFindings([...rules, ...ai]) };
+  }
+
+  function overridesLog() {
+    const rows = all(
+      `SELECT s.*, u.name AS pharmacist, m.name AS medicine, pa.name AS patient_name
+       FROM screenings s
+       JOIN users u ON u.id = s.signed_off_by
+       JOIN dispense_jobs j ON j.id = s.job_id
+       JOIN prescription_items i ON i.id = j.item_id
+       JOIN medicines m ON m.id = i.medicine_id
+       JOIN prescriptions p ON p.id = i.prescription_id
+       JOIN patients pa ON pa.id = p.patient_id
+       WHERE s.status = 'signed_off' ORDER BY s.id DESC LIMIT 500`,
+    );
+    const out = [];
+    for (const r of rows) {
+      const findings = JSON.parse(r.findings);
+      const decisions = JSON.parse(r.decisions || '{}');
+      for (const f of findings) {
+        const d = decisions[f.id];
+        if (d && ['hard_stop', 'high'].includes(f.severity)) {
+          out.push({ screeningId: r.id, jobId: r.job_id, at: r.signed_off_at, pharmacist: r.pharmacist, patient: r.patient_name, medicine: r.medicine, severity: f.severity, origin: f.origin, code: f.code, message: f.message, action: d.action, reason: d.reason ?? d.note ?? null, prescriberConfirmed: !!d.prescriberConfirmed });
+        }
+      }
+    }
+    return out;
   }
 
   // ───────────────────────── fulfilment helpers ─────────────────────────
@@ -230,8 +361,8 @@ export function createPlatform({ db, adapters, config }) {
     );
     if (!f) {
       const r = run(
-        'INSERT INTO fulfilments (patient_id, method, address, scheduled_for) VALUES (?, ?, ?, ?)',
-        job.patient_id, method, addr, scheduledFor ?? null,
+        'INSERT INTO fulfilments (patient_id, method, address, scheduled_for, pickup_code) VALUES (?, ?, ?, ?, ?)',
+        job.patient_id, method, addr, scheduledFor ?? null, newPickupCode(),
       );
       f = one('SELECT * FROM fulfilments WHERE id = ?', Number(r.lastInsertRowid));
     }
@@ -253,13 +384,35 @@ export function createPlatform({ db, adapters, config }) {
           break;
 
         case 'clinical_check': {
-          const warnings = warningsFor(job);
-          const high = warnings.filter((w) => w.severity === 'high');
-          if (high.length && body.acknowledge !== true) {
-            throw conflict('Clinical warnings must be reviewed and acknowledged', { warnings });
+          const { stored, findings } = findingsForSignOff(job);
+          const decisions = { ...(body.decisions ?? {}) };
+          if (body.acknowledge === true) {
+            // Shorthand: acknowledge every "high" finding with one note. Hard stops still need explicit overrides.
+            for (const f of findings) if (f.severity === 'high' && !decisions[f.id]) decisions[f.id] = { action: 'acknowledge', note: body.note ?? null };
+          }
+          const problem = validateDecisions(findings, decisions);
+          if (problem) throw conflict(problem, { warnings: findings, findings, screeningId: stored?.id ?? null });
+
+          let screeningId = stored?.status === 'pending' ? stored.id : null;
+          if (screeningId) {
+            run('UPDATE screenings SET findings = ? WHERE id = ?', JSON.stringify(findings), screeningId);
+          } else {
+            screeningId = Number(run(
+              "INSERT INTO screenings (job_id, rules_version, reviewer, findings) VALUES (?, ?, 'none (rules only)', ?)",
+              job.id, RULES_VERSION, JSON.stringify(findings),
+            ).lastInsertRowid);
+          }
+          run(
+            "UPDATE screenings SET status = 'signed_off', decisions = ?, signed_off_by = ?, signed_off_at = datetime('now') WHERE id = ?",
+            JSON.stringify(decisions), user.id, screeningId,
+          );
+          for (const f of findings) {
+            if (f.severity === 'hard_stop') {
+              audit.record({ userId: user.id, action: 'screening.hard_stop_override', entity: 'job', entityId: job.id, data: { finding: f.code, message: f.message, ...decisions[f.id] } });
+            }
           }
           set.clinical_checked_by = user.id;
-          set.warnings_acknowledged = JSON.stringify({ warnings, note: body.note ?? null, by: user.id });
+          set.warnings_acknowledged = JSON.stringify({ screeningId, warnings: findings, decisions, note: body.note ?? null, by: user.id });
           break;
         }
 
@@ -267,7 +420,7 @@ export function createPlatform({ db, adapters, config }) {
           const available = onHand(job.medicine_id);
           const supply = Math.min(available, job.quantity);
           if (supply === 0) throw conflict('No stock on hand — order stock or place the job on hold');
-          moveStock(job.medicine_id, -supply, { reason: `Dispensed Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id });
+          moveStock(job.medicine_id, -supply, { reason: `Dispensed Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id, kind: 'dispensed' });
           set.quantity_supplied = supply;
           set.owing = job.quantity - supply;
           set.assembled_by = user.id;
@@ -335,7 +488,7 @@ export function createPlatform({ db, adapters, config }) {
           if (!body.reason) throw new DomainError('A reason is required to cancel');
           const heldStock = STOCK_HELD_STATES.includes(job.state) || STOCK_HELD_STATES.includes(job.held_from);
           if (heldStock && job.quantity_supplied > 0) {
-            moveStock(job.medicine_id, job.quantity_supplied, { reason: `Returned to stock: cancelled Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id });
+            moveStock(job.medicine_id, job.quantity_supplied, { reason: `Returned to stock: cancelled Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id, kind: 'returned' });
           }
           set.hold_reason = body.reason;
           break;
@@ -371,7 +524,7 @@ export function createPlatform({ db, adapters, config }) {
       if (!['assembled', 'checked', 'released', 'completed'].includes(job.state)) throw conflict(`Cannot supply owing in state "${job.state}"`);
       const supply = Math.min(onHand(job.medicine_id), job.owing);
       if (supply === 0) throw conflict('Still no stock on hand');
-      moveStock(job.medicine_id, -supply, { reason: `Owing supplied Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id });
+      moveStock(job.medicine_id, -supply, { reason: `Owing supplied Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id, kind: 'dispensed' });
       run(
         "UPDATE dispense_jobs SET quantity_supplied = quantity_supplied + ?, owing = owing - ?, updated_at = datetime('now') WHERE id = ?",
         supply, supply, job.id,
@@ -496,6 +649,30 @@ export function createPlatform({ db, adapters, config }) {
     return [header, ...rows.map((c) => [c.id, c.job_id, c.patient_nhi, c.prescriber_cpn, c.medicine_code, c.quantity, c.subsidy_cents, c.patient_charge_cents, c.status, c.batch_ref, c.created_at].map(esc).join(','))].join('\n');
   }
 
+  // ───────────────────────── reorder ─────────────────────────
+
+  /**
+   * Draft a wholesaler order: every line at or below its reorder point, topped
+   * up to par level (or 30 days of recent usage, if higher), rounded up to
+   * whole packs. A draft only; a person reviews and sends it.
+   */
+  function reorderDraft() {
+    const meds = all('SELECT m.*, COALESCE(s.on_hand, 0) AS on_hand FROM medicines m LEFT JOIN stock s ON s.medicine_id = m.id ORDER BY m.name');
+    const lines = [];
+    for (const m of meds) {
+      if (m.on_hand > m.reorder_point) continue;
+      const used30 = -(one(
+        "SELECT COALESCE(SUM(change), 0) AS n FROM stock_ledger WHERE medicine_id = ? AND change < 0 AND kind IN ('dispensed','sold') AND at >= datetime('now','-30 days')",
+        m.id,
+      ).n);
+      const target = Math.max(m.par_level, used30);
+      const need = Math.max(target - m.on_hand, 1);
+      const packs = Math.ceil(need / m.pack_size);
+      lines.push({ medicineId: m.id, code: m.code, name: `${m.name} ${m.strength} ${m.form}`, onHand: m.on_hand, reorderPoint: m.reorder_point, parLevel: m.par_level, used30, packSize: m.pack_size, packs, units: packs * m.pack_size, controlled: m.controlled_class });
+    }
+    return { generatedAt: new Date().toISOString(), lines };
+  }
+
   // ───────────────────────── read models ─────────────────────────
 
   const JOB_VIEW = `
@@ -515,7 +692,10 @@ export function createPlatform({ db, adapters, config }) {
     if (!job) throw notFound('Dispense job', id);
     job.actions = availableActions(job, user);
     job.on_hand = onHand(job.medicine_id);
-    if (['entered', 'queued'].includes(job.state)) job.warnings = warningsFor(loadJob(id));
+    job.screening = latestScreening(job.id);
+    if (['entered', 'queued'].includes(job.state)) {
+      job.warnings = findingsForSignOff(loadJob(id)).findings;
+    }
     if (job.warnings_acknowledged) job.warnings_acknowledged = JSON.parse(job.warnings_acknowledged);
     return job;
   }
@@ -583,6 +763,15 @@ export function createPlatform({ db, adapters, config }) {
       ...(medicineId ? [Number(medicineId)] : []),
     ),
     adjustStock,
+    runScreening,
+    overridesLog,
+    stockLedger: (medicineId) => all(
+      `SELECT l.*, m.name AS medicine, m.strength FROM stock_ledger l JOIN medicines m ON m.id = l.medicine_id
+       ${medicineId ? 'WHERE l.medicine_id = ?' : ''} ORDER BY l.id DESC LIMIT 500`,
+      ...(medicineId ? [Number(medicineId)] : []),
+    ),
+    reorderDraft,
+    _internal: { moveStock, onHand, medicine, patient, fulfilmentAction, getFulfilment, audit, one, all, run },
     intakeFromSource,
     intakeManual,
     requestRepeat,
@@ -600,6 +789,15 @@ export function createPlatform({ db, adapters, config }) {
     claimsCsv,
     dashboard,
   };
+}
+
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newPickupCode() {
+  return Array.from({ length: 6 }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join('');
+}
+
+function countBy(list, key) {
+  return list.reduce((acc, x) => ((acc[x[key]] = (acc[x[key]] ?? 0) + 1), acc), {});
 }
 
 function pick(obj, keys) {
