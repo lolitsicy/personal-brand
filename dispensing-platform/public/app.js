@@ -16,7 +16,8 @@ const ACTION_LABEL = {
 };
 
 let userId = localStorageGet('userId');
-let currentTab = 'queue';
+let currentTab = 'home';
+let users = [];
 
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
@@ -44,13 +45,18 @@ const guard = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toas
 
 // ───────────── boot ─────────────
 async function boot() {
-  const [cfg, users] = await Promise.all([api('/api/config'), api('/api/users')]);
-  $('#pharmacy-name').textContent = cfg.pharmacy.name;
+  const [cfg, userList] = await Promise.all([api('/api/config'), api('/api/users')]);
+  users = userList;
+  document.querySelectorAll('[data-pharmacy]').forEach((el) => (el.textContent = cfg.pharmacy.name));
   const sel = $('#user-select');
   sel.innerHTML = users.map((u) => `<option value="${u.id}">${esc(u.name)} (${u.role})</option>`).join('');
   if (!users.some((u) => String(u.id) === userId)) userId = String(users[0].id);
   sel.value = userId;
-  sel.onchange = () => { userId = sel.value; localStorageSet('userId', userId); render(); };
+  const setAvatar = () => ($('#user-avatar').textContent = users.find((u) => String(u.id) === userId)?.initials ?? '');
+  setAvatar();
+  sel.onchange = () => { userId = sel.value; localStorageSet('userId', userId); setAvatar(); render(); };
+  $('#new-script').onclick = () => showTab('intake');
+  $('#global-search').onsubmit = (e) => { e.preventDefault(); $('#rx-search').value = $('#global-search-input').value; showTab('prescriptions'); };
 
   document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
   $('#scid-form').onsubmit = guard(onScidSubmit);
@@ -75,7 +81,94 @@ function showTab(tab) {
 }
 
 function render() {
-  return guard(({ queue: renderQueue, intake: renderIntake, prescriptions: renderPrescriptions, counter: renderCounter, fulfilment: renderFulfilment, stock: renderStock, claims: renderClaims, safety: renderSafety, audit: renderAudit })[currentTab])();
+  guard(updateNavCount)();
+  return guard(({ home: renderHome, queue: renderQueue, intake: renderIntake, prescriptions: renderPrescriptions, counter: renderCounter, fulfilment: renderFulfilment, stock: renderStock, claims: renderClaims, safety: renderSafety, audit: renderAudit })[currentTab])();
+}
+
+// ───────────── home ─────────────
+async function updateNavCount() {
+  const d = await api('/api/dashboard');
+  const n = ['queued', 'entered', 'clinically_checked', 'assembled', 'checked'].reduce((t, k) => t + (d.jobs[k] ?? 0), 0);
+  $('#nav-queue-count').textContent = n || '';
+}
+
+function since(ts) {
+  if (!ts) return '—';
+  const mins = Math.max(0, Math.round((Date.now() - Date.parse(ts.replace(' ', 'T') + 'Z')) / 60000));
+  return mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+async function renderHome() {
+  const h = await api('/api/home');
+  const n = h.next;
+  const card = $('#next-decision');
+  card.className = `card next-card ${n?.finding?.severity ?? ''}`;
+  if (n) {
+    const stepLabel = n.step === 'clinical_check' ? 'Clinical check' : 'Final check';
+    const reason = n.finding ? ({ hard_stop: 'Hard stop', high: 'Needs review', moderate: 'Check', info: 'Ready' })[n.finding.severity] : 'Ready';
+    card.innerHTML = `
+      <div class="eyebrow">Next decision · ${esc(stepLabel)} · ${esc(reason)}</div>
+      <div class="med">${esc(n.medicine)} <span class="muted" style="font-size:20px">${esc(n.form)}</span></div>
+      <div class="who">${esc(n.patient)} · NHI ${esc(n.nhi ?? '—')} · ${esc(n.source)} · waiting ${since(n.waitingSince)} ${n.controlled ? `<span class="tag cd">CD ${esc(n.controlled)}</span>` : ''}</div>
+      ${n.finding ? `<div class="why">${esc(n.finding.message)}</div>` : '<div class="why">No findings that need a decision.</div>'}
+      <div class="actions"><button class="primary" id="open-next">Open the script →</button></div>`;
+    $('#open-next').onclick = guard(() => openJob(n.jobId));
+  } else {
+    card.innerHTML = `<div class="eyebrow">Next decision</div><div class="empty-state">Nothing is waiting for a pharmacist.</div>`;
+  }
+  $('#side-stats').innerHTML = [
+    [h.awaitingPharmacist, 'waiting for a pharmacist'],
+    [h.inProgress, 'scripts in progress'],
+    [since(h.oldestWaitingSince), 'longest wait'],
+  ].map(([v, l]) => `<div class="side-stat"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  const t = h.today;
+  $('#kpis').innerHTML = [
+    ['Received today', t.received, 'supplies queued'],
+    ['Screened', t.screened, 'rules + reviewer'],
+    ['Hard stops resolved', t.hardStops, `${t.overrides} overridden with a reason`],
+    ['Reviewed findings', t.acknowledged, 'acknowledged by a pharmacist'],
+    ['Released', t.released, `${h.readyForCollection} awaiting pickup · ${h.outForDelivery} out for delivery`],
+  ].map(([l, v, sub]) => `<div class="kpi"><span class="label">${l}</span><b>${v}</b><span class="sub">${sub}</span></div>`).join('');
+
+  barChart($('#days-chart'), h.days.map((d) => ({ label: d.day, value: d.n })));
+
+  $('#collections').innerHTML = h.collections.map((f) => `<li><span><b>${esc(f.patient_name)}</b><br/><span class="muted">${esc(f.method.replace('_', ' '))} · ${f.items} item${f.items === 1 ? '' : 's'}</span></span>
+    ${f.pickup_code && f.method === 'pickup' ? `<code>${esc(f.pickup_code)}</code>` : f.tracking_ref ? `<span class="tag">${esc(f.tracking_ref)}</span>` : statusTag(f.status)}</li>`).join('') || '<li class="muted">Nothing waiting.</li>';
+}
+
+/** Single-series bar chart: one hue, 4px rounded tops anchored to the baseline, recessive grid, hover tooltip. */
+function barChart(el, data) {
+  const W = el.clientWidth || 600, H = 220, padL = 28, padB = 24, padT = 8;
+  const max = Math.max(1, ...data.map((d) => d.value));
+  const step = Math.ceil(max / 4) || 1;
+  const top = step * 4;
+  const plotW = W - padL, plotH = H - padB - padT;
+  const slot = plotW / data.length, bw = Math.max(4, Math.min(28, slot - 6));
+  const y = (v) => padT + plotH - (v / top) * plotH;
+  const grid = [0, 1, 2, 3, 4].map((i) => `<line class="grid" x1="${padL}" x2="${W}" y1="${y(i * step)}" y2="${y(i * step)}"/><text class="axis" x="${padL - 6}" y="${y(i * step) + 4}" text-anchor="end">${i * step}</text>`).join('');
+  const fmt = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' });
+  const bars = data.map((d, i) => {
+    const x = padL + i * slot + (slot - bw) / 2, h = Math.max(0, y(0) - y(d.value)), r = Math.min(4, h, bw / 2);
+    const path = h ? `M${x},${y(0)} V${y(0) - h + r} Q${x},${y(0) - h} ${x + r},${y(0) - h} H${x + bw - r} Q${x + bw},${y(0) - h} ${x + bw},${y(0) - h + r} V${y(0)} Z` : '';
+    const label = i % 2 === data.length % 2 || i === data.length - 1 ? `<text class="axis" x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${i === data.length - 1 ? 'Today' : fmt(d.label)}</text>` : '';
+    return `<g data-i="${i}"><rect x="${padL + i * slot}" y="${padT}" width="${slot}" height="${plotH}" fill="transparent"/>${path ? `<path class="bar" d="${path}"/>` : ''}${label}</g>`;
+  }).join('');
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scripts received per day, last 14 days">${grid}${bars}</svg><div class="tooltip"></div>
+    <table class="sr-only" style="position:absolute;left:-9999px"><tr><th>Day</th><th>Scripts</th></tr>${data.map((d) => `<tr><td>${d.label}</td><td>${d.value}</td></tr>`).join('')}</table>`;
+  const tip = el.querySelector('.tooltip');
+  el.querySelectorAll('g[data-i]').forEach((g) => {
+    g.onmouseenter = () => {
+      const d = data[g.dataset.i];
+      g.querySelector('.bar')?.classList.add('hover');
+      const r = g.querySelector('rect');
+      tip.textContent = `${fmt(d.label)}: ${d.value} script${d.value === 1 ? '' : 's'}`;
+      tip.style.left = `${((+r.getAttribute('x') + slot / 2) / W) * 100}%`;
+      tip.style.top = `${y(d.value)}px`;
+      tip.classList.add('show');
+    };
+    g.onmouseleave = () => { g.querySelector('.bar')?.classList.remove('hover'); tip.classList.remove('show'); };
+  });
 }
 
 // ───────────── queue ─────────────

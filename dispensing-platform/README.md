@@ -12,6 +12,8 @@ reorder drafts, an accounting export and a tamper-evident audit trail.
 > claiming) is a **mock**. This shows the architecture and workflow; it is not
 > certified software. See "What's between this and production" below.
 
+![Today](docs/home.png)
+
 ![Screening](docs/screening.png)
 
 ## Run it

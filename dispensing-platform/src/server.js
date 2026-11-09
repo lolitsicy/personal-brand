@@ -36,6 +36,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
   route('GET', '/api/config', () => ({ pharmacy: config.pharmacy, allowSelfCheck: config.allowSelfCheck, sources: Object.keys(adapters.scriptSources) }));
   route('GET', '/api/users', () => platform.users());
   route('GET', '/api/dashboard', () => platform.dashboard());
+  route('GET', '/api/home', ({ user }) => platform.home(user));
 
   route('GET', '/api/medicines', () => platform.medicines());
   route('POST', '/api/medicines/:id/stock', ({ params, body, user }) => platform.adjustStock(params.id, Number(body.delta), body.reason, user));

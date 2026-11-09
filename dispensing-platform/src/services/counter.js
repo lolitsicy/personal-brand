@@ -233,7 +233,11 @@ export function createCounter({ db, platform, adapters, config }) {
     refund,
     endOfDay,
     accountingCsv,
-    listSales: () => all("SELECT s.*, p.name AS patient_name FROM sales s LEFT JOIN patients p ON p.id = s.patient_id ORDER BY s.id DESC LIMIT 100"),
+    listSales: () => all(
+      `SELECT s.*, p.name AS patient_name,
+              CASE WHEN s.status = 'open' THEN (SELECT COALESCE(SUM(unit_cents * quantity), 0) FROM sale_lines WHERE sale_id = s.id) ELSE s.total_cents END AS total_cents
+       FROM sales s LEFT JOIN patients p ON p.id = s.patient_id ORDER BY s.id DESC LIMIT 100`,
+    ),
     otcProducts: () => all('SELECT m.*, COALESCE(s.on_hand, 0) AS on_hand FROM medicines m LEFT JOIN stock s ON s.medicine_id = m.id WHERE m.is_otc = 1 ORDER BY m.name'),
   };
 }

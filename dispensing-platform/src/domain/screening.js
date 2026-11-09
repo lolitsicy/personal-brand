@@ -31,6 +31,8 @@ const INTERACTIONS = [
   { a: 'metformin', b: 'iodinated contrast', severity: 'moderate', msg: 'Withhold metformin around iodinated contrast', src: 'Demo interaction table' },
 ];
 
+const LANGUAGES = { en: 'English', mi: 'te reo Māori', sm: 'Samoan', to: 'Tongan', zh: 'Chinese', hi: 'Hindi', ko: 'Korean', pa: 'Punjabi' };
+
 const CNS_DEPRESSANTS = new Set(['oxycodone', 'codeine', 'diazepam']);
 
 const finding = (f) => ({ ...f, id: `${f.code}:${f.subject ?? ''}`.toLowerCase() });
@@ -165,7 +167,7 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
   if (patient.preferred_language && patient.preferred_language !== 'en') {
     out.push(finding({
       code: 'LANGUAGE', subject: patient.preferred_language, severity: 'info', specialist: 'advocacy',
-      message: `Preferred language is ${patient.preferred_language}: offer counselling and written information in that language`,
+      message: `Preferred language is ${LANGUAGES[patient.preferred_language] ?? patient.preferred_language}: offer counselling and written information in that language`,
       trace: { inputs: { preferredLanguage: patient.preferred_language }, rule: 'Non-English preferred language on record', source: 'Patient record' },
     }));
   }

@@ -736,6 +736,58 @@ export function createPlatform({ db, adapters, config }) {
     );
   }
 
+  /** Home screen: the single most important decision waiting, plus today's numbers. */
+  function home(user) {
+    const SEV = { hard_stop: 0, high: 1, moderate: 2, info: 3 };
+    const candidates = [];
+    for (const j of all(`${JOB_VIEW} WHERE j.state = 'entered' ORDER BY j.created_at, j.id`)) {
+      const findings = findingsForSignOff(loadJob(j.id)).findings;
+      const top = findings.reduce((a, f) => (!a || SEV[f.severity] < SEV[a.severity] ? f : a), null);
+      candidates.push({ job: j, step: 'clinical_check', top, rank: top ? SEV[top.severity] : 4 });
+    }
+    for (const j of all(`${JOB_VIEW} WHERE j.state = 'assembled' ORDER BY j.created_at, j.id`)) {
+      candidates.push({ job: j, step: 'final_check', top: null, rank: 5 });
+    }
+    candidates.sort((a, b) => a.rank - b.rank || a.job.created_at.localeCompare(b.job.created_at));
+    const next = candidates[0] ?? null;
+
+    const oldest = one(`SELECT MIN(created_at) AS t FROM dispense_jobs WHERE state IN ('queued','entered','clinically_checked','assembled','checked')`).t;
+    const days = all(
+      `WITH RECURSIVE d(day) AS (SELECT date('now','-13 days') UNION ALL SELECT date(day,'+1 day') FROM d WHERE day < date('now'))
+       SELECT d.day, (SELECT COUNT(*) FROM dispense_jobs j WHERE date(j.created_at) = d.day) AS n FROM d`,
+    );
+    const signedToday = all("SELECT findings, decisions FROM screenings WHERE status = 'signed_off' AND date(signed_off_at) = date('now')");
+    let hardStops = 0, overrides = 0, acknowledged = 0;
+    for (const s of signedToday) {
+      const f = JSON.parse(s.findings);
+      const d = JSON.parse(s.decisions || '{}');
+      hardStops += f.filter((x) => x.severity === 'hard_stop').length;
+      overrides += Object.values(d).filter((x) => x.action === 'override').length;
+      acknowledged += Object.values(d).filter((x) => x.action === 'acknowledge').length;
+    }
+    return {
+      pharmacy: config.pharmacy.name,
+      next: next && { jobId: next.job.id, step: next.step, medicine: `${next.job.medicine} ${next.job.strength}`, form: next.job.form, patient: next.job.patient_name, nhi: next.job.nhi, source: next.job.source, controlled: next.job.controlled_class, waitingSince: next.job.created_at, finding: next.top && { severity: next.top.severity, message: next.top.message, origin: next.top.origin } },
+      awaitingPharmacist: candidates.length,
+      inProgress: one("SELECT COUNT(*) AS n FROM dispense_jobs WHERE state IN ('queued','entered','clinically_checked','assembled','checked')").n,
+      readyForCollection: one("SELECT COUNT(*) AS n FROM fulfilments WHERE status = 'open' AND method = 'pickup'").n,
+      outForDelivery: one("SELECT COUNT(*) AS n FROM fulfilments WHERE status = 'out_for_delivery'").n,
+      oldestWaitingSince: oldest,
+      today: {
+        received: one("SELECT COUNT(*) AS n FROM dispense_jobs WHERE date(created_at) = date('now')").n,
+        screened: one("SELECT COUNT(*) AS n FROM screenings WHERE status <> 'superseded' AND date(created_at) = date('now')").n,
+        hardStops, overrides, acknowledged,
+        released: one("SELECT COUNT(*) AS n FROM dispense_jobs WHERE state IN ('released','completed') AND date(updated_at) = date('now')").n,
+      },
+      days,
+      collections: all(
+        `SELECT f.id, f.method, f.status, f.pickup_code, f.tracking_ref, p.name AS patient_name,
+                (SELECT COUNT(*) FROM dispense_jobs WHERE fulfilment_id = f.id) AS items
+         FROM fulfilments f JOIN patients p ON p.id = f.patient_id WHERE f.status IN ('open','out_for_delivery') ORDER BY f.id DESC LIMIT 6`,
+      ),
+    };
+  }
+
   function dashboard() {
     const byState = Object.fromEntries(all('SELECT state, COUNT(*) AS n FROM dispense_jobs GROUP BY state').map((r) => [r.state, r.n]));
     return {
@@ -788,6 +840,7 @@ export function createPlatform({ db, adapters, config }) {
     submitClaims,
     claimsCsv,
     dashboard,
+    home,
   };
 }
 

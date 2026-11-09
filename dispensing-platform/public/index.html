@@ -4,134 +4,174 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dispensary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&display=swap" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="dot"></span><strong id="pharmacy-name">Dispensary</strong></div>
-    <nav id="tabs">
-      <button data-tab="queue" class="active">Queue</button>
-      <button data-tab="intake">Intake</button>
-      <button data-tab="prescriptions">Scripts</button>
-      <button data-tab="counter">Counter</button>
-      <button data-tab="fulfilment">Fulfilment</button>
-      <button data-tab="stock">Stock &amp; CD</button>
-      <button data-tab="claims">Claims</button>
-      <button data-tab="safety">Safety</button>
-      <button data-tab="audit">Audit</button>
-    </nav>
-    <label class="user">Acting as
-      <select id="user-select"></select>
-    </label>
-  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity=".18"/><path d="M12 6.5v11M6.5 12h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <span>Dispensary</span>
+      </div>
+      <nav id="tabs" aria-label="Main">
+        <button data-tab="home" class="active"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z"/></svg>Today</button>
+        <button data-tab="queue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="10" rx="1.5"/></svg>Queue<span class="nav-count" id="nav-queue-count"></span></button>
+        <button data-tab="intake"><svg viewBox="0 0 24 24"><path d="M4 7V5h3M17 5h3v2M20 17v2h-3M7 19H4v-2M8 9v6M11 9v6M14 9v6M17 9v6"/></svg>Intake</button>
+        <button data-tab="prescriptions"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg>Scripts</button>
+        <div class="nav-group">Counter &amp; delivery</div>
+        <button data-tab="counter"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Counter</button>
+        <button data-tab="fulfilment"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>Fulfilment</button>
+        <div class="nav-group">Records</div>
+        <button data-tab="stock"><svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4-8 4zM4 8v8l8 4 8-4V8M12 12v8"/></svg>Stock &amp; CD</button>
+        <button data-tab="claims"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Claims</button>
+        <button data-tab="safety"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Safety log</button>
+        <button data-tab="audit"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Audit</button>
+      </nav>
+      <div class="sidebar-foot">Prototype · simulated integrations · demo clinical rules · not for clinical use</div>
+    </aside>
 
-  <div class="prototype-banner">Prototype: NZePS, NHI, claims, payments and courier are simulated, and the clinical rules are demo values. Not for clinical use.</div>
-
-  <main>
-    <section id="tab-queue" class="tab active">
-      <div id="stats" class="stats"></div>
-      <div id="board" class="board"></div>
-    </section>
-
-    <section id="tab-intake" class="tab">
-      <div class="grid2">
-        <div class="card">
-          <h2>Scan or key an e-script</h2>
-          <p class="muted">Scan the NZePS barcode or type the 18-character SCID. I and O are read as 1 and 0.</p>
-          <form id="scid-form" class="row">
-            <input id="scid-input" placeholder="SCID" autocomplete="off" spellcheck="false" />
-            <button type="submit" class="primary">Fetch script</button>
-          </form>
-          <div id="scid-status" class="hint"></div>
-          <h3>Demo e-scripts on the mock broker</h3>
-          <ul id="demo-scripts" class="list"></ul>
+    <div class="main">
+      <header class="topbar">
+        <form id="global-search" class="search" role="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+          <input id="global-search-input" placeholder="Search patient, NHI or SCID" autocomplete="off" />
+        </form>
+        <div class="topbar-right">
+          <label class="user"><span class="avatar" id="user-avatar"></span><select id="user-select" aria-label="Acting as"></select></label>
+          <button class="pill dark" id="new-script">+ New script</button>
         </div>
-        <div class="card">
-          <h2>Manual / paper script</h2>
-          <form id="manual-form" class="stack">
-            <div class="row">
-              <select name="source"><option value="paper">Paper</option><option value="signature_exempt">Signature exempt</option><option value="fax">Fax</option><option value="phone">Phone order</option></select>
-              <input name="externalId" placeholder="SCID on paper copy (optional)" />
+      </header>
+
+      <main>
+        <section id="tab-home" class="tab active">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Today</h1></header>
+          <div class="home-grid">
+            <article class="card next-card" id="next-decision"></article>
+            <div class="side-stats" id="side-stats"></div>
+          </div>
+          <div class="kpis" id="kpis"></div>
+          <div class="home-grid lower">
+            <article class="card"><div class="card-head"><h2>Scripts received</h2><span class="muted">Last 14 days</span></div><div id="days-chart" class="chart"></div></article>
+            <article class="card"><div class="card-head"><h2>Waiting to go out</h2></div><ul id="collections" class="list plain"></ul></article>
+          </div>
+        </section>
+
+        <section id="tab-queue" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Queue</h1><p class="lede">Every script, from receipt to release.</p></header>
+          <div id="stats" class="kpis"></div>
+          <div id="board" class="board"></div>
+        </section>
+
+        <section id="tab-intake" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Intake</h1><p class="lede">Scan an e-script, or key a paper, fax or phone order.</p></header>
+          <div class="grid2">
+            <div class="card">
+              <h2>Scan or key an e-script</h2>
+              <p class="muted">Scan the NZePS barcode or type the 18-character SCID. I and O are read as 1 and 0.</p>
+              <form id="scid-form" class="row">
+                <input id="scid-input" placeholder="SCID" autocomplete="off" spellcheck="false" />
+                <button type="submit" class="pill dark">Fetch script</button>
+              </form>
+              <div id="scid-status" class="hint"></div>
+              <h3>Demo e-scripts on the mock broker</h3>
+              <ul id="demo-scripts" class="list"></ul>
             </div>
-            <fieldset><legend>Patient</legend>
-              <div class="row"><input name="nhi" placeholder="NHI" /><input name="pname" placeholder="Name" required /><input name="dob" type="date" /></div>
-              <input name="address" placeholder="Address" />
-            </fieldset>
-            <fieldset><legend>Prescriber</legend>
-              <div class="row"><input name="cpn" placeholder="CPN" /><input name="dname" placeholder="Name" required /></div>
-            </fieldset>
-            <fieldset><legend>Item</legend>
-              <div class="row"><select name="medicineCode" id="med-select"></select><input name="quantity" type="number" min="1" placeholder="Qty" required /><input name="repeats" type="number" min="0" value="0" title="Repeats" /></div>
-              <input name="directions" placeholder="Directions" required />
-            </fieldset>
-            <button class="primary">Add to queue</button>
-          </form>
-        </div>
-      </div>
-    </section>
+            <div class="card">
+              <h2>Manual or paper script</h2>
+              <form id="manual-form" class="stack">
+                <div class="row">
+                  <select name="source"><option value="paper">Paper</option><option value="signature_exempt">Signature exempt</option><option value="fax">Fax</option><option value="phone">Phone order</option></select>
+                  <input name="externalId" placeholder="SCID on paper copy (optional)" />
+                </div>
+                <fieldset><legend>Patient</legend>
+                  <div class="row"><input name="nhi" placeholder="NHI" /><input name="pname" placeholder="Name" required /><input name="dob" type="date" /></div>
+                  <input name="address" placeholder="Address" />
+                </fieldset>
+                <fieldset><legend>Prescriber</legend>
+                  <div class="row"><input name="cpn" placeholder="CPN" /><input name="dname" placeholder="Name" required /></div>
+                </fieldset>
+                <fieldset><legend>Item</legend>
+                  <div class="row"><select name="medicineCode" id="med-select"></select><input name="quantity" type="number" min="1" placeholder="Qty" required /><input name="repeats" type="number" min="0" value="0" title="Repeats" /></div>
+                  <input name="directions" placeholder="Directions" required />
+                </fieldset>
+                <button class="pill dark">Add to queue</button>
+              </form>
+            </div>
+          </div>
+        </section>
 
-    <section id="tab-prescriptions" class="tab">
-      <div class="card">
-        <div class="row"><input id="rx-search" placeholder="Search patient, NHI or SCID" /></div>
-        <table id="rx-table"></table>
-      </div>
-      <div id="rx-detail"></div>
-    </section>
+        <section id="tab-prescriptions" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Scripts</h1></header>
+          <div class="card">
+            <div class="row"><input id="rx-search" placeholder="Search patient, NHI or SCID" /></div>
+            <table id="rx-table"></table>
+          </div>
+          <div id="rx-detail"></div>
+        </section>
 
-    <section id="tab-counter" class="tab">
-      <div class="grid2">
-        <div class="card">
-          <div class="row space"><h2>Basket</h2><button id="new-sale">New basket</button></div>
-          <div id="sale-box" class="muted">No basket open.</div>
-        </div>
-        <div class="card">
-          <h2>Add to basket</h2>
-          <form id="pickup-form" class="row"><input id="pickup-code" placeholder="Pickup code" autocomplete="off" /><button>Add pickup</button></form>
-          <h3>Over the counter</h3>
-          <ul id="otc-list" class="list"></ul>
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="card"><div class="row space"><h2>End of day</h2><a class="btn" href="/api/accounting.csv">Accounting export (CSV)</a></div><div id="eod"></div></div>
-        <div class="card"><h2>Recent sales</h2><table id="sales-table"></table></div>
-      </div>
-    </section>
+        <section id="tab-counter" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Counter</h1><p class="lede">Scripts and over-the-counter items in one basket.</p></header>
+          <div class="grid2">
+            <div class="card">
+              <div class="card-head"><h2>Basket</h2><button id="new-sale" class="pill">New basket</button></div>
+              <div id="sale-box">No basket open.</div>
+            </div>
+            <div class="card">
+              <h2>Add to basket</h2>
+              <form id="pickup-form" class="row"><input id="pickup-code" placeholder="Pickup code" autocomplete="off" /><button class="pill">Add pickup</button></form>
+              <h3>Over the counter</h3>
+              <ul id="otc-list" class="list"></ul>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="card"><div class="card-head"><h2>End of day</h2><a class="pill" href="/api/accounting.csv">Accounting export</a></div><div id="eod"></div></div>
+            <div class="card"><h2>Recent sales</h2><table id="sales-table"></table></div>
+          </div>
+        </section>
 
-    <section id="tab-safety" class="tab">
-      <div class="card">
-        <h2>Override and acknowledgement log</h2>
-        <p class="muted">Every hard-stop override and every high-severity finding a pharmacist acknowledged, with their reason.</p>
-        <table id="overrides-table"></table>
-      </div>
-    </section>
+        <section id="tab-fulfilment" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Fulfilment</h1><p class="lede">Pickups, deliveries, courier parcels and compliance packs.</p></header>
+          <div id="fulfilment-list" class="cards"></div>
+        </section>
 
-    <section id="tab-fulfilment" class="tab"><div id="fulfilment-list" class="cards"></div></section>
+        <section id="tab-stock" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Stock &amp; controlled drugs</h1></header>
+          <div class="grid2">
+            <div class="card"><h2>Stock</h2><table id="stock-table"></table></div>
+            <div class="card"><h2>Controlled drug register</h2><table id="cd-table"></table></div>
+          </div>
+          <div class="grid2">
+            <div class="card"><div class="card-head"><h2>Reorder draft</h2><a class="pill" href="/api/stock/reorder.csv">Download CSV</a></div><table id="reorder-table"></table></div>
+            <div class="card"><h2>Stock ledger</h2><table id="ledger-table"></table></div>
+          </div>
+        </section>
 
-    <section id="tab-stock" class="tab">
-      <div class="grid2">
-        <div class="card"><h2>Stock</h2><table id="stock-table"></table></div>
-        <div class="card"><h2>Controlled drug register</h2><table id="cd-table"></table></div>
-      </div>
-      <div class="grid2">
-        <div class="card"><div class="row space"><h2>Reorder draft</h2><a class="btn" href="/api/stock/reorder.csv">Download CSV</a></div><table id="reorder-table"></table></div>
-        <div class="card"><h2>Stock ledger</h2><table id="ledger-table"></table></div>
-      </div>
-    </section>
+        <section id="tab-claims" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Claims</h1></header>
+          <div class="card">
+            <div class="card-head"><h2>Subsidy claims</h2><div class="row"><a href="/api/claims.csv" class="pill">Export CSV</a><button id="submit-claims" class="pill dark">Submit pending batch</button></div></div>
+            <table id="claims-table"></table>
+          </div>
+        </section>
 
-    <section id="tab-claims" class="tab">
-      <div class="card">
-        <div class="row space"><h2>Claims</h2><div><a href="/api/claims.csv" class="btn">Export CSV</a> <button id="submit-claims" class="primary">Submit pending batch</button></div></div>
-        <table id="claims-table"></table>
-      </div>
-    </section>
+        <section id="tab-safety" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Safety log</h1><p class="lede">Every hard-stop override and every high-severity finding a pharmacist acknowledged, with their reason.</p></header>
+          <div class="card"><table id="overrides-table"></table></div>
+        </section>
 
-    <section id="tab-audit" class="tab">
-      <div class="card">
-        <div class="row space"><h2>Audit trail</h2><span id="audit-verify"></span></div>
-        <table id="audit-table"></table>
-      </div>
-    </section>
-  </main>
+        <section id="tab-audit" class="tab">
+          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Audit trail</h1></header>
+          <div class="card">
+            <div class="card-head"><h2>Events</h2><span id="audit-verify"></span></div>
+            <table id="audit-table"></table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
 
   <dialog id="job-dialog"><div id="job-detail"></div></dialog>
   <div id="toast"></div>
