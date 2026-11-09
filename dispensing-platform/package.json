@@ -1,0 +1,15 @@
+{
+  "name": "dispensing-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prototype pharmacy dispensing and fulfilment platform: universal script intake, dispensing workflow, controlled drug register, claims and fulfilment.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  }
+}
