@@ -1,0 +1,182 @@
+{
+  "_disclaimer": "DEMO DATA — not clinically validated; replace with licensed NZF/NZULM data",
+  "_notes": "Written in our own words for the prototype. No text is copied from the New Zealand Formulary. Doses are adult oral doses. nzfUrl is null because no stable public NZF deep-link pattern could be verified (see docs/formulary-sources.md).",
+  "name": "Local demo formulary",
+  "version": "demo-formulary-2026.11",
+  "licensed": false,
+  "groups": {
+    "benzodiazepine": ["diazepam", "lorazepam", "clonazepam", "temazepam", "triazolam", "midazolam", "alprazolam", "oxazepam", "nitrazepam"],
+    "opioid": ["oxycodone", "codeine", "morphine", "tramadol", "fentanyl", "methadone", "dihydrocodeine", "tapentadol", "buprenorphine", "pethidine"],
+    "gabapentinoid": ["gabapentin", "pregabalin"],
+    "nsaid": ["ibuprofen", "diclofenac", "naproxen", "celecoxib", "mefenamic acid", "ketoprofen", "tenoxicam", "etoricoxib"],
+    "ace inhibitor": ["cilazapril", "enalapril", "lisinopril", "perindopril", "quinapril", "captopril"],
+    "angiotensin receptor blocker": ["losartan", "candesartan"],
+    "diuretic": ["furosemide", "bendroflumethiazide", "chlortalidone", "indapamide", "spironolactone", "bumetanide"],
+    "strong cyp3a4 inhibitor": ["clarithromycin", "erythromycin", "itraconazole", "ketoconazole", "posaconazole", "ritonavir"],
+    "statin": ["atorvastatin", "simvastatin", "rosuvastatin", "pravastatin"],
+    "sedating antihistamine": ["promethazine", "cyclizine", "chlorphenamine", "doxylamine"]
+  },
+  "monographs": {
+    "metformin": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 3000,
+      "renal": [
+        { "egfrBelow": 30, "action": "avoid", "note": "Lactic acidosis risk rises sharply with poor kidney function; stop metformin." },
+        { "egfrBelow": 45, "action": "reduce", "note": "Keep the total daily dose at or below about 1 g and review kidney function more often." },
+        { "egfrBelow": 60, "action": "monitor", "note": "Check eGFR at least every 3 to 6 months." }
+      ],
+      "hepatic": { "action": "avoid", "note": "Avoid in significant liver impairment because of lactic acidosis risk." },
+      "interactions": [
+        { "with": "iodinated contrast", "severity": "moderate", "mechanism": "Contrast can cause acute kidney injury, which lets metformin accumulate.", "advice": "Withhold metformin around the procedure and restart once kidney function is confirmed." },
+        { "with": "alcohol", "severity": "moderate", "mechanism": "Heavy drinking increases lactic acidosis and hypoglycaemia risk.", "advice": "Counsel to limit alcohol." },
+        { "with": "dolutegravir", "severity": "moderate", "mechanism": "Dolutegravir raises metformin levels by blocking renal transporters.", "advice": "Consider a lower metformin dose and monitor glucose." }
+      ]
+    },
+    "metronidazole": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 2400,
+      "renal": [],
+      "hepatic": { "action": "reduce", "note": "In severe liver impairment, reduce the dose (for example to a third) or extend the dosing interval." },
+      "interactions": [
+        { "with": "alcohol", "severity": "moderate", "mechanism": "May cause a disulfiram-like reaction (flushing, nausea, vomiting, palpitations).", "advice": "No alcohol during the course and for 48 hours after the last dose." },
+        { "with": "warfarin", "severity": "severe", "mechanism": "Metronidazole inhibits warfarin metabolism, raising the INR.", "advice": "Avoid if possible; otherwise reduce the warfarin dose and check the INR within a few days." },
+        { "with": "lithium", "severity": "moderate", "mechanism": "Lithium levels can rise.", "advice": "Monitor lithium level and kidney function." },
+        { "with": "disulfiram", "severity": "contraindicated", "mechanism": "Combination has caused acute psychotic and confusional reactions.", "advice": "Do not use together or within two weeks of disulfiram." }
+      ],
+      "maxContinuousDays": 10,
+      "durationNote": "Usual courses run 5 to 7 days; longer courses raise neuropathy risk and should be confirmed with the prescriber."
+    },
+    "atorvastatin": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 80,
+      "renal": [],
+      "hepatic": { "action": "avoid", "note": "Avoid in active liver disease or unexplained persistently raised transaminases." },
+      "interactions": [
+        { "with": "clarithromycin", "severity": "severe", "mechanism": "Clarithromycin strongly inhibits CYP3A4, sharply raising atorvastatin exposure (myopathy, rhabdomyolysis).", "advice": "Withhold atorvastatin during the antibiotic course, or limit to 20 mg daily with myopathy counselling." },
+        { "with": "erythromycin", "severity": "moderate", "mechanism": "CYP3A4 inhibition raises atorvastatin levels.", "advice": "Consider pausing the statin during the course; counsel to report muscle pain." },
+        { "with": "itraconazole", "severity": "severe", "mechanism": "Strong CYP3A4 inhibition.", "advice": "Avoid together; pause the statin." },
+        { "with": "ciclosporin", "severity": "contraindicated", "mechanism": "Large rise in statin exposure via transporter and CYP3A4 inhibition.", "advice": "Do not combine; choose an alternative lipid-lowering plan." },
+        { "with": "grapefruit juice", "severity": "mild", "mechanism": "Large amounts inhibit gut CYP3A4.", "advice": "Avoid drinking large quantities of grapefruit juice." }
+      ]
+    },
+    "amoxicillin": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 3000,
+      "renal": [
+        { "egfrBelow": 30, "action": "reduce", "note": "Lower the dose or extend the interval (for example 500 mg twice daily) because of accumulation." }
+      ],
+      "interactions": [
+        { "with": "methotrexate", "severity": "moderate", "mechanism": "Penicillins reduce methotrexate clearance.", "advice": "Monitor for methotrexate toxicity, especially at higher doses." },
+        { "with": "warfarin", "severity": "mild", "mechanism": "Antibiotic courses occasionally raise the INR.", "advice": "Consider an extra INR check." }
+      ],
+      "maxContinuousDays": 14,
+      "durationNote": "Most courses are 5 to 7 days; supply beyond two weeks should match a documented indication."
+    },
+    "oxycodone": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 80,
+      "renal": [
+        { "egfrBelow": 30, "action": "reduce", "note": "Start low and lengthen the interval; active metabolites accumulate." },
+        { "egfrBelow": 60, "action": "monitor", "note": "Watch for sedation; titrate slowly." }
+      ],
+      "hepatic": { "action": "reduce", "note": "Start at a third to a half of the usual dose in liver impairment." },
+      "interactions": [
+        { "with": "benzodiazepine", "severity": "severe", "mechanism": "Additive CNS and respiratory depression.", "advice": "Avoid together where possible; if needed use the lowest doses and counsel the patient and whanau about sedation." },
+        { "with": "opioid", "severity": "severe", "mechanism": "Two opioids together: additive respiratory depression and overdose risk.", "advice": "Confirm the plan with the prescriber." },
+        { "with": "gabapentinoid", "severity": "severe", "mechanism": "Additive respiratory depression.", "advice": "Use the lowest doses and monitor for sedation." },
+        { "with": "alcohol", "severity": "severe", "mechanism": "Additive CNS depression.", "advice": "Counsel to avoid alcohol." },
+        { "with": "strong cyp3a4 inhibitor", "severity": "moderate", "mechanism": "CYP3A4 inhibition raises oxycodone levels.", "advice": "Monitor for increased opioid effects; consider a dose reduction." },
+        { "with": "sedating antihistamine", "severity": "moderate", "mechanism": "Additive sedation.", "advice": "Counsel about drowsiness and driving." }
+      ],
+      "maxContinuousDays": 14,
+      "durationNote": "Opioid supply for acute pain should be reviewed after about two weeks of continuous use."
+    },
+    "paracetamol": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 4000,
+      "renal": [
+        { "egfrBelow": 30, "action": "monitor", "note": "Consider a dosing interval of at least 6 hours." }
+      ],
+      "hepatic": { "action": "reduce", "note": "Limit to about 2 to 3 g a day in liver impairment, chronic alcohol use or low body weight." },
+      "interactions": [
+        { "with": "warfarin", "severity": "moderate", "mechanism": "Regular use over several days can raise the INR.", "advice": "Occasional doses are fine; with regular use check the INR." }
+      ]
+    },
+    "codeine": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 240,
+      "renal": [
+        { "egfrBelow": 30, "action": "reduce", "note": "Metabolites accumulate; use a lower dose or an alternative." },
+        { "egfrBelow": 60, "action": "monitor", "note": "Watch for sedation and constipation." }
+      ],
+      "hepatic": { "action": "avoid", "note": "Avoid or use with great caution in liver impairment." },
+      "interactions": [
+        { "with": "benzodiazepine", "severity": "severe", "mechanism": "Additive CNS and respiratory depression.", "advice": "Avoid together where possible; counsel about sedation." },
+        { "with": "opioid", "severity": "severe", "mechanism": "Two opioids together: additive respiratory depression.", "advice": "Confirm the plan with the prescriber." },
+        { "with": "gabapentinoid", "severity": "severe", "mechanism": "Additive respiratory depression.", "advice": "Use the lowest doses and monitor." },
+        { "with": "alcohol", "severity": "severe", "mechanism": "Additive CNS depression.", "advice": "Counsel to avoid alcohol." },
+        { "with": "fluoxetine", "severity": "moderate", "mechanism": "CYP2D6 inhibition reduces conversion to morphine, so pain relief may fail.", "advice": "Consider a different analgesic." },
+        { "with": "paroxetine", "severity": "moderate", "mechanism": "CYP2D6 inhibition reduces conversion to morphine.", "advice": "Consider a different analgesic." }
+      ],
+      "maxContinuousDays": 14,
+      "durationNote": "Regular codeine beyond two weeks risks dependence and medication-overuse headache; review with the prescriber."
+    },
+    "clarithromycin": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 1000,
+      "renal": [
+        { "egfrBelow": 30, "action": "reduce", "note": "Halve the dose." }
+      ],
+      "interactions": [
+        { "with": "atorvastatin", "severity": "severe", "mechanism": "Strong CYP3A4 inhibition raises atorvastatin exposure (myopathy risk).", "advice": "Pause the statin during the course or limit atorvastatin to 20 mg." },
+        { "with": "simvastatin", "severity": "contraindicated", "mechanism": "Very large rise in simvastatin exposure.", "advice": "Stop simvastatin for the duration of the course." },
+        { "with": "colchicine", "severity": "severe", "mechanism": "CYP3A4 and P-gp inhibition can cause colchicine toxicity, which can be fatal in kidney or liver impairment.", "advice": "Avoid; if unavoidable reduce colchicine substantially." },
+        { "with": "ergotamine", "severity": "contraindicated", "mechanism": "Risk of ergotism.", "advice": "Do not combine." },
+        { "with": "warfarin", "severity": "moderate", "mechanism": "INR can rise.", "advice": "Check the INR during the course." },
+        { "with": "opioid", "severity": "moderate", "mechanism": "CYP3A4 inhibition raises levels of some opioids such as oxycodone and fentanyl.", "advice": "Monitor for sedation." }
+      ],
+      "maxContinuousDays": 14,
+      "durationNote": "Typical courses run 7 to 14 days; longer use needs a documented indication."
+    },
+    "ibuprofen": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 1200,
+      "renal": [
+        { "egfrBelow": 30, "action": "avoid", "note": "NSAIDs can tip reduced kidney function into acute kidney injury." },
+        { "egfrBelow": 60, "action": "monitor", "note": "Use the lowest dose for the shortest time; check kidney function if used regularly." }
+      ],
+      "hepatic": { "action": "avoid", "note": "Avoid in severe liver impairment." },
+      "interactions": [
+        { "with": "ace inhibitor", "severity": "moderate", "mechanism": "Reduced kidney perfusion; part of the 'triple whammy' with a diuretic.", "advice": "Avoid regular use, especially if the patient also takes a diuretic." },
+        { "with": "angiotensin receptor blocker", "severity": "moderate", "mechanism": "Reduced kidney perfusion; part of the 'triple whammy'.", "advice": "Avoid regular use, especially with a diuretic." },
+        { "with": "diuretic", "severity": "moderate", "mechanism": "Reduced diuretic effect and kidney injury risk.", "advice": "Avoid regular use; check kidney function." },
+        { "with": "warfarin", "severity": "severe", "mechanism": "Bleeding risk from platelet effects and gut irritation.", "advice": "Avoid; suggest paracetamol instead." },
+        { "with": "methotrexate", "severity": "severe", "mechanism": "Reduced methotrexate clearance.", "advice": "Avoid with higher-dose methotrexate; monitor with low weekly doses." },
+        { "with": "lithium", "severity": "moderate", "mechanism": "Lithium levels rise.", "advice": "Monitor lithium level." },
+        { "with": "nsaid", "severity": "moderate", "mechanism": "Two NSAIDs: more gut bleeding and kidney risk with no extra benefit.", "advice": "Use one NSAID only." }
+      ],
+      "maxContinuousDays": 10,
+      "durationNote": "Non-prescription use should not run past about 10 days without review. The 1200 mg ceiling is the non-prescription limit; prescribed doses can go higher."
+    },
+    "loratadine": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 10,
+      "renal": [],
+      "hepatic": { "action": "reduce", "note": "In severe liver impairment use 10 mg on alternate days." },
+      "interactions": [
+        { "with": "clarithromycin", "severity": "mild", "mechanism": "Loratadine levels rise slightly; no clinically important effect expected.", "advice": "No action usually needed." }
+      ]
+    },
+    "omeprazole": {
+      "nzfUrl": null,
+      "adultMaxDailyMg": 80,
+      "renal": [],
+      "interactions": [
+        { "with": "clopidogrel", "severity": "moderate", "mechanism": "CYP2C19 inhibition may reduce clopidogrel activation.", "advice": "Prefer pantoprazole if a PPI is needed." },
+        { "with": "methotrexate", "severity": "moderate", "mechanism": "May reduce clearance of high-dose methotrexate.", "advice": "Consider pausing around high-dose methotrexate." }
+      ],
+      "maxContinuousDays": 56,
+      "durationNote": "Review the need for a PPI after about 8 weeks; step down where possible."
+    }
+  }
+}
