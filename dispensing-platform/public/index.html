@@ -6,17 +6,19 @@
   <title>Dispensary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="shell">
-    <aside class="sidebar">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity=".18"/><path d="M12 6.5v11M6.5 12h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        <span>Dispensary</span>
+    <aside class="sidebar panel">
+      <div class="case-card">
+        <div class="case-id"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg><span>Community pharmacy</span></div>
+        <div class="case-title" data-pharmacy></div>
+        <div class="case-desc" id="case-desc"></div>
       </div>
       <nav id="tabs" aria-label="Main">
+        <div class="nav-group">Dispensing</div>
         <button data-tab="home" class="active"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z"/></svg>Today</button>
         <button data-tab="queue"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="10" rx="1.5"/></svg>Queue<span class="nav-count" id="nav-queue-count"></span></button>
         <button data-tab="intake"><svg viewBox="0 0 24 24"><path d="M4 7V5h3M17 5h3v2M20 17v2h-3M7 19H4v-2M8 9v6M11 9v6M14 9v6M17 9v6"/></svg>Intake</button>
@@ -30,18 +32,21 @@
         <button data-tab="safety"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Safety log</button>
         <button data-tab="audit"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Audit</button>
       </nav>
-      <div class="sidebar-foot">Prototype · simulated integrations · demo clinical rules · not for clinical use</div>
+      <div class="sidebar-foot">
+        <label class="user"><span class="avatar" id="user-avatar"></span><select id="user-select" aria-label="Acting as"></select></label>
+        <div class="proto">Prototype: simulated integrations and demo clinical rules. Not for clinical use.</div>
+      </div>
     </aside>
 
     <div class="main">
       <header class="topbar">
-        <form id="global-search" class="search" role="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
-          <input id="global-search-input" placeholder="Search patient, NHI or SCID" autocomplete="off" />
-        </form>
+        <nav class="crumb" id="crumb" aria-label="Breadcrumb"></nav>
         <div class="topbar-right">
-          <label class="user"><span class="avatar" id="user-avatar"></span><select id="user-select" aria-label="Acting as"></select></label>
-          <button class="pill dark" id="new-script">+ New script</button>
+          <form id="global-search" class="search" role="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+            <input id="global-search-input" placeholder="Search patient, NHI or SCID" autocomplete="off" />
+          </form>
+          <button class="icon-btn" id="new-script" title="New script" aria-label="New script"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </header>
 
@@ -60,9 +65,21 @@
         </section>
 
         <section id="tab-queue" class="tab">
-          <header class="page-head"><div class="eyebrow" data-pharmacy></div><h1>Queue</h1><p class="lede">Every script, from receipt to release.</p></header>
-          <div id="stats" class="kpis"></div>
-          <div id="board" class="board"></div>
+          <div class="split">
+            <div class="threads">
+              <select id="queue-filter" class="chip-select" aria-label="Filter queue">
+                <option value="all">All scripts</option>
+                <option value="pharmacist">Needs a pharmacist</option>
+                <option value="flagged">Flagged by screening</option>
+                <option value="cd">Controlled drugs</option>
+              </select>
+              <div id="thread-list"></div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-bar" id="code-bar"></div>
+              <div class="code-panel panel" id="job-pane"><div class="empty">Select a script from the queue.</div></div>
+            </div>
+          </div>
         </section>
 
         <section id="tab-intake" class="tab">
@@ -173,7 +190,6 @@
     </div>
   </div>
 
-  <dialog id="job-dialog"><div id="job-detail"></div></dialog>
   <div id="toast"></div>
   <script type="module" src="/app.js"></script>
 </body>

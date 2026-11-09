@@ -3,7 +3,7 @@
 // Claude reviewer.
 
 const TEMPLATES = {
-  en: (c) => `You have been given ${c.new_item.medicine} ${c.new_item.strength}. ${c.new_item.directions}.`,
+  en: (c) => `You have been given ${c.new_item.medicine} ${c.new_item.strength}. ${c.new_item.directions.replace(/\.?$/, '.')}`,
 };
 
 export function createMockReviewer() {

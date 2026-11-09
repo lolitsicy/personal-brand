@@ -676,7 +676,7 @@ export function createPlatform({ db, adapters, config }) {
   // ───────────────────────── read models ─────────────────────────
 
   const JOB_VIEW = `
-    SELECT j.*, i.medicine_id, i.directions, i.repeats_authorised, i.dispensings_count, i.period_days, i.prescription_id,
+    SELECT j.*, i.medicine_id, i.directions, i.dose_units, i.doses_per_day, i.repeats_authorised, i.dispensings_count, i.period_days, i.prescription_id,
            m.name AS medicine, m.strength, m.form, m.controlled_class, m.code AS medicine_code,
            p.scid, p.source, pa.id AS patient_id, pa.name AS patient_name, pa.nhi,
            pr.name AS prescriber_name
@@ -693,6 +693,9 @@ export function createPlatform({ db, adapters, config }) {
     job.actions = availableActions(job, user);
     job.on_hand = onHand(job.medicine_id);
     job.screening = latestScreening(job.id);
+    const ctx = screeningContext(loadJob(id));
+    job.medication_list = ctx.otherMeds;
+    job.patient = { dob: ctx.patient.dob, egfr: ctx.patient.egfr, allergies: JSON.parse(ctx.patient.allergies || '[]'), preferred_language: ctx.patient.preferred_language };
     if (['entered', 'queued'].includes(job.state)) {
       job.warnings = findingsForSignOff(loadJob(id)).findings;
     }
@@ -704,7 +707,14 @@ export function createPlatform({ db, adapters, config }) {
     const rows = state
       ? all(`${JOB_VIEW} WHERE j.state = ? ORDER BY j.created_at, j.id`, state)
       : all(`${JOB_VIEW} WHERE j.state IN (${OPEN_JOB_STATES.map(() => '?').join(',')}) ORDER BY j.created_at, j.id`, ...OPEN_JOB_STATES);
-    return rows.map((j) => ({ ...j, actions: availableActions(j, user) }));
+    const SEV = ['hard_stop', 'high', 'moderate', 'info'];
+    return rows.map((j) => {
+      let top = null;
+      if (['queued', 'entered'].includes(j.state)) {
+        for (const f of findingsForSignOff(loadJob(j.id)).findings) if (!top || SEV.indexOf(f.severity) < SEV.indexOf(top)) top = f.severity;
+      }
+      return { ...j, top_severity: top, actions: availableActions(j, user) };
+    });
   }
 
   function getPrescription(id) {

@@ -59,6 +59,8 @@ async function boot() {
   $('#global-search').onsubmit = (e) => { e.preventDefault(); $('#rx-search').value = $('#global-search-input').value; showTab('prescriptions'); };
 
   document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+  $('#queue-filter').onchange = () => { selectedJobId = null; renderQueue(); };
+  setCrumb(['Today']);
   $('#scid-form').onsubmit = guard(onScidSubmit);
   $('#scid-input').oninput = debounce(onScidInput, 200);
   $('#manual-form').onsubmit = guard(onManualSubmit);
@@ -73,8 +75,14 @@ async function boot() {
   render();
 }
 
+const TAB_TITLE = { home: 'Today', queue: 'Queue', intake: 'Intake', prescriptions: 'Scripts', counter: 'Counter', fulfilment: 'Fulfilment', stock: 'Stock & CD', claims: 'Claims', safety: 'Safety log', audit: 'Audit' };
+function setCrumb(parts) {
+  $('#crumb').innerHTML = parts.map((p, i) => (i === 0 ? `<span>${p}</span>` : `<span class="sep">›</span>${p.startsWith('<') ? p : `<b>${p}</b>`}`)).join(' ');
+}
+
 function showTab(tab) {
   currentTab = tab;
+  setCrumb([TAB_TITLE[tab] ?? tab]);
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab').forEach((s) => s.classList.toggle('active', s.id === `tab-${tab}`));
   render();
@@ -90,6 +98,8 @@ async function updateNavCount() {
   const d = await api('/api/dashboard');
   const n = ['queued', 'entered', 'clinically_checked', 'assembled', 'checked'].reduce((t, k) => t + (d.jobs[k] ?? 0), 0);
   $('#nav-queue-count').textContent = n || '';
+  const h = await api('/api/home');
+  $('#case-desc').textContent = `${h.inProgress} script${h.inProgress === 1 ? '' : 's'} in progress · ${h.awaitingPharmacist} waiting for a pharmacist · ${h.readyForCollection} ready to collect`;
 }
 
 function since(ts) {
@@ -171,55 +181,173 @@ function barChart(el, data) {
   });
 }
 
-// ───────────── queue ─────────────
-async function renderQueue() {
-  const [jobs, dash] = await Promise.all([api('/api/queue'), api('/api/dashboard')]);
-  const s = dash.jobs;
-  $('#stats').innerHTML = [
-    ['In progress', (s.queued ?? 0) + (s.entered ?? 0) + (s.clinically_checked ?? 0) + (s.assembled ?? 0) + (s.checked ?? 0)],
-    ['Awaiting collection / delivery', s.released ?? 0],
-    ['Owings', dash.owing],
-    ['Claims pending', dash.claims.pending ?? 0],
-    ['Low stock lines', dash.lowStock.length],
-  ].map(([l, n]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join('');
+// ───────────── queue (stage list · script view · reviewer rail) ─────────────
+let selectedJobId = null;
+let railOpen = true;
+const openTrace = new Set();
 
-  $('#board').innerHTML = COLUMNS.map(([state, title]) => {
-    const col = jobs.filter((j) => j.state === state);
-    return `<div class="col"><h4>${title}<span>${col.length}</span></h4>${col.map(jobCard).join('') || '<div class="muted" style="padding:4px">—</div>'}</div>`;
-  }).join('');
-  document.querySelectorAll('.job').forEach((el) => (el.onclick = () => openJob(el.dataset.id)));
-}
-
-function jobCard(j) {
-  return `<div class="job" data-id="${j.id}">
-    <div class="med">${esc(j.medicine)} ${esc(j.strength)}</div>
-    <div>${esc(j.patient_name)} <span class="meta">${esc(j.nhi ?? '')}</span></div>
-    <div class="meta">Qty ${j.quantity} · ${j.sequence === 0 ? 'Original' : `Repeat ${j.sequence}`} · ${esc(j.source)}</div>
-    <div>${j.controlled_class ? `<span class="tag cd">CD ${j.controlled_class}</span>` : ''}${j.owing ? `<span class="tag warn">Owing ${j.owing}</span>` : ''}${j.hold_reason && j.state === 'on_hold' ? `<span class="tag warn">${esc(j.hold_reason)}</span>` : ''}</div>
-  </div>`;
-}
-
-const SPECIALIST = { pharma: 'Medication review', pharmacology: 'Clinical pharmacology', regulatory: 'Regulatory', advocacy: 'Patient advocacy' };
+const SPECIALIST = { pharma: 'medication review', pharmacology: 'clinical pharmacology', regulatory: 'regulatory', advocacy: 'patient advocacy' };
 const LANG = { en: 'English', mi: 'te reo Māori', sm: 'Samoan', to: 'Tongan', zh: 'Chinese', hi: 'Hindi' };
-const SEV_LABEL = { hard_stop: 'HARD STOP', high: 'High', moderate: 'Check', info: 'Info' };
+const SEV_LABEL = { hard_stop: 'Hard stop', high: 'Needs review', moderate: 'Check', info: 'Info' };
+const SEV_ICON = { hard_stop: '!', high: '●', moderate: '○', info: 'i' };
 
-function findingsHtml(findings, { editable, decisions = {} }) {
-  if (!findings.length) return '<p class="muted">No findings.</p>';
-  const groups = {};
-  for (const f of findings) (groups[f.specialist] ??= []).push(f);
-  return Object.entries(groups).map(([spec, list]) => `<div class="spec">${SPECIALIST[spec] ?? spec}</div>` + list.map((f) => {
+async function renderQueue() {
+  const jobs = await api('/api/queue');
+  const filter = $('#queue-filter').value;
+  const keep = (j) => filter === 'all' ? true
+    : filter === 'pharmacist' ? ['entered', 'assembled'].includes(j.state)
+    : filter === 'flagged' ? ['hard_stop', 'high'].includes(j.top_severity)
+    : filter === 'cd' ? !!j.controlled_class : true;
+  const visible = jobs.filter(keep);
+  if (!selectedJobId || !jobs.some((j) => j.id === selectedJobId)) {
+    const rank = (j) => ({ hard_stop: 0, high: 1 })[j.top_severity] ?? (j.state === 'entered' ? 2 : j.state === 'assembled' ? 3 : 4);
+    selectedJobId = [...visible].sort((a, b) => rank(a) - rank(b))[0]?.id ?? null;
+  }
+  $('#thread-list').innerHTML = COLUMNS.map(([state, title], i) => {
+    const list = visible.filter((j) => j.state === state);
+    const worst = list.some((j) => j.top_severity === 'hard_stop') ? 'hard_stop' : list.some((j) => j.top_severity === 'high') ? 'high' : null;
+    const open = list.length && (list.some((j) => j.id === selectedJobId) || ['entered', 'assembled'].includes(state));
+    return `<details class="thread ${list.length ? '' : 'empty-group'}" ${open ? 'open' : ''}>
+      <summary><span class="n">${list.length}</span>${title}${worst ? `<span class="flag ${worst === 'high' ? 'high' : ''}">${worst === 'high' ? '•' : '×'}</span>` : ''}</summary>
+      ${list.map((j) => `<div class="titem ${j.id === selectedJobId ? 'sel' : ''}" data-id="${j.id}" title="${esc(j.patient_name)}">
+        <span class="ico">${j.controlled_class ? 'CD' : 'Rx'}</span><span class="t">${esc(j.medicine)} ${esc(j.strength)} · ${esc(j.patient_name.split(' ')[0])}</span>
+        ${j.top_severity && j.top_severity !== 'info' ? `<span class="sevdot ${j.top_severity}"></span>` : ''}</div>`).join('')}
+    </details>`;
+  }).join('');
+  document.querySelectorAll('.titem').forEach((el) => (el.onclick = () => { selectedJobId = Number(el.dataset.id); renderQueue(); }));
+  if (selectedJobId) await renderJobPane(selectedJobId);
+  else { $('#job-pane').innerHTML = '<div class="empty">Nothing in the queue for this filter.</div>'; $('#code-bar').innerHTML = ''; setCrumb(['Queue']); }
+}
+
+/** Open a job from anywhere: jump to the queue with it selected. */
+async function openJob(id) {
+  selectedJobId = Number(id);
+  showTab('queue');
+}
+
+function ageOf(dob) { if (!dob) return null; const d = new Date(dob); return Math.floor((Date.now() - d) / 31557600000); }
+
+async function renderJobPane(id, { autoScreen = true } = {}) {
+  let j = await api(`/api/jobs/${id}`);
+  if (autoScreen && j.state === 'entered' && (!j.screening || j.screening.status !== 'pending')) {
+    await api(`/api/jobs/${id}/screen`, { method: 'POST' }).catch(() => {});
+    j = await api(`/api/jobs/${id}`);
+  }
+  const signedOff = j.warnings_acknowledged;
+  const SPEC_ORDER = ['pharma', 'pharmacology', 'regulatory', 'advocacy'];
+  const SEV_ORDER = ['hard_stop', 'high', 'moderate', 'info'];
+  const findings = [...(j.warnings ?? signedOff?.warnings ?? [])]
+    .sort((a, b) => SPEC_ORDER.indexOf(a.specialist) - SPEC_ORDER.indexOf(b.specialist) || SEV_ORDER.indexOf(a.severity) - SEV_ORDER.indexOf(b.severity));
+  const editable = j.actions.includes('clinical_check');
+  const decisions = signedOff?.decisions ?? {};
+  const fileName = `${j.medicine.toLowerCase().replace(/\s+/g, '_')}_${j.strength.replace(/\s+/g, '')}.rx`;
+  setCrumb(['Queue', `<span class="file"><i>Rx</i><b>${esc(fileName)}</b></span>`, `<span class="when">${esc(new Date(j.created_at.replace(' ', 'T') + 'Z').toLocaleString('en-NZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</span>`]);
+
+  // toolbar above the panel
+  $('#code-bar').innerHTML = `
+    ${['queued', 'entered'].includes(j.state) ? '<button class="chip accent" id="rescreen">✦ Screen again</button>' : ''}
+    <span class="chip">◉ ${esc(j.source)}</span>
+    <span class="chip">${esc(j.patient_name)}</span>
+    <span class="grow"></span>
+    ${j.controlled_class ? `<span class="chip">CD ${esc(j.controlled_class)}</span>` : ''}
+    <span class="chip"><span class="dot"></span>${j.scid ? `${esc(j.scid.slice(0, 6))}… · ` : ''}${since(j.created_at)} ago</span>
+    <span class="chip">${esc(j.state.replace('_', ' '))}</span>`;
+
+  // script as numbered lines
+  const L = [];
+  const line = (tx, extra = {}) => L.push({ tx, ...extra });
+  const kv = (k, v) => `<span class="k">${k}</span> ${v}`;
+  const age = ageOf(j.patient?.dob);
+  line(`<span class="k">rx</span> <span class="id">${esc(j.id)}-${esc(j.sequence)}</span> <span class="c">// ${j.sequence === 0 ? 'original supply' : `repeat ${j.sequence}`} of ${j.repeats_authorised + 1}${j.scid ? ` · SCID ${esc(j.scid)}` : ''}</span>`);
+  line('{');
+  line(`    ${kv('patient', `<span class="s">"${esc(j.patient_name)}"</span>`)}, ${kv('nhi', `<span class="id">${esc(j.nhi ?? '—')}</span>`)}${age != null ? `, ${kv('age', `<span class="num">${age}</span>`)}` : ''}${j.patient?.egfr != null ? `, ${kv('egfr', `<span class="num">${j.patient.egfr}</span>`)}` : ''}`);
+  line(`    ${kv('allergies', `[${(j.patient?.allergies ?? []).map((a) => `<span class="s">"${esc(a)}"</span>`).join(', ')}]`)}`);
+  line(`    ${kv('prescriber', `<span class="s">"${esc(j.prescriber_name)}"</span>`)}`);
+  line('');
+  line(`    <span class="c">// what was prescribed</span>`);
+  line(`    ${kv('medicine', `<span class="id">${esc(j.medicine)}</span> <span class="num">${esc(j.strength)}</span> ${esc(j.form)}`)}`);
+  line(`    ${kv('directions', `<span class="s">"${esc(j.directions)}"</span>`)}`);
+  line(`    ${kv('quantity', `<span class="num">${j.quantity}</span>`)}${j.quantity_supplied ? ` <span class="c">// supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="c">// on hand ${j.on_hand}</span>`);
+  if (j.dose_units && j.doses_per_day) line(`    ${kv('dose', `<span class="num">${j.dose_units}</span> × <span class="num">${j.doses_per_day}</span>/day`)}`);
+  line('');
+  line(`    <span class="c">// medication list (${j.medication_list?.length ?? 0} other)</span>`);
+  for (const m of j.medication_list ?? []) line(`    <span class="k">also</span> <span class="id">${esc(m.ingredient)}</span> <span class="c">// ${esc(m.source)}</span>`);
+  line('');
+  line(`    <span class="c">// screening: ${esc(j.screening?.reviewer ?? 'rules only')} · ${esc(j.screening?.status ?? 'not run')}</span>`);
+  let lastSpec = null;
+  for (const f of findings) {
+    if (f.specialist !== lastSpec) { line(`    <span class="c">// ${esc(SPECIALIST[f.specialist] ?? f.specialist)}</span>`); lastSpec = f.specialist; }
+    const flagged = ['hard_stop', 'high', 'moderate'].includes(f.severity);
     const d = decisions[f.id];
-    const decide = !editable ? (d ? `<div class="muted">↳ ${esc(d.action)}${d.reason ? `: ${esc(d.reason)}` : d.note ? `: ${esc(d.note)}` : ''}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` : '')
-      : f.severity === 'hard_stop' ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="override"><input type="text" placeholder="Override reason (required)" data-reason /><label><input type="checkbox" data-prescriber /> Prescriber contacted</label></div>`
-      : f.severity === 'high' ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="ack"><label><input type="checkbox" data-ack /> Reviewed</label><input type="text" placeholder="Note (optional)" data-note /></div>` : '';
-    return `<div class="finding ${f.severity}"><div class="head"><span class="sev ${f.severity}">${SEV_LABEL[f.severity]}</span>${f.origin === 'ai' ? '<span class="tag">AI</span>' : '<span class="tag">Rule</span>'}<span>${esc(f.message)}</span></div>
-      <details><summary>Reasoning trace</summary><pre>${esc(`Rule: ${f.trace?.rule ?? ''}\nSource: ${f.trace?.source ?? ''}\nInputs: ${typeof f.trace?.inputs === 'string' ? f.trace.inputs : JSON.stringify(f.trace?.inputs, null, 1)}`)}</pre></details>${decide}</div>`;
-  }).join('')).join('');
+    const sevClass = d ? 'ok' : f.severity;
+    const badge = d ? `<span class="badge ok">✓ ${esc(d.action === 'override' ? 'Overridden' : 'Reviewed')}</span>`
+      : f.origin === 'ai' && f.severity === 'info' ? '<span class="badge ai">AI</span>'
+      : flagged ? `<span class="badge ${f.severity}">${SEV_ICON[f.severity]} ${SEV_LABEL[f.severity]}</span>` : '';
+    L.push({
+      flag: flagged || !!d ? sevClass : null, fid: f.id,
+      tx: `    <span class="k">${f.origin === 'ai' ? 'ai' : 'rule'}</span>.<span class="id">${esc(f.code.toLowerCase())}</span>(${f.severity === 'hard_stop' || f.severity === 'high' ? `<span class="hl ${f.severity}">${esc(f.message)}</span>` : `<span class="s">"${esc(f.message)}"</span>`});`,
+      badge,
+    });
+    if (openTrace.has(f.id)) {
+      L.push({ sub: `<div class="trace">// rule:   ${esc(f.trace?.rule ?? '')}\n// source: ${esc(f.trace?.source ?? '')}\n// inputs: ${esc(typeof f.trace?.inputs === 'string' ? f.trace.inputs : JSON.stringify(f.trace?.inputs))}</div>` });
+    }
+    if (editable && f.severity === 'hard_stop') {
+      L.push({ sub: `<div class="decide" data-fid="${esc(f.id)}" data-kind="override"><input type="text" placeholder="Override reason (required)" data-reason /><label><input type="checkbox" data-prescriber /> Prescriber contacted</label></div>` });
+    } else if (editable && f.severity === 'high') {
+      L.push({ sub: `<div class="decide" data-fid="${esc(f.id)}" data-kind="ack"><label><input type="checkbox" data-ack /> Reviewed</label><input type="text" placeholder="Note (optional)" data-note /></div>` });
+    } else if (d && (d.reason || d.note)) {
+      L.push({ sub: `<div class="trace">// ${esc(d.action)}: ${esc(d.reason ?? d.note)}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` });
+    }
+  }
+  if (!findings.length) line(`    <span class="c">// no findings</span>`);
+  if (j.label_text) {
+    line('');
+    line(`    <span class="c">// label</span>`);
+    L.push({ sub: `<pre class="label">${esc(j.label_text)}</pre>` });
+  }
+  line('}');
+
+  let n = 0;
+  const codeHtml = L.map((l) => {
+    if (l.sub) return `<div class="sub"><div>${l.sub}</div></div>`;
+    n++;
+    return `<div class="ln ${l.flag ? `flag ${l.flag}` : ''}" ${l.fid ? `data-trace="${esc(l.fid)}" title="Click to show the reasoning trace"` : ''}>
+      <span class="g">${l.flag ? `<span class="gd ${l.flag}"></span>` : ''}</span><span class="no">${n}</span><span class="tx">${l.tx || ' '}</span><span>${l.badge ?? ''}</span></div>`;
+  }).join('');
+
+  const counsel = j.screening?.counselling;
+  const aiCount = findings.filter((f) => f.origin === 'ai' && f.code !== 'AI_STATUS').length;
+  const aiStatus = findings.find((f) => f.code === 'AI_STATUS');
+  $('#job-pane').innerHTML = `
+    <div class="code">${codeHtml}</div>
+    <aside class="rail ${railOpen ? '' : 'closed'}">
+      <button class="chip accent rail-toggle" id="rail-toggle">✦ Reviewer ${railOpen ? '⌄' : '‹'}</button>
+      <h4>AI reviewer</h4>
+      <div class="meta">${esc(j.screening?.reviewer ?? 'Not run yet')} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
+      <div class="meta">Works on a de-identified case. Can add findings; can't clear or downgrade a rule.</div>
+      ${counsel ? `<h4 style="margin-top:8px">Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}
+    </aside>
+    <div class="code-actions">
+      ${j.actions.includes('release') ? `<select id="rel-method"><option value="pickup">Pickup in store</option><option value="delivery">Pharmacy delivery</option><option value="courier">Courier</option><option value="compliance_pack">Compliance pack</option></select><input id="rel-address" placeholder="Delivery address (defaults to patient's)" />` : ''}
+      ${j.actions.map((a) => `<button data-act="${a}" class="${a === 'cancel' ? 'danger' : a === 'hold' ? '' : 'primary'}">${ACTION_LABEL[a] ?? a}</button>`).join('')}
+      ${j.owing ? '<button data-act="supply-owing">Supply owing</button>' : ''}
+      ${!j.actions.length && !j.owing ? '<span class="muted">No actions for your role at this stage.</span>' : ''}
+    </div>`;
+
+  $('#rescreen')?.addEventListener('click', guard(async () => { await api(`/api/jobs/${j.id}/screen`, { method: 'POST' }); await renderJobPane(j.id, { autoScreen: false }); }));
+  $('#rail-toggle').onclick = () => { railOpen = !railOpen; renderJobPane(j.id, { autoScreen: false }); };
+  document.querySelectorAll('#job-pane [data-trace]').forEach((el) => (el.onclick = () => {
+    const fid = el.dataset.trace;
+    openTrace.has(fid) ? openTrace.delete(fid) : openTrace.add(fid);
+    renderJobPane(j.id, { autoScreen: false });
+  }));
+  document.querySelectorAll('#job-pane .decide').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
+  document.querySelectorAll('#job-pane [data-act]').forEach((b) => (b.onclick = guard(() => doAction(j, b.dataset.act))));
 }
 
 function collectDecisions() {
   const decisions = {};
-  document.querySelectorAll('#job-detail .decide').forEach((el) => {
+  document.querySelectorAll('#job-pane .decide').forEach((el) => {
     if (el.dataset.kind === 'override') {
       const reason = el.querySelector('[data-reason]').value.trim();
       if (reason) decisions[el.dataset.fid] = { action: 'override', reason, prescriberConfirmed: el.querySelector('[data-prescriber]').checked };
@@ -228,42 +356,6 @@ function collectDecisions() {
     }
   });
   return decisions;
-}
-
-async function openJob(id, { autoScreen = true } = {}) {
-  let j = await api(`/api/jobs/${id}`);
-  if (autoScreen && j.state === 'entered' && (!j.screening || j.screening.status !== 'pending')) {
-    await api(`/api/jobs/${id}/screen`, { method: 'POST' }).catch(() => {});
-    j = await api(`/api/jobs/${id}`);
-  }
-  const dlg = $('#job-detail').closest('dialog');
-  const signedOff = j.warnings_acknowledged;
-  const findings = j.warnings ?? signedOff?.warnings ?? [];
-  const editable = j.actions.includes('clinical_check');
-  $('#job-detail').innerHTML = `
-    <div class="row space"><h2>${esc(j.medicine)} ${esc(j.strength)} ${esc(j.form)}</h2><button id="close-dlg">✕</button></div>
-    <p>${esc(j.patient_name)} · NHI ${esc(j.nhi ?? '—')} · ${esc(j.prescriber_name)}<br/>
-      <span class="muted">${j.scid ? `SCID <code>${esc(j.scid)}</code> · ` : ''}${esc(j.source)} · ${j.sequence === 0 ? 'Original supply' : `Repeat ${j.sequence}`} of ${j.repeats_authorised + 1} · state <b>${esc(j.state)}</b></span></p>
-    <p><b>Directions:</b> ${esc(j.directions)}<br/><b>Quantity:</b> ${j.quantity} ${j.quantity_supplied ? `(supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''})` : ''} · <span class="muted">on hand ${j.on_hand}</span></p>
-    <div class="row space"><h3>Clinical screening ${j.screening ? `<span class="muted" style="text-transform:none">· ${esc(j.screening.reviewer)} · ${esc(j.screening.status)}</span>` : ''}</h3>
-      ${['queued', 'entered'].includes(j.state) ? '<button id="rescreen">Re-run screening</button>' : ''}</div>
-    ${findingsHtml(findings, { editable, decisions: signedOff?.decisions ?? {} })}
-    ${j.screening?.counselling ? `<h3>Counselling draft (${esc(LANG[j.screening.counselling.language] ?? j.screening.counselling.language)})</h3><div class="counsel">${esc(j.screening.counselling.text)}</div>` : ''}
-    ${j.label_text ? `<h3>Label</h3><pre class="label">${esc(j.label_text)}</pre>` : ''}
-    <div id="release-opts" style="display:${j.actions.includes('release') ? 'block' : 'none'}">
-      <h3>Fulfilment</h3>
-      <div class="row"><select id="rel-method"><option value="pickup">Pickup in store</option><option value="delivery">Pharmacy delivery</option><option value="courier">Courier</option><option value="compliance_pack">Compliance pack</option></select>
-      <input id="rel-address" placeholder="Delivery address (defaults to patient address)" /></div>
-    </div>
-    <div class="actions">
-      ${j.actions.map((a) => `<button data-act="${a}" class="${a === 'cancel' ? 'danger' : ['hold'].includes(a) ? '' : 'primary'}">${ACTION_LABEL[a] ?? a}</button>`).join('')}
-      ${j.owing ? '<button data-act="supply-owing">Supply owing</button>' : ''}
-      ${!j.actions.length && !j.owing ? '<span class="muted">No actions available for your role in this state.</span>' : ''}
-    </div>`;
-  $('#close-dlg').onclick = () => dlg.close();
-  $('#rescreen')?.addEventListener('click', guard(async () => { await api(`/api/jobs/${j.id}/screen`, { method: 'POST' }); await openJob(j.id, { autoScreen: false }); }));
-  document.querySelectorAll('#job-detail [data-act]').forEach((b) => (b.onclick = guard(() => doAction(j, b.dataset.act))));
-  if (!dlg.open) dlg.showModal();
 }
 
 async function doAction(j, act) {
@@ -277,15 +369,10 @@ async function doAction(j, act) {
     body.method = $('#rel-method').value;
     body.address = $('#rel-address').value || undefined;
   }
-  try {
-    if (act === 'supply-owing') await api(`/api/jobs/${j.id}/supply-owing`, { method: 'POST' });
-    else await api(`/api/jobs/${j.id}/${act.replace(/_/g, '-')}`, { method: 'POST', body });
-  } catch (e) {
-    throw e;
-  }
+  if (act === 'supply-owing') await api(`/api/jobs/${j.id}/supply-owing`, { method: 'POST' });
+  else await api(`/api/jobs/${j.id}/${act.replace(/_/g, '-')}`, { method: 'POST', body });
   toast(`${ACTION_LABEL[act] ?? act}: done`);
-  if (act === 'release' || act === 'cancel') $('#job-dialog').close();
-  else await openJob(j.id, { autoScreen: false });
+  if (act === 'release' || act === 'cancel') selectedJobId = null;
   render();
 }
 
