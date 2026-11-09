@@ -10,7 +10,12 @@ import { createAudit } from './audit.js';
 const OPEN_JOB_STATES = ['queued', 'entered', 'clinically_checked', 'assembled', 'checked', 'on_hold'];
 const STOCK_HELD_STATES = ['assembled', 'checked'];
 
-export function createPlatform({ db, adapters, config }) {
+export function createPlatform({ db, adapters, config, hooks = {} }) {
+  // hooks (filled in by server.js after construction):
+  //   formulary      — { check(ctx) -> findings[], buildHistory(rows) } (synchronous)
+  //   afterIntake    — async (prescription) => void
+  //   afterTransition— async (jobId, action) => void
+  //   afterFulfilment— async (fulfilmentId, action) => void
   const audit = createAudit(db);
   const one = (sql, ...p) => db.prepare(sql).get(...p);
   const all = (sql, ...p) => db.prepare(sql).all(...p);
@@ -192,7 +197,7 @@ export function createPlatform({ db, adapters, config }) {
     const canon = JSON.parse(raw);
     canon.externalId ??= id;
     canon.source ??= sourceName;
-    return ingest(canon, user, { sourcePayload: raw });
+    return afterIntake(await ingest(canon, user, { sourcePayload: raw }));
   }
 
   async function intakeManual(canon, user) {
@@ -203,11 +208,23 @@ export function createPlatform({ db, adapters, config }) {
     // A paper copy of an e-script still carries an SCID; keep it so the broker can be updated.
     const externalId = canon.externalId ? assertScid(canon.externalId) : null;
     const { document, ...keyed } = canon;
-    return ingest({ ...keyed, source, externalId }, user, {
+    return afterIntake(await ingest({ ...keyed, source, externalId }, user, {
       document,
       // A verbal (phone) order has no document; everything written down must come with its original.
       requireDocument: ['paper', 'signature_exempt', 'fax'].includes(source),
-    });
+    }));
+  }
+
+  /** Run post-commit pipeline hooks; a hook failure is logged, never undoes the committed work. */
+  async function runHook(name, ...args) {
+    if (!hooks[name]) return;
+    try { await hooks[name](...args); } catch (err) {
+      audit.record({ action: `hook.${name}.failed`, entity: 'system', data: { error: err.message } });
+    }
+  }
+  async function afterIntake(rx) {
+    await runHook('afterIntake', rx);
+    return getPrescription(rx.id);
   }
 
   // ───────────────────────── repeats ─────────────────────────
@@ -265,10 +282,34 @@ export function createPlatform({ db, adapters, config }) {
     };
   }
 
+  /** Past supplies for this patient (for duration-of-therapy checks). */
+  function supplyHistory(patientId, excludeJobId) {
+    return all(
+      `SELECT m.ingredient, j.updated_at AS supplied_at, j.quantity_supplied, i.dose_units, i.doses_per_day, i.period_days
+       FROM dispense_jobs j JOIN prescription_items i ON i.id = j.item_id
+       JOIN prescriptions p ON p.id = i.prescription_id JOIN medicines m ON m.id = i.medicine_id
+       WHERE p.patient_id = ? AND j.id <> ? AND j.state IN ('released','completed') ORDER BY j.updated_at`,
+      patientId, excludeJobId,
+    ).map((r) => ({ ...r, supplied_at: r.supplied_at.replace(' ', 'T') + 'Z' }));
+  }
+
   function ruleFindings(job) {
     const ctx = screeningContext(job);
-    const formulary = all('SELECT * FROM medicines');
-    return { ctx, findings: [...screen(ctx), ...lasaFindings(ctx.medicine, formulary)].map((f) => ({ ...f, origin: 'rules' })) };
+    const meds = all('SELECT * FROM medicines');
+    const findings = [...screen(ctx), ...lasaFindings(ctx.medicine, meds)].map((f) => ({ ...f, origin: 'rules' }));
+    if (hooks.formulary) {
+      try {
+        const history = hooks.formulary.buildHistory ? hooks.formulary.buildHistory(supplyHistory(job.patient_id, job.id)) : [];
+        const extra = hooks.formulary.check({ ...ctx, history });
+        if (extra && typeof extra.then === 'function') throw new Error('formulary.check must be synchronous');
+        // Formulary findings sit alongside rules; never replace them. Skip exact duplicates by id.
+        const ids = new Set(findings.map((f) => f.id));
+        for (const f of extra ?? []) if (!ids.has(f.id)) findings.push({ ...f, origin: 'formulary' });
+      } catch (err) {
+        findings.push({ id: 'nzf_error:check', code: 'NZF_ERROR', severity: 'moderate', specialist: 'pharma', origin: 'formulary', message: `Formulary check unavailable: ${err.message}. Rules-only screening applies; check the formulary manually.`, trace: { inputs: {}, rule: 'Formulary adapter error', source: 'formulary' } });
+      }
+    }
+    return { ctx, findings };
   }
 
   /** Strip direct identifiers before anything leaves the system. */
@@ -579,6 +620,7 @@ export function createPlatform({ db, adapters, config }) {
         audit.record({ userId: user.id, action: 'broker.update_failed', entity: 'job', entityId: result, data: { error: err.message, ...u } });
       }
     }
+    await runHook('afterTransition', result, action);
     return getJob(result, user);
   }
 
@@ -641,7 +683,7 @@ export function createPlatform({ db, adapters, config }) {
         : { provider: 'in-house', trackingRef: `DRV-${f.id}` };
     }
 
-    return tx(db, () => {
+    const out = tx(db, () => {
       const cur = getFulfilment(id); // re-read inside the transaction
       switch (action) {
         case 'dispatch':
@@ -676,6 +718,8 @@ export function createPlatform({ db, adapters, config }) {
       audit.record({ userId: user.id, action: `fulfilment.${action}`, entity: 'fulfilment', entityId: cur.id, data: { ...pick(body, ['reason', 'proof']), ...(booking ?? {}) } });
       return getFulfilment(cur.id);
     });
+    await runHook('afterFulfilment', out.id, action);
+    return getFulfilment(out.id);
   }
 
   // ───────────────────────── claims ─────────────────────────
@@ -971,6 +1015,8 @@ export function createPlatform({ db, adapters, config }) {
     claimsCsv,
     dashboard,
     home,
+    hooks,
+    supplyHistory,
   };
 }
 
