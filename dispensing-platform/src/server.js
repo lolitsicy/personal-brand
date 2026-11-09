@@ -49,6 +49,11 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
 
   route('GET', '/api/prescriptions', ({ query }) => platform.listPrescriptions({ q: query.get('q'), status: query.get('status') }));
   route('GET', '/api/prescriptions/:id', ({ params }) => platform.getPrescription(params.id));
+  route('GET', '/api/prescriptions/:id/original', ({ params }) => platform.originalFor(Number(params.id)));
+  route('GET', '/api/prescriptions/:id/documents/:docId', ({ params }) => {
+    const d = platform.getDocument(params.id, params.docId);
+    return { __raw: d.data, type: d.mime, headers: { 'Content-Disposition': 'inline', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox" } };
+  });
   route('POST', '/api/items/:id/repeat', ({ params, user }) => platform.requestRepeat(params.id, user));
 
   route('GET', '/api/queue', ({ query, user }) => platform.queue({ state: query.get('state') }, user));
@@ -105,7 +110,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
       const user = platform.getUser(req.headers['x-user-id']);
       const out = await match.handler({ params, query: url.searchParams, body, user });
       if (out?.__raw !== undefined) {
-        res.writeHead(200, { 'Content-Type': out.type });
+        res.writeHead(200, { 'Content-Type': out.type, ...(out.headers ?? {}) });
         return res.end(out.__raw);
       }
       send(res, 200, out);
@@ -128,7 +133,7 @@ async function readJson(req) {
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 1_000_000) throw Object.assign(new Error('Body too large'), { status: 413 });
+    if (raw.length > 9_000_000) throw Object.assign(new Error('Body too large'), { status: 413 });
   }
   if (!raw) return {};
   try {

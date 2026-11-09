@@ -101,6 +101,24 @@ adapter. The dispensing logic doesn't change.
 - **Counselling draft** in the patient's preferred language. Real
   translation needs the AI reviewer enabled.
 
+## The original script: what was received is what is reviewed
+
+- **E-scripts** are stored byte-for-byte as the e-prescription service
+  returned them. **Paper, fax and signature-exempt scripts** must have a
+  scan or photo (PNG, JPEG or PDF) attached at intake. **Phone orders** are
+  marked as verbal.
+- Each original is fingerprinted (SHA-256) at receipt, and the fingerprint
+  goes into the audit chain. If the stored copy changes, the clinical check
+  is blocked.
+- The script view's side panel shows the original. For e-scripts it
+  compares the received item, field by field, with what is being dispensed
+  (medicine, directions, quantity, repeats, dose).
+- Data entry may amend directions or quantity, with a reason. Each
+  amendment shows as **≠** against the original.
+- The pharmacist can't sign off the clinical check without confirming they
+  checked against the original. Who confirmed, when, and which fields
+  differed are recorded.
+
 ## Counter, stock, accounting
 
 - One basket holds released scripts (by **pickup code**) and over-the-counter

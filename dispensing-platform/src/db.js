@@ -88,6 +88,19 @@ CREATE TABLE IF NOT EXISTS prescriptions (
   prescribed_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','completed','cancelled')),
   notes TEXT,
+  source_payload TEXT,            -- the script exactly as received (e-script) or as keyed (manual)
+  source_hash TEXT,               -- sha256 of source_payload at receipt
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS prescription_documents (
+  id INTEGER PRIMARY KEY,
+  prescription_id INTEGER NOT NULL REFERENCES prescriptions(id),
+  mime TEXT NOT NULL CHECK (mime IN ('image/png','image/jpeg','application/pdf')),
+  filename TEXT,
+  data BLOB NOT NULL,
+  sha256 TEXT NOT NULL,
+  uploaded_by INTEGER REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -102,6 +115,7 @@ CREATE TABLE IF NOT EXISTS prescription_items (
   period_days INTEGER,
   dose_units REAL,
   doses_per_day REAL,
+  amendments TEXT NOT NULL DEFAULT '[]',
   dispensings_count INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','completed','cancelled'))
 );

@@ -184,6 +184,7 @@ function barChart(el, data) {
 // ───────────── queue (stage list · script view · reviewer rail) ─────────────
 let selectedJobId = null;
 let railOpen = true;
+let railTab = 'original';
 const openTrace = new Set();
 
 const SPECIALIST = { pharma: 'medication review', pharmacology: 'clinical pharmacology', regulatory: 'regulatory', advocacy: 'patient advocacy' };
@@ -266,8 +267,11 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   line('');
   line(`    <span class="c">// what was prescribed</span>`);
   line(`    ${kv('medicine', `<span class="id">${esc(j.medicine)}</span> <span class="num">${esc(j.strength)}</span> ${esc(j.form)}`)}`);
-  line(`    ${kv('directions', `<span class="s">"${esc(j.directions)}"</span>`)}`);
-  line(`    ${kv('quantity', `<span class="num">${j.quantity}</span>`)}${j.quantity_supplied ? ` <span class="c">// supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="c">// on hand ${j.on_hand}</span>`);
+  const differs = (field) => j.original?.compare?.find((c) => c.field === field && !c.match);
+  const srcWord = j.original?.kind === 'electronic' ? 'Original' : 'Keyed';
+  const diffBadge = (field) => (differs(field) ? { flag: 'high', badge: `<span class="badge high">≠ ${srcWord}: ${esc(differs(field).received)}</span>` } : {});
+  line(`    ${kv('directions', `<span class="s">"${esc(j.directions)}"</span>`)}`, diffBadge('Directions'));
+  line(`    ${kv('quantity', `<span class="num">${j.quantity}</span>`)}${j.quantity_supplied ? ` <span class="c">// supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="c">// on hand ${j.on_hand}</span>`, diffBadge('Quantity'));
   if (j.dose_units && j.doses_per_day) line(`    ${kv('dose', `<span class="num">${j.dose_units}</span> × <span class="num">${j.doses_per_day}</span>/day`)}`);
   line('');
   line(`    <span class="c">// medication list (${j.medication_list?.length ?? 0} other)</span>`);
@@ -318,16 +322,26 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   const counsel = j.screening?.counselling;
   const aiCount = findings.filter((f) => f.origin === 'ai' && f.code !== 'AI_STATUS').length;
   const aiStatus = findings.find((f) => f.code === 'AI_STATUS');
+  const o = j.original;
   $('#job-pane').innerHTML = `
     <div class="code">${codeHtml}</div>
     <aside class="rail ${railOpen ? '' : 'closed'}">
-      <button class="chip accent rail-toggle" id="rail-toggle">✦ Reviewer ${railOpen ? '⌄' : '‹'}</button>
-      <h4>AI reviewer</h4>
-      <div class="meta">${esc(j.screening?.reviewer ?? 'Not run yet')} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
-      <div class="meta">Works on a de-identified case. Can add findings; can't clear or downgrade a rule.</div>
-      ${counsel ? `<h4 style="margin-top:8px">Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}
+      <button class="chip accent rail-toggle" id="rail-toggle">✦ ${railTab === 'original' ? 'Original' : 'Reviewer'} ${railOpen ? '⌄' : '‹'}</button>
+      <div class="rail-tabs">
+        <button class="${railTab === 'original' ? 'on' : ''}" data-rail="original">Original script</button>
+        <button class="${railTab === 'reviewer' ? 'on' : ''}" data-rail="reviewer">AI reviewer</button>
+      </div>
+      ${railTab === 'original' ? originalHtml(j, o) : `
+        <div class="meta">${esc(j.screening?.reviewer ?? 'Not run yet')} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
+        <div class="meta">Works on a de-identified case. Can add findings; can't clear or downgrade a rule.</div>
+        ${counsel ? `<h4>Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}`}
     </aside>
     <div class="code-actions">
+      ${j.actions.includes('enter') ? `<div class="amend"><span class="muted">Amend at entry (optional):</span>
+        <input id="amend-directions" value="${esc(j.directions)}" aria-label="Directions" />
+        <input id="amend-quantity" type="number" min="1" value="${j.quantity}" aria-label="Quantity" style="width:90px" />
+        <input id="amend-reason" placeholder="Reason for any change" /></div>` : ''}
+      ${j.actions.includes('clinical_check') ? `<label class="verify"><input type="checkbox" id="src-verified" /> ${o?.kind === 'document' ? 'Read against the scanned original' : o?.kind === 'verbal' ? 'Verbal order confirmed with prescriber' : 'Checked against the original e-script'}${o?.compare?.some((c) => !c.match) ? ` <span class="tag warn">${o.compare.filter((c) => !c.match).length} difference${o.compare.filter((c) => !c.match).length === 1 ? '' : 's'}</span>` : ''}</label>` : ''}
       ${j.actions.includes('release') ? `<select id="rel-method"><option value="pickup">Pickup in store</option><option value="delivery">Pharmacy delivery</option><option value="courier">Courier</option><option value="compliance_pack">Compliance pack</option></select><input id="rel-address" placeholder="Delivery address (defaults to patient's)" />` : ''}
       ${j.actions.map((a) => `<button data-act="${a}" class="${a === 'cancel' ? 'danger' : a === 'hold' ? '' : 'primary'}">${ACTION_LABEL[a] ?? a}</button>`).join('')}
       ${j.owing ? '<button data-act="supply-owing">Supply owing</button>' : ''}
@@ -336,6 +350,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
 
   $('#rescreen')?.addEventListener('click', guard(async () => { await api(`/api/jobs/${j.id}/screen`, { method: 'POST' }); await renderJobPane(j.id, { autoScreen: false }); }));
   $('#rail-toggle').onclick = () => { railOpen = !railOpen; renderJobPane(j.id, { autoScreen: false }); };
+  document.querySelectorAll('[data-rail]').forEach((b) => (b.onclick = () => { railTab = b.dataset.rail; railOpen = true; renderJobPane(j.id, { autoScreen: false }); }));
   document.querySelectorAll('#job-pane [data-trace]').forEach((el) => (el.onclick = () => {
     const fid = el.dataset.trace;
     openTrace.has(fid) ? openTrace.delete(fid) : openTrace.add(fid);
@@ -343,6 +358,39 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   }));
   document.querySelectorAll('#job-pane .decide').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
   document.querySelectorAll('#job-pane [data-act]').forEach((b) => (b.onclick = guard(() => doAction(j, b.dataset.act))));
+}
+
+function originalHtml(j, o) {
+  if (!o) return '<div class="meta">No original stored.</div>';
+  const kindLabel = { electronic: `E-script · ${esc(o.payloadRole)}`, document: 'Written script · scan attached at intake', verbal: 'Verbal order · no written original' }[o.kind];
+  const integrity = o.intact && o.documents.every((d) => d.intact)
+    ? `<span class="badge ok">✓ Unchanged since receipt</span>`
+    : `<span class="badge hard_stop">✗ Integrity check failed</span>`;
+  const p = o.payload ?? {};
+  const doc = o.kind === 'electronic' ? `
+    <div class="rx-doc">
+      <div class="rx-head"><b>E-prescription</b><span>${esc(p.prescribedAt ?? '')}</span></div>
+      ${o.scid ? `<div class="rx-sec"><span>Script ID (SCID)</span><code class="rx-scid">${esc(o.scid)}</code></div>` : ''}
+      <div class="rx-sec"><span>Prescriber</span>${esc(p.prescriber?.name ?? '')}<br/><small>CPN ${esc(p.prescriber?.cpn ?? '—')} · ${esc(p.prescriber?.facilityName ?? '')} ${p.prescriber?.facilityHpi ? `(${esc(p.prescriber.facilityHpi)})` : ''}</small></div>
+      <div class="rx-sec"><span>Patient</span>${esc(p.patient?.name ?? '')}<br/><small>NHI ${esc(p.patient?.nhi ?? '—')} · DOB ${esc(p.patient?.dob ?? '—')}<br/>${esc(p.patient?.address ?? '')}</small></div>
+      ${(p.items ?? []).map((it, i) => `<div class="rx-item ${String(it.itemRef ?? i + 1) === String(j.item_ref) ? 'cur' : ''}">
+        <b>${esc(it.medicineCode)}</b> · qty ${esc(it.quantity)} · repeats ${esc(it.repeats ?? 0)}<br/><span>${esc(it.directions)}</span></div>`).join('')}
+    </div>` : o.kind === 'document' ? o.documents.map((d) => d.mime === 'application/pdf'
+      ? `<a class="pill" target="_blank" rel="noopener" href="/api/prescriptions/${j.prescription_id}/documents/${d.id}">Open original (PDF)</a>`
+      : `<a target="_blank" rel="noopener" href="/api/prescriptions/${j.prescription_id}/documents/${d.id}"><img class="rx-scan" alt="Scan of the original script" src="/api/prescriptions/${j.prescription_id}/documents/${d.id}" /></a>`).join('')
+    : '<div class="meta">Phone order: get written or electronic confirmation from the prescriber within the legal timeframe.</div>';
+  return `
+    <div class="meta">${kindLabel}</div>
+    <div>${integrity}</div>
+    <div class="meta mono-hash">received ${esc(o.receivedAt)} · sha256 ${esc((o.hash ?? '').slice(0, 16))}…</div>
+    ${doc}
+    ${o.kind !== 'electronic' ? '<div class="meta"><b>The scan above is the original.</b> Read it against the script lines on the left; the table below only compares what was keyed at intake with what is being dispensed.</div>' : ''}
+    ${o.compare.length ? `<h4>${o.kind === 'electronic' ? 'Received vs dispensing' : 'Keyed at intake vs dispensing'}</h4>
+      <table class="cmp"><tr><th></th><th>${o.kind === 'electronic' ? 'Received' : 'Keyed'}</th><th>Dispensing</th></tr>
+      ${o.compare.map((c) => `<tr class="${c.match ? '' : 'diff'}"><td>${c.match ? '✓' : '≠'} ${esc(c.field)}</td><td>${esc(c.received)}</td><td>${esc(c.dispensing)}</td></tr>`).join('')}</table>`
+      : ''}
+    ${o.amendments.length ? `<h4>Amended at data entry</h4>${o.amendments.map((a) => `<div class="meta">${esc(a.byName ?? '')}: ${Object.entries(a.changes).map(([k, v]) => `${esc(k)} ${esc(v.from)} → ${esc(v.to)}`).join('; ')}<br/>“${esc(a.reason)}”</div>`).join('')}` : ''}
+    ${o.payload ? `<details class="raw"><summary>Raw message (${esc(o.payloadRole)})</summary><pre>${esc(JSON.stringify(o.payload, null, 2))}</pre></details>` : ''}`;
 }
 
 function collectDecisions() {
@@ -364,7 +412,14 @@ async function doAction(j, act) {
     body.reason = prompt(`Reason to ${act}?`);
     if (!body.reason) return;
   }
-  if (act === 'clinical_check') body.decisions = collectDecisions();
+  if (act === 'clinical_check') {
+    body.decisions = collectDecisions();
+    body.sourceVerified = !!$('#src-verified')?.checked;
+  }
+  if (act === 'enter') {
+    const dir = $('#amend-directions').value.trim(), qty = Number($('#amend-quantity').value), reason = $('#amend-reason').value.trim();
+    if (dir !== j.directions || qty !== j.quantity) body.amend = { directions: dir, quantity: qty, reason };
+  }
   if (act === 'release') {
     body.method = $('#rel-method').value;
     body.address = $('#rel-address').value || undefined;
@@ -407,10 +462,13 @@ async function onScidSubmit(e) {
 async function onManualSubmit(e) {
   e.preventDefault();
   const f = Object.fromEntries(new FormData(e.target));
+  const file = e.target.querySelector('[name=document]').files[0];
+  const document = file ? { filename: file.name, dataBase64: await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(file); }) } : undefined;
   const rx = await api('/api/intake/manual', {
     method: 'POST',
     body: {
       source: f.source,
+      document,
       externalId: f.externalId || undefined,
       patient: { nhi: f.nhi || undefined, name: f.pname, dob: f.dob || undefined, address: f.address || undefined },
       prescriber: { cpn: f.cpn || undefined, name: f.dname },

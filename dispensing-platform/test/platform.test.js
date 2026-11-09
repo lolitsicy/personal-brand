@@ -10,6 +10,10 @@ const OXY_SCID = makeScid('C1D2E3F4G5H6J7K8L'); // Grace: oxycodone (Class B) + 
 
 let app, p, adapters, priya, tom, lucy, ben;
 
+// Smallest valid PNG (1x1), standing in for a scanned paper script.
+const PNG_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+const scan = () => ({ filename: 'script-scan.png', dataBase64: PNG_B64 });
+
 beforeEach(() => {
   adapters = createMockAdapters();
   app = createApp({ adapters });
@@ -25,7 +29,7 @@ function approveAll(jobId) {
     if (f.severity === 'hard_stop') decisions[f.id] = { action: 'override', reason: 'Discussed with prescriber; benefit outweighs risk', prescriberConfirmed: true };
     else if (f.severity === 'high') decisions[f.id] = { action: 'acknowledge', note: 'Reviewed' };
   }
-  return { decisions };
+  return { decisions, sourceVerified: true };
 }
 
 async function runToChecked(jobId) {
@@ -102,7 +106,7 @@ test('class allergy (penicillin -> amoxicillin) is a hard stop: acknowledging is
   await assert.rejects(p.transition(jobId, 'clinical_check', priya, { acknowledge: true, note: 'fine' }), /Hard stop/);
   const id = p.getJob(jobId, priya).warnings[0].id;
   await assert.rejects(p.transition(jobId, 'clinical_check', priya, { decisions: { [id]: { action: 'override', reason: 'x' } } }), /prescriber/);
-  const ok = await p.transition(jobId, 'clinical_check', priya, { decisions: { [id]: { action: 'override', reason: 'Prescriber confirmed: childhood rash only, tolerated cefalexin', prescriberConfirmed: true } } });
+  const ok = await p.transition(jobId, 'clinical_check', priya, { sourceVerified: true, decisions: { [id]: { action: 'override', reason: 'Prescriber confirmed: childhood rash only, tolerated cefalexin', prescriberConfirmed: true } } });
   assert.equal(ok.state, 'clinically_checked');
   const log = p.overridesLog();
   assert.equal(log[0].code, 'ALLERGY');
@@ -163,7 +167,7 @@ test('controlled drug: register tracks every movement and pickup needs proof of 
 test('Class B script with repeats is rejected at intake', async () => {
   await assert.rejects(
     p.intakeManual({
-      source: 'paper',
+      source: 'paper', document: scan(),
       patient: { nhi: 'ZZZ0032', name: 'Grace Lee' },
       prescriber: { cpn: '56JKLM', name: 'Dr Hana Kim' },
       items: [{ medicineCode: 'OXY5', directions: 'as directed', quantity: 20, repeats: 2 }],
@@ -282,7 +286,7 @@ test('whole-list screening: renal, interaction with medication history, LASA and
 
 test('dose ceiling is a hard stop computed from structured dose', async () => {
   const rx = await p.intakeManual({
-    source: 'paper',
+    source: 'paper', document: scan(),
     patient: { nhi: 'ZZZ0032', name: 'Grace Lee', dob: '1972-06-21' },
     prescriber: { cpn: '56JKLM', name: 'Dr Hana Kim' },
     items: [{ medicineCode: 'PAR500', directions: 'Take THREE tablets four times daily', quantity: 100, doseUnits: 3, dosesPerDay: 4 }],
@@ -339,7 +343,7 @@ function approveAllWithAi(jobId) {
     if (f.severity === 'hard_stop') decisions[f.id] = { action: 'override', reason: 'Prescriber confirmed', prescriberConfirmed: true };
     else if (f.severity === 'high') decisions[f.id] = { action: 'acknowledge' };
   }
-  return { decisions };
+  return { decisions, sourceVerified: true };
 }
 
 test('AI reviewer failure falls back to rules-only screening', async () => {
@@ -442,4 +446,65 @@ test('HTTP: screening route is reachable (not swallowed by the generic job actio
   } finally {
     app.server.close();
   }
+});
+
+// ───────────── original script: what was received is what is reviewed ─────────────
+
+test('e-script is stored exactly as received, fingerprinted, and matches what is dispensed', async () => {
+  const raw = JSON.stringify(await adapters.scriptSources.nzeps.fetch(METFORMIN_SCID));
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const o = p.originalFor(rx.id, rx.items[0].id);
+  assert.equal(o.kind, 'electronic');
+  assert.equal(JSON.stringify(o.payload), raw, 'byte-for-byte the broker response');
+  assert.equal(o.intact, true);
+  assert.ok(o.compare.length >= 4);
+  assert.ok(o.compare.every((c) => c.match));
+});
+
+test('clinical check requires confirming the original was checked', async () => {
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const id = rx.items[1].jobs[0].id;
+  await p.transition(id, 'enter', lucy);
+  const { decisions } = approveAll(id);
+  await assert.rejects(p.transition(id, 'clinical_check', priya, { decisions }), /original/);
+  const ok = await p.transition(id, 'clinical_check', priya, { decisions, sourceVerified: true });
+  assert.equal(ok.warnings_acknowledged.sourceVerified.by, priya.id);
+});
+
+test('amending at data entry needs a reason and shows as a difference against the original', async () => {
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const id = rx.items[0].jobs[0].id;
+  await assert.rejects(p.transition(id, 'enter', lucy, { amend: { quantity: 56 } }), /reason/);
+  const j = await p.transition(id, 'enter', lucy, { amend: { quantity: 56, reason: 'Rounded to 4 x 14 blister packs' } });
+  assert.equal(j.quantity, 56);
+  const diff = j.original.compare.filter((c) => !c.match);
+  assert.deepEqual(diff.map((c) => c.field), ['Quantity']);
+  assert.equal(diff[0].received, '60');
+  assert.equal(j.original.amendments[0].reason, 'Rounded to 4 x 14 blister packs');
+  await p.transition(id, 'clinical_check', priya, approveAll(id));
+  assert.deepEqual(p.getJob(id, priya).warnings_acknowledged.sourceVerified.differences, ['Quantity']);
+});
+
+test('tampering with the stored original blocks the clinical check', async () => {
+  const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
+  const id = rx.items[1].jobs[0].id;
+  await p.transition(id, 'enter', lucy);
+  app.db.prepare("UPDATE prescriptions SET source_payload = replace(source_payload, '\"quantity\":30', '\"quantity\":300') WHERE id = ?").run(rx.id);
+  assert.equal(p.originalFor(rx.id).intact, false);
+  await assert.rejects(p.transition(id, 'clinical_check', priya, approveAll(id)), /integrity/);
+});
+
+test('paper scripts need the scan attached; it is stored, fingerprinted and served back unchanged', async () => {
+  const base = { source: 'paper', patient: { nhi: 'ZZZ0040', name: 'Wiremu Parata' }, prescriber: { name: 'Dr Anna Brooks' }, items: [{ medicineCode: 'ATO40', directions: 'ONE at night', quantity: 30 }] };
+  await assert.rejects(p.intakeManual(base, lucy), /scan or photo/);
+  await assert.rejects(p.intakeManual({ ...base, document: { dataBase64: Buffer.from('<svg/>').toString('base64') } }, lucy), /PNG, JPEG or PDF/);
+  const rx = await p.intakeManual({ ...base, document: scan() }, lucy);
+  const o = p.originalFor(rx.id, rx.items[0].id);
+  assert.equal(o.kind, 'document');
+  assert.equal(o.documents[0].mime, 'image/png');
+  assert.equal(o.documents[0].intact, true);
+  assert.equal(Buffer.from(p.getDocument(rx.id, o.documents[0].id).data).toString('base64'), PNG_B64);
+  // verbal phone orders are allowed without a document
+  const phone = await p.intakeManual({ ...base, source: 'phone' }, lucy);
+  assert.equal(p.originalFor(phone.id).kind, 'verbal');
 });

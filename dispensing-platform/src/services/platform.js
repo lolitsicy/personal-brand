@@ -2,7 +2,7 @@ import { tx } from '../db.js';
 import { assertScid } from '../domain/scid.js';
 import { planTransition, availableActions } from '../domain/workflow.js';
 import { screen, lasaFindings, sortFindings, validateDecisions, RULES_VERSION } from '../domain/screening.js';
-import { randomInt } from 'node:crypto';
+import { randomInt, createHash } from 'node:crypto';
 import { buildLabel } from '../domain/label.js';
 import { DomainError, notFound, forbidden, conflict } from '../domain/errors.js';
 import { createAudit } from './audit.js';
@@ -86,7 +86,23 @@ export function createPlatform({ db, adapters, config }) {
   // ───────────────────────── intake ─────────────────────────
 
   /** Universal intake: any script source is normalised to a CanonicalPrescription first. */
-  async function ingest(canon, user) {
+  const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
+
+  /** Validate an attached scan/photo of the original script. Returns { mime, filename, data, hash }. */
+  function parseDocument(doc) {
+    if (!doc) return null;
+    const data = Buffer.from(String(doc.dataBase64 ?? ''), 'base64');
+    if (!data.length) throw new DomainError('Attached document is empty');
+    if (data.length > 6_000_000) throw new DomainError('Attached document is larger than 6 MB');
+    const magic = data.subarray(0, 5);
+    const mime = magic[0] === 0x89 && magic[1] === 0x50 ? 'image/png'
+      : magic[0] === 0xff && magic[1] === 0xd8 ? 'image/jpeg'
+      : magic.toString('latin1') === '%PDF-' ? 'application/pdf' : null;
+    if (!mime) throw new DomainError('Original script must be a PNG, JPEG or PDF');
+    return { mime, filename: String(doc.filename ?? '').slice(0, 120) || null, data, hash: sha256(data) };
+  }
+
+  async function ingest(canon, user, { sourcePayload, document = null, requireDocument = false } = {}) {
     if (!user) throw new DomainError('Sign in required', { status: 401 });
     if (!canon?.patient || !canon?.prescriber || !Array.isArray(canon.items) || canon.items.length === 0) {
       throw new DomainError('Prescription needs a patient, a prescriber and at least one item');
@@ -105,6 +121,12 @@ export function createPlatform({ db, adapters, config }) {
       }
       if (!(Number(it.quantity) > 0)) throw new DomainError(`${med.name}: quantity must be positive`);
     }
+    const doc = parseDocument(document);
+    if (requireDocument && !doc) {
+      throw new DomainError('Attach a scan or photo of the original script so the pharmacist can check against it');
+    }
+    const payload = sourcePayload ?? JSON.stringify(canon);
+    const payloadHash = sha256(payload);
 
     // Enrich patient from the identity service before opening the transaction.
     let nhiRecord = null;
@@ -123,20 +145,27 @@ export function createPlatform({ db, adapters, config }) {
         pat = patient(Number(r.lastInsertRowid));
       }
 
-      let doc = canon.prescriber.cpn ? one('SELECT * FROM prescribers WHERE hpi_cpn = ?', canon.prescriber.cpn) : null;
-      if (!doc) {
+      let prescriberRow = canon.prescriber.cpn ? one('SELECT * FROM prescribers WHERE hpi_cpn = ?', canon.prescriber.cpn) : null;
+      if (!prescriberRow) {
         const r = run(
           'INSERT INTO prescribers (hpi_cpn, name, facility_hpi, facility_name) VALUES (?, ?, ?, ?)',
           canon.prescriber.cpn ?? null, canon.prescriber.name, canon.prescriber.facilityHpi ?? null, canon.prescriber.facilityName ?? null,
         );
-        doc = prescriber(Number(r.lastInsertRowid));
+        prescriberRow = prescriber(Number(r.lastInsertRowid));
       }
 
       const rx = run(
-        'INSERT INTO prescriptions (scid, source, patient_id, prescriber_id, prescribed_at, notes) VALUES (?, ?, ?, ?, ?, ?)',
-        canon.externalId ?? null, canon.source, pat.id, doc.id, canon.prescribedAt ?? new Date().toISOString().slice(0, 10), canon.notes ?? null,
+        'INSERT INTO prescriptions (scid, source, patient_id, prescriber_id, prescribed_at, notes, source_payload, source_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        canon.externalId ?? null, canon.source, pat.id, prescriberRow.id, canon.prescribedAt ?? new Date().toISOString().slice(0, 10), canon.notes ?? null,
+        payload, payloadHash,
       );
       const rxId = Number(rx.lastInsertRowid);
+      if (doc) {
+        run(
+          'INSERT INTO prescription_documents (prescription_id, mime, filename, data, sha256, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)',
+          rxId, doc.mime, doc.filename, doc.data, doc.hash, user.id,
+        );
+      }
 
       for (const [idx, { it, med }] of meds.entries()) {
         const item = run(
@@ -149,7 +178,7 @@ export function createPlatform({ db, adapters, config }) {
           Number(item.lastInsertRowid), Number(it.quantity),
         );
       }
-      audit.record({ userId: user.id, action: 'prescription.received', entity: 'prescription', entityId: rxId, data: { source: canon.source, externalId: canon.externalId ?? null } });
+      audit.record({ userId: user.id, action: 'prescription.received', entity: 'prescription', entityId: rxId, data: { source: canon.source, externalId: canon.externalId ?? null, sourceHash: payloadHash, documentHash: doc?.hash ?? null } });
       return getPrescription(rxId);
     });
   }
@@ -158,10 +187,12 @@ export function createPlatform({ db, adapters, config }) {
     const source = adapters.scriptSources[sourceName];
     if (!source) throw new DomainError(`Unknown script source "${sourceName}"`);
     const id = sourceName === 'nzeps' ? assertScid(rawId) : String(rawId);
-    const canon = await source.fetch(id);
+    // Keep the script byte-for-byte as the source returned it; work on a parsed copy.
+    const raw = JSON.stringify(await source.fetch(id));
+    const canon = JSON.parse(raw);
     canon.externalId ??= id;
     canon.source ??= sourceName;
-    return ingest(canon, user);
+    return ingest(canon, user, { sourcePayload: raw });
   }
 
   async function intakeManual(canon, user) {
@@ -171,7 +202,12 @@ export function createPlatform({ db, adapters, config }) {
     }
     // A paper copy of an e-script still carries an SCID; keep it so the broker can be updated.
     const externalId = canon.externalId ? assertScid(canon.externalId) : null;
-    return ingest({ ...canon, source, externalId }, user);
+    const { document, ...keyed } = canon;
+    return ingest({ ...keyed, source, externalId }, user, {
+      document,
+      // A verbal (phone) order has no document; everything written down must come with its original.
+      requireDocument: ['paper', 'signature_exempt', 'fax'].includes(source),
+    });
   }
 
   // ───────────────────────── repeats ─────────────────────────
@@ -379,9 +415,31 @@ export function createPlatform({ db, adapters, config }) {
       const set = { state: to };
 
       switch (action) {
-        case 'enter':
+        case 'enter': {
           set.entered_by = user.id;
+          // Data entry may amend directions or quantity (e.g. to match a subsidy pack). Every change
+          // keeps the original, needs a reason, and shows as a difference at the clinical check.
+          const a = body.amend ?? {};
+          const changes = {};
+          if (a.directions != null && String(a.directions).trim() && String(a.directions).trim() !== job.directions) changes.directions = { from: job.directions, to: String(a.directions).trim() };
+          if (a.quantity != null && Number(a.quantity) !== job.item_quantity) {
+            if (!(Number.isInteger(Number(a.quantity)) && Number(a.quantity) > 0)) throw new DomainError('Amended quantity must be a positive whole number');
+            changes.quantity = { from: job.item_quantity, to: Number(a.quantity) };
+          }
+          if (Object.keys(changes).length) {
+            if (!a.reason?.trim()) throw new DomainError('Give a reason for amending the script at data entry');
+            const item = one('SELECT amendments FROM prescription_items WHERE id = ?', job.item_id);
+            const log = JSON.parse(item.amendments || '[]');
+            log.push({ changes, reason: a.reason.trim(), by: user.id, byName: user.name, at: new Date().toISOString() });
+            run(
+              'UPDATE prescription_items SET directions = ?, quantity = ?, amendments = ? WHERE id = ?',
+              changes.directions?.to ?? job.directions, changes.quantity?.to ?? job.item_quantity, JSON.stringify(log), job.item_id,
+            );
+            if (changes.quantity) set.quantity = changes.quantity.to;
+            audit.record({ userId: user.id, action: 'item.amended_at_entry', entity: 'job', entityId: job.id, data: { changes, reason: a.reason.trim() } });
+          }
           break;
+        }
 
         case 'clinical_check': {
           const { stored, findings } = findingsForSignOff(job);
@@ -392,6 +450,13 @@ export function createPlatform({ db, adapters, config }) {
           }
           const problem = validateDecisions(findings, decisions);
           if (problem) throw conflict(problem, { warnings: findings, findings, screeningId: stored?.id ?? null });
+          if (body.sourceVerified !== true) {
+            throw conflict('Confirm you have checked the script against the original as received', { needsSourceCheck: true });
+          }
+          const original = originalFor(job.prescription_id, job.item_id);
+          if (!original.intact || original.documents.some((d) => !d.intact)) {
+            throw conflict('The stored original script failed its integrity check: do not dispense; investigate', { integrity: false });
+          }
 
           let screeningId = stored?.status === 'pending' ? stored.id : null;
           if (screeningId) {
@@ -412,7 +477,8 @@ export function createPlatform({ db, adapters, config }) {
             }
           }
           set.clinical_checked_by = user.id;
-          set.warnings_acknowledged = JSON.stringify({ screeningId, warnings: findings, decisions, note: body.note ?? null, by: user.id });
+          set.warnings_acknowledged = JSON.stringify({ screeningId, warnings: findings, decisions, note: body.note ?? null, by: user.id, sourceVerified: { by: user.id, at: new Date().toISOString(), differences: original.compare.filter((c) => !c.match).map((c) => c.field) } });
+          audit.record({ userId: user.id, action: 'job.source_verified', entity: 'job', entityId: job.id, data: { sourceHash: original.hash, differences: original.compare.filter((c) => !c.match).map((c) => c.field) } });
           break;
         }
 
@@ -649,6 +715,57 @@ export function createPlatform({ db, adapters, config }) {
     return [header, ...rows.map((c) => [c.id, c.job_id, c.patient_nhi, c.prescriber_cpn, c.medicine_code, c.quantity, c.subsidy_cents, c.patient_charge_cents, c.status, c.batch_ref, c.created_at].map(esc).join(','))].join('\n');
   }
 
+  // ───────────────────────── original script ─────────────────────────
+
+  /**
+   * The script as received, an integrity check, and a field-by-field comparison
+   * of the received item against what is being dispensed.
+   */
+  function originalFor(prescriptionId, itemId) {
+    const rx = one('SELECT id, source, scid, source_payload, source_hash, created_at FROM prescriptions WHERE id = ?', prescriptionId);
+    if (!rx) throw notFound('Prescription', prescriptionId);
+    const received = one(
+      "SELECT data FROM audit_log WHERE action = 'prescription.received' AND entity = 'prescription' AND entity_id = ? ORDER BY id LIMIT 1",
+      rx.id,
+    );
+    const auditHash = received ? JSON.parse(received.data).sourceHash : null;
+    const intact = !!rx.source_payload && sha256(rx.source_payload) === rx.source_hash && (!auditHash || auditHash === rx.source_hash);
+    const documents = all('SELECT id, mime, filename, sha256, data, created_at FROM prescription_documents WHERE prescription_id = ? ORDER BY id', rx.id)
+      .map((d) => ({ id: d.id, mime: d.mime, filename: d.filename, sha256: d.sha256, created_at: d.created_at, intact: sha256(d.data) === d.sha256 }));
+    const kind = rx.source === 'nzeps' ? 'electronic' : documents.length ? 'document' : 'verbal';
+    const payload = rx.source_payload ? JSON.parse(rx.source_payload) : null;
+
+    let compare = [];
+    let amendments = [];
+    if (itemId) {
+      const item = one('SELECT i.*, m.code, m.name, m.strength FROM prescription_items i JOIN medicines m ON m.id = i.medicine_id WHERE i.id = ?', itemId);
+      amendments = JSON.parse(item.amendments || '[]');
+      const src = payload?.items?.find((x, i) => String(x.itemRef ?? i + 1) === String(item.item_ref));
+      if (src) {
+        const dose = (u, d) => (u && d ? `${u} × ${d}/day` : '—');
+        compare = [
+          ['Medicine', src.medicineCode, item.code, `${item.name} ${item.strength}`],
+          ['Directions', src.directions, item.directions],
+          ['Quantity', String(src.quantity), String(item.quantity)],
+          ['Repeats', String(src.repeats ?? 0), String(item.repeats_authorised)],
+          ['Dose', dose(src.doseUnits, src.dosesPerDay), dose(item.dose_units, item.doses_per_day)],
+        ].map(([field, rec, disp, label]) => ({ field, received: rec ?? '—', dispensing: label ?? disp ?? '—', match: String(rec ?? '').trim() === String(disp ?? '').trim() }));
+      }
+    }
+    return {
+      kind, source: rx.source, scid: rx.scid, receivedAt: rx.created_at, hash: rx.source_hash, intact,
+      // For manual scripts the payload is what staff keyed; the document is the original.
+      payloadRole: kind === 'electronic' ? 'as received from the e-prescription service' : 'as keyed at intake',
+      payload, documents, compare, amendments,
+    };
+  }
+
+  function getDocument(prescriptionId, docId) {
+    const d = one('SELECT * FROM prescription_documents WHERE id = ? AND prescription_id = ?', Number(docId), Number(prescriptionId));
+    if (!d) throw notFound('Document', docId);
+    return d;
+  }
+
   // ───────────────────────── reorder ─────────────────────────
 
   /**
@@ -676,7 +793,7 @@ export function createPlatform({ db, adapters, config }) {
   // ───────────────────────── read models ─────────────────────────
 
   const JOB_VIEW = `
-    SELECT j.*, i.medicine_id, i.directions, i.dose_units, i.doses_per_day, i.repeats_authorised, i.dispensings_count, i.period_days, i.prescription_id,
+    SELECT j.*, i.medicine_id, i.item_ref, i.directions, i.dose_units, i.doses_per_day, i.repeats_authorised, i.dispensings_count, i.period_days, i.prescription_id,
            m.name AS medicine, m.strength, m.form, m.controlled_class, m.code AS medicine_code,
            p.scid, p.source, pa.id AS patient_id, pa.name AS patient_name, pa.nhi,
            pr.name AS prescriber_name
@@ -695,6 +812,7 @@ export function createPlatform({ db, adapters, config }) {
     job.screening = latestScreening(job.id);
     const ctx = screeningContext(loadJob(id));
     job.medication_list = ctx.otherMeds;
+    job.original = originalFor(job.prescription_id, job.item_id);
     job.patient = { dob: ctx.patient.dob, egfr: ctx.patient.egfr, allergies: JSON.parse(ctx.patient.allergies || '[]'), preferred_language: ctx.patient.preferred_language };
     if (['entered', 'queued'].includes(job.state)) {
       job.warnings = findingsForSignOff(loadJob(id)).findings;
@@ -833,6 +951,8 @@ export function createPlatform({ db, adapters, config }) {
       ...(medicineId ? [Number(medicineId)] : []),
     ),
     reorderDraft,
+    originalFor,
+    getDocument,
     _internal: { moveStock, onHand, medicine, patient, fulfilmentAction, getFulfilment, audit, one, all, run },
     intakeFromSource,
     intakeManual,

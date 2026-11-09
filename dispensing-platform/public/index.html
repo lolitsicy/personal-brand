@@ -103,6 +103,9 @@
                   <select name="source"><option value="paper">Paper</option><option value="signature_exempt">Signature exempt</option><option value="fax">Fax</option><option value="phone">Phone order</option></select>
                   <input name="externalId" placeholder="SCID on paper copy (optional)" />
                 </div>
+                <label class="upload">Scan or photo of the original script <span class="muted">(PNG, JPEG or PDF · required for paper, fax and signature-exempt)</span>
+                  <input type="file" name="document" accept="image/png,image/jpeg,application/pdf" />
+                </label>
                 <fieldset><legend>Patient</legend>
                   <div class="row"><input name="nhi" placeholder="NHI" /><input name="pname" placeholder="Name" required /><input name="dob" type="date" /></div>
                   <input name="address" placeholder="Address" />
