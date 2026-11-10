@@ -213,8 +213,31 @@ const openTrace = new Set();
 
 const SPECIALIST = { pharma: 'medication review', pharmacology: 'clinical pharmacology', regulatory: 'regulatory', advocacy: 'patient advocacy' };
 const LANG = { en: 'English', mi: 'te reo Māori', sm: 'Samoan', to: 'Tongan', zh: 'Chinese', hi: 'Hindi' };
-const SEV_LABEL = { hard_stop: 'Hard stop', high: 'Needs review', moderate: 'Check', info: 'Info' };
-const SEV_ICON = { hard_stop: '!', high: '●', moderate: '○', info: 'i' };
+const SEV_LABEL = { hard_stop: 'Hard stop', high: 'Review', moderate: 'Check', info: 'Note' };
+const ICONS = {
+  stop: '<path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M12 8v5M12 16.5v.01"/>',
+  alert: '<path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4.5M12 17.5v.01"/>',
+  dot: '<circle cx="12" cy="12" r="8"/><path d="M8.5 12h7"/>',
+  info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.01"/>',
+  check: '<circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.4 2.5 2.5 4.9-5.1"/>',
+  shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  diff: '<path d="M6 9.5h12M6 14.5h12M15.5 5l-7 14"/>',
+  refresh: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/>',
+  print: '<path d="M7 9V4h10v5"/><path d="M7 17H4.5v-7h15v7H17"/><path d="M7 14h10v6H7z"/>',
+  pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  chevron: '<path d="m9 6 6 6-6 6"/>',
+  pill: '<rect x="3" y="8.5" width="18" height="7" rx="3.5"/><path d="M12 8.5v7"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+};
+const ico = (name) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+const SEV_ICON_NAME = { hard_stop: 'stop', high: 'alert', moderate: 'dot', info: 'info', ok: 'check' };
+/** Status tag: icon + word, tinted by severity. Never colour alone. */
+const stag = (kind, label, { href, title } = {}) => {
+  const icon = ico(SEV_ICON_NAME[kind] ?? kind);
+  return href
+    ? `<a class="stag s-${kind}" href="${href}" ${title ? `title="${esc(title)}"` : ''}>${icon}<span>${esc(label)}</span></a>`
+    : `<span class="stag s-${kind}" ${title ? `title="${esc(title)}"` : ''}>${icon}<span>${esc(label)}</span></span>`;
+};
 
 async function renderQueue() {
   const jobs = await api('/api/queue');
@@ -233,7 +256,7 @@ async function renderQueue() {
     const worst = list.some((j) => j.top_severity === 'hard_stop') ? 'hard_stop' : list.some((j) => j.top_severity === 'high') ? 'high' : null;
     const open = list.length && (list.some((j) => j.id === selectedJobId) || ['entered', 'assembled'].includes(state));
     return `<details class="thread ${list.length ? '' : 'empty-group'}" ${open ? 'open' : ''}>
-      <summary><span class="n">${list.length}</span>${title}${worst ? `<span class="flag ${worst === 'high' ? 'high' : ''}">${worst === 'high' ? '•' : '×'}</span>` : ''}</summary>
+      <summary><span class="n">${list.length}</span>${title}${worst ? `<span class="tflag s-${worst}" title="${worst === 'high' ? 'Has findings to review' : 'Has a hard stop'}">${ico(worst === 'high' ? 'alert' : 'stop')}</span>` : ''}</summary>
       ${list.map((j) => `<div class="titem ${j.id === selectedJobId ? 'sel' : ''}" data-id="${j.id}" title="${esc(j.patient_name)}">
         <span class="ico">${j.controlled_class ? 'CD' : 'Rx'}</span><span class="t">${esc(j.medicine)} ${esc(j.strength)} · ${esc(j.patient_name.split(' ')[0])}</span>
         ${j.top_severity && j.top_severity !== 'info' ? `<span class="sevdot ${j.top_severity}"></span>` : ''}</div>`).join('')}
@@ -270,9 +293,9 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
 
   // toolbar above the panel
   $('#code-bar').innerHTML = `
-    ${['queued', 'entered'].includes(j.state) ? '<button class="chip accent" id="rescreen">✦ Screen again</button>' : ''}
-    <button class="chip" id="print-worksheet" title="Print the standardised dispensing worksheet">⎙ Worksheet</button>
-    <span class="chip">◉ ${esc(j.source)}</span>
+    ${['queued', 'entered'].includes(j.state) ? `<button class="chip" id="rescreen">${ico('refresh')} Screen again</button>` : ''}
+    <button class="chip" id="print-worksheet" title="Print the standardised dispensing worksheet">${ico('print')} Worksheet</button>
+    <span class="chip">${esc(({ nzeps: 'NZePS e-script', paper: 'Paper', fax: 'Fax', phone: 'Phone order', signature_exempt: 'Signature exempt' })[j.source] ?? j.source)}</span>
     <span class="chip">${esc(j.patient_name)}</span>
     <span class="grow"></span>
     ${j.controlled_class ? `<span class="chip">CD ${esc(j.controlled_class)}</span>` : ''}
@@ -297,7 +320,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
       if (!cur || rank(f) < rank(cur)) byLabel.set(label, f);
     }
     return [...byLabel.entries()].map(([label, f]) =>
-      `<a class="fflag ${decisions[f.id] ? 'ok' : f.severity}" href="#flag-${esc(f.id)}" title="${esc(f.message)}">${decisions[f.id] ? '✓' : SEV_ICON[f.severity]} ${esc(label)}</a>`).join('');
+      stag(decisions[f.id] ? 'ok' : f.severity, label, { href: `#flag-${esc(f.id)}`, title: f.message })).join('');
   };
   const field = (key, label, valueHtml, { diffField, input } = {}) => {
     const list = (flags[key] ?? []).filter((f) => f.severity !== 'info' && !decisions[f.id]);
@@ -307,7 +330,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
       <div class="rx-label">${label}</div>
       <div class="rx-value">${editing && input ? input : valueHtml}
         ${d && !editing ? `<div class="rx-orig">${srcWord}: <s>${esc(d.received)}</s></div>` : ''}</div>
-      <div class="rx-flags">${chips(key)}${d ? `<span class="fflag high">≠ Changed</span>` : ''}</div>
+      <div class="rx-flags">${chips(key)}${d ? `<span class="stag s-edit">${ico('diff')}<span>Changed</span></span>` : ''}</div>
     </div>`;
   };
   const num = (name, val, attrs = '') => `<input class="rx-in" type="number" name="${name}" value="${esc(val ?? '')}" ${attrs} />`;
@@ -318,8 +341,8 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
       <div class="rx-top">
         <div><div class="rx-kind">${o?.kind === 'electronic' ? 'NZ e-prescription' : o?.kind === 'document' ? 'Written prescription (scanned)' : 'Verbal order'}</div>
           <div class="rx-scidline">${j.scid ? `SCID <b>${esc(j.scid)}</b> · ` : ''}Rx ${esc(j.id)}-${esc(j.sequence)} · ${j.sequence === 0 ? 'original supply' : `repeat ${j.sequence}`}</div></div>
-        <div class="rx-top-right">${o?.intact ? '<span class="fflag ok">✓ Original intact</span>' : '<span class="fflag hard_stop">✗ Integrity failed</span>'}
-          ${editing ? '<span class="fflag high">Editing</span>' : ''}</div>
+        <div class="rx-top-right">${o?.intact ? `<span class="stag s-ok">${ico('shield')}<span>Original intact</span></span>` : stag('hard_stop', 'Integrity failed')}
+          ${editing ? `<span class="stag s-edit">${ico('edit')}<span>Editing</span></span>` : ''}</div>
       </div>
       <div class="rx-cols">
         <section class="rx-sec"><h5>Prescriber</h5>
@@ -335,7 +358,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
         </section>
       </div>
       <section class="rx-sec rx-item"><h5>Medicine</h5>
-        ${field('medicine', 'Medicine', `<span class="rx-med">${esc(j.medicine)} ${esc(j.strength)} ${esc(j.form)}</span> <span class="mono muted">${esc(j.medicine_code ?? '')}</span>${j.controlled_class ? ` <span class="fflag cd">CD Class ${esc(j.controlled_class)}</span>` : ''}`, { diffField: 'Medicine' })}
+        ${field('medicine', 'Medicine', `<span class="rx-med">${esc(j.medicine)} ${esc(j.strength)} ${esc(j.form)}</span> <span class="mono muted">${esc(j.medicine_code ?? '')}</span>${j.controlled_class ? ` <span class="stag s-cd">${ico('pill')}<span>Controlled · Class ${esc(j.controlled_class)}</span></span>` : ''}`, { diffField: 'Medicine' })}
         ${field('directions', 'Directions', `<span class="rx-dir">${esc(j.directions)}</span>`, { diffField: 'Directions', input: `<textarea class="rx-in" name="directions" rows="2">${esc(j.directions)}</textarea>` })}
         ${field('dose', 'Dose', j.dose_units && j.doses_per_day ? `${j.dose_units} × ${j.doses_per_day} a day${dailyMg ? ` <span class="muted">(${dailyMg} mg/day)</span>` : ''}` : '<span class="muted">Free text only</span>', { diffField: 'Dose', input: `${num('doseUnits', j.dose_units, 'step="0.5" min="0"')} units × ${num('dosesPerDay', j.doses_per_day, 'step="1" min="0"')} a day` })}
         ${field('quantity', 'Quantity', `<b>${j.quantity}</b>${j.quantity_supplied ? ` <span class="muted">· supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="muted">· ${j.on_hand} on hand</span>`, { diffField: 'Quantity', input: num('quantity', j.quantity, 'min="1" step="1"') })}
@@ -358,7 +381,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   $('#job-pane').innerHTML = `
     <div class="code rx-scroll">${escriptHtml}</div>
     <aside class="rail ${railOpen ? '' : 'closed'}">
-      <button class="chip accent rail-toggle" id="rail-toggle">✦ ${({ original: 'Original', reviewer: 'Reviewer', flow: 'Flow' })[railTab]} ${railOpen ? '⌄' : '‹'}</button>
+      <button class="chip accent rail-toggle" id="rail-toggle">${railOpen ? 'Hide panel' : 'Show panel'} <span class="chev ${railOpen ? 'open' : ''}">${ico('chevron')}</span></button>
       <div class="rail-tabs">
         <button class="${railTab === 'original' ? 'on' : ''}" data-rail="original">Original script</button>
         <button class="${railTab === 'flow' ? 'on' : ''}" data-rail="flow">Pipeline</button>
@@ -371,7 +394,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
     </aside>
     <div class="code-actions">
       ${editing ? `<button id="edit-cancel">Cancel</button><button class="primary" id="edit-save">Save changes</button><span class="muted">Saving re-runs screening. The original as received is kept unchanged.</span>`
-      : `${canEdit ? '<button id="edit-start">✎ Edit e-script</button>' : ''}
+      : `${canEdit ? `<button id="edit-start">${ico('pencil')} Edit e-script</button>` : ''}
       ${j.actions.includes('clinical_check') ? `<label class="verify"><input type="checkbox" id="src-verified" /> ${o?.kind === 'document' ? 'Read against the scanned original' : o?.kind === 'verbal' ? 'Verbal order confirmed with prescriber' : 'Checked against the original e-script'}${o?.compare?.some((c) => !c.match) ? ` <span class="tag warn">${o.compare.filter((c) => !c.match).length} change${o.compare.filter((c) => !c.match).length === 1 ? '' : 's'}</span>` : ''}</label>` : ''}
       ${j.actions.includes('release') ? `<select id="rel-method"><option value="pickup">Pickup in store</option><option value="delivery">Pharmacy delivery</option><option value="courier">Courier</option><option value="compliance_pack">Compliance pack</option></select><input id="rel-address" placeholder="Delivery address (defaults to patient's)" />` : ''}
       <span class="grow"></span>
@@ -409,8 +432,8 @@ function originalHtml(j, o) {
   if (!o) return '<div class="meta">No original stored.</div>';
   const kindLabel = { electronic: `E-script · ${esc(o.payloadRole)}`, document: 'Written script · scan attached at intake', verbal: 'Verbal order · no written original' }[o.kind];
   const integrity = o.intact && o.documents.every((d) => d.intact)
-    ? `<span class="badge ok">✓ Unchanged since receipt</span>`
-    : `<span class="badge hard_stop">✗ Integrity check failed</span>`;
+    ? `<span class="stag s-ok">${ico('shield')}<span>Unchanged since receipt</span></span>`
+    : stag('hard_stop', 'Integrity check failed');
   const p = o.payload ?? {};
   const doc = o.kind === 'electronic' ? `
     <div class="rx-doc">
@@ -490,12 +513,12 @@ function flagListHtml(findings, decisions, editable) {
       ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="override"><input type="text" placeholder="Override reason (required)" data-reason /><label><input type="checkbox" data-prescriber /> Prescriber contacted</label></div>`
       : editable && f.severity === 'high'
         ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="ack"><label><input type="checkbox" data-ack /> Reviewed</label><input type="text" placeholder="Note (optional)" data-note /></div>`
-        : d ? `<div class="rx-decision">✓ ${esc(d.action === 'override' ? 'Overridden' : 'Reviewed')}${d.reason || d.note ? `: ${esc(d.reason ?? d.note)}` : ''}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` : '';
+        : d ? `<div class="rx-decision">${ico('check')} ${esc(d.action === 'override' ? 'Overridden' : 'Reviewed')}${d.reason || d.note ? `: ${esc(d.reason ?? d.note)}` : ''}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` : '';
     return `<div class="rx-flag sev-${sev}" id="flag-${esc(f.id)}">
-      <div class="rx-flag-head"><span class="badge ${sev === 'ok' ? 'ok' : f.severity}">${d ? '✓' : SEV_ICON[f.severity]} ${d ? 'Done' : SEV_LABEL[f.severity]}</span>
-        <span class="rx-origin">${f.origin === 'ai' ? 'AI' : f.origin === 'formulary' ? 'Formulary' : 'Rule'}</span>
-        <span class="rx-flag-msg">${esc(f.message)}</span>
-        <button type="button" class="rx-why" data-trace="${esc(f.id)}">${openTrace.has(f.id) ? 'Hide' : 'Why?'}</button></div>
+      <div class="rx-flag-head">${stag(d ? 'ok' : f.severity, d ? 'Resolved' : SEV_LABEL[f.severity])}
+        <span class="rx-origin">${f.origin === 'ai' ? 'AI reviewer' : f.origin === 'formulary' ? 'Formulary' : 'Rule'} · ${esc(SPECIALIST[f.specialist] ?? f.specialist)}</span>
+        <button type="button" class="rx-why ${openTrace.has(f.id) ? 'open' : ''}" data-trace="${esc(f.id)}" aria-expanded="${openTrace.has(f.id)}">Details ${ico('chevron')}</button></div>
+      <div class="rx-flag-msg">${esc(f.message)}</div>
       ${openTrace.has(f.id) ? `<div class="rx-trace"><b>Rule</b> ${esc(f.trace?.rule ?? '')}<br/><b>Source</b> ${esc(f.trace?.source ?? '')}${f.trace?.link ? ` · <a href="${esc(f.trace.link)}" target="_blank" rel="noopener">reference</a>` : ''}<br/><b>Inputs</b> <code>${esc(typeof f.trace?.inputs === 'string' ? f.trace.inputs : JSON.stringify(f.trace?.inputs))}</code></div>` : ''}
       ${decide}
     </div>`;
@@ -625,7 +648,7 @@ async function renderFulfilment() {
       <div class="muted">${esc(f.method.replace('_', ' '))}${f.address ? ` · ${esc(f.address)}` : ''}${f.tracking_ref ? ` · ${esc(f.provider)} <code>${esc(f.tracking_ref)}</code>` : ''}${f.pickup_code && f.method === 'pickup' ? ` · pickup code <code>${esc(f.pickup_code)}</code>` : ''}</div>
       <ul class="list" style="margin-top:8px">${f.jobs.map((j) => `<li><span>${esc(j.medicine)} ${esc(j.strength)} ×${j.quantity_supplied}${j.controlled_class ? ' <span class="tag cd">CD</span>' : ''}${j.owing ? ` <span class="tag warn">owing ${j.owing}</span>` : ''}</span><span class="tag">${esc(j.state)}</span></li>`).join('')}</ul>
       ${f.proof ? `<p class="muted">${esc(f.proof)}</p>` : ''}
-      <div class="actions"><button data-print-label="${f.id}">${['pickup', 'compliance_pack'].includes(f.method) ? '⎙ Bag label' : '⎙ Shipping label'}</button>${f.ready || f.status !== 'open' ? acts.map(([a, l]) => `<button class="primary" data-f="${f.id}" data-a="${a}" data-cd="${f.hasControlled}">${l}</button>`).join('') : '<span class="muted">Waiting for remaining items…</span>'}</div></div>`;
+      <div class="actions"><button data-print-label="${f.id}">${ico('print')} ${['pickup', 'compliance_pack'].includes(f.method) ? 'Bag label' : 'Shipping label'}</button>${f.ready || f.status !== 'open' ? acts.map(([a, l]) => `<button class="primary" data-f="${f.id}" data-a="${a}" data-cd="${f.hasControlled}">${l}</button>`).join('') : '<span class="muted">Waiting for remaining items…</span>'}</div></div>`;
   }).join('') || '<p class="muted">Nothing released yet.</p>';
   document.querySelectorAll('[data-print-label]').forEach((b) => (b.onclick = () => openPrint(`/api/print/fulfilments/${b.dataset.printLabel}/label`)));
   document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = guard(async () => {
@@ -734,7 +757,7 @@ async function renderSafety() {
   const rows = await api('/api/screening/overrides');
   $('#overrides-table').innerHTML = '<tr><th>When</th><th>Pharmacist</th><th>Patient</th><th>Medicine</th><th>Finding</th><th>Decision</th></tr>' +
     (rows.map((r) => `<tr><td class="mono">${esc(r.at)}</td><td>${esc(r.pharmacist)}</td><td>${esc(r.patient)}</td><td>${esc(r.medicine)}</td>
-      <td><span class="sev ${r.severity}">${SEV_LABEL[r.severity]}</span> <span class="tag">${r.origin === 'ai' ? 'AI' : 'Rule'}</span> ${esc(r.message)}</td>
+      <td>${stag(r.severity, SEV_LABEL[r.severity])} <span class="muted">${r.origin === 'ai' ? 'AI reviewer' : r.origin === 'formulary' ? 'Formulary' : 'Rule'}</span><div>${esc(r.message)}</div></td>
       <td><b>${esc(r.action)}</b>${r.reason ? `: ${esc(r.reason)}` : ''}${r.prescriberConfirmed ? '<br/><span class="muted">prescriber contacted</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No overrides yet.</td></tr>');
 }
 
