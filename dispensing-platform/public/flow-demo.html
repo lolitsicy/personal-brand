@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pharmacy flows · demo harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/flow.css" />
+  <style>
+    /* harness-only layout helpers */
+    .demo-timelines { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .demo-rail { border-left: 2px solid var(--accent); background: linear-gradient(180deg, rgba(166,114,255,.12), rgba(192,77,255,.04)); }
+    .demo-note { color: var(--muted); font-size: 11.5px; }
+    @media (max-width: 1100px) { .demo-timelines { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <!--
+    Standalone harness for public/flow.js: an in-page mock of the flow API in
+    docs/flow-contract.md, so the designer and timeline can be developed and
+    screenshotted without the backend. Query params:
+      ?role=technician   view as a non-editor (read-only designer)
+      ?view=timeline     open on the timeline tab
+      ?live=1            use the real backend (fetch + X-User-Id) instead of the mock;
+                         &job=<id> picks the job for the vertical timeline (default: first in the queue)
+  -->
+  <div class="shell">
+    <aside class="sidebar panel">
+      <div class="case-card">
+        <div class="case-id"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg><span>Community pharmacy</span></div>
+        <div class="case-title">Demo Community Pharmacy</div>
+        <div class="case-desc">Flow UI harness · mocked API</div>
+      </div>
+      <nav id="tabs" aria-label="Main">
+        <div class="nav-group">Settings</div>
+        <button data-tab="flows" class="active"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="7" height="5" rx="1.5"/><rect x="13" y="15.5" width="7" height="5" rx="1.5"/><path d="M7.5 8.5v4.5a2 2 0 0 0 2 2h3.5"/></svg>Flows</button>
+        <button data-tab="timeline"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Job timeline</button>
+      </nav>
+      <div class="sidebar-foot">
+        <label class="user"><span class="avatar" id="user-avatar">PS</span><select id="user-select" aria-label="Acting as">
+          <option value="pharmacist">Priya Shah (pharmacist)</option>
+          <option value="technician">Lucy Chen (technician)</option>
+        </select></label>
+        <div class="proto">Prototype: simulated integrations and demo clinical rules. Not for clinical use.</div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <nav class="crumb" id="crumb" aria-label="Breadcrumb"><span>Flows</span></nav>
+      </header>
+      <main>
+        <section id="tab-flows" class="tab active">
+          <div id="designer"></div>
+        </section>
+        <section id="tab-timeline" class="tab">
+          <div class="demo-timelines">
+            <div class="card demo-rail"><div class="card-head"><h2>Flow · job 42</h2><span class="demo-note">vertical (job-pane rail)</span></div><div id="timeline"></div></div>
+            <div>
+              <div class="card"><div class="card-head"><h2>Flow · job 43</h2><span class="demo-note">horizontal (strip above the script)</span></div><div id="timeline-h"></div></div>
+              <div class="card"><div class="card-head"><h2>Flow · job 44</h2><span class="demo-note">no flow started</span></div><div id="timeline-empty"></div></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div id="toast"></div>
+
+  <script type="module">
+    import { renderFlowDesigner, renderFlowTimeline } from '/flow.js';
+
+    // ───────── fixtures (shapes per docs/flow-contract.md) ─────────
+    const SRC = { type: 'sources' };
+    const catalogue = [
+      { type: 'receive', kind: 'auto', label: 'Receive', description: 'Accept the script from NZePS, scan or keyed order', required: false, configSchema: [] },
+      { type: 'match_patient', kind: 'auto', label: 'Match patient', description: 'Match NHI and demographics to a patient record', required: false, configSchema: [{ key: 'minConfidence', label: 'Minimum match confidence', type: 'number', default: 0.9 }] },
+      { type: 'verify_original', kind: 'auto', label: 'Verify original', description: 'Check the scan or e-script hash against what was keyed', required: false, configSchema: [{ key: 'requireScan', label: 'Require a scan for paper and fax', type: 'boolean', default: true }] },
+      { type: 'map_formulary', kind: 'auto', label: 'Map to formulary', description: 'Map the prescribed item to a stocked product', required: false, configSchema: [] },
+      { type: 'check_stock', kind: 'auto', label: 'Check stock', description: 'Confirm enough on hand; flag owings', required: false, configSchema: [{ key: 'reserve', label: 'Reserve stock', type: 'boolean', default: true }, { key: 'lowStockWarn', label: 'Warn below (units)', type: 'number', default: 20 }] },
+      { type: 'screen', kind: 'auto', label: 'Clinical screening', description: 'Rules, formulary and AI reviewer findings', required: false, configSchema: [{ key: 'useAi', label: 'Include AI reviewer', type: 'boolean', default: true }] },
+      { type: 'check_history', kind: 'auto', label: 'Check history', description: 'Duplicate therapy and duration-too-long checks', required: false, configSchema: [{ key: 'lookbackDays', label: 'Look back (days)', type: 'number', default: 90 }, { key: 'maxDurationDays', label: 'Max supply (days)', type: 'number', default: 90 }] },
+      { type: 'print_worksheet', kind: 'auto', label: 'Print worksheet', description: 'Assembly worksheet for the dispensary bench', required: false, configSchema: [{ key: 'printer', label: 'Printer', type: 'string', default: 'Dispensary' }] },
+      { type: 'generate_label', kind: 'auto', label: 'Generate label', description: 'Dispensing label with warnings', required: false, configSchema: [] },
+      { type: 'book_courier', kind: 'auto', label: 'Book courier', description: 'Book a parcel and record the tracking ref', required: false, configSchema: [{ key: 'carrier', label: 'Carrier', type: 'string', default: 'NZ Couriers' }] },
+      { type: 'notify_patient', kind: 'auto', label: 'Notify patient', description: 'SMS or email when ready', required: false, configSchema: [{ key: 'channel', label: 'Channel', type: 'string', default: 'sms' }] },
+      { type: 'submit_claim', kind: 'auto', label: 'Submit claim', description: 'Queue the subsidy claim for the next batch', required: false, configSchema: [{ key: 'batch', label: 'Batch with end-of-day claims', type: 'boolean', default: true }] },
+      { type: 'data_entry', kind: 'human', label: 'Data entry', description: 'Confirm the keyed or received script', required: false, configSchema: [{ key: 'autoFor', label: 'Auto-confirm for', ...SRC, default: [] }] },
+      { type: 'clinical_check', kind: 'human', label: 'Clinical check', description: 'Pharmacist reviews findings and signs off', required: true, configSchema: [{ key: 'requireSourceVerified', label: 'Require source verified', type: 'boolean', default: true }] },
+      { type: 'assemble', kind: 'human', label: 'Assemble', description: 'Pick, count and label', required: false, configSchema: [{ key: 'scanBarcodes', label: 'Scan product barcodes', type: 'boolean', default: true }] },
+      { type: 'final_check', kind: 'human', label: 'Final check', description: 'Pharmacist checks the assembled supply', required: true, configSchema: [] },
+      { type: 'handover', kind: 'human', label: 'Hand over', description: 'Release to patient, delivery or courier', required: false, configSchema: [{ key: 'requireSignature', label: 'Require signature', type: 'boolean', default: false }] },
+    ];
+    const KIND = Object.fromEntries(catalogue.map((c) => [c.type, c.kind]));
+    const step = (type, extra = {}) => ({ id: type.replace(/_/g, '-'), type, enabled: true, config: Object.fromEntries((catalogue.find((c) => c.type === type).configSchema).map((f) => [f.key, f.default])), ...extra });
+    const standardSteps = (v2) => [
+      step('receive'), step('match_patient'), step('verify_original'), step('map_formulary'),
+      step('data_entry', v2 ? { config: { autoFor: ['nzeps'] } } : {}),
+      step('check_stock'), step('screen'), ...(v2 ? [step('check_history')] : []),
+      step('clinical_check'), step('print_worksheet'), step('assemble'), step('final_check'),
+      step('generate_label'), ...(v2 ? [step('notify_patient')] : []), step('handover'), step('submit_claim'),
+    ];
+    let nextId = 5;
+    const flows = [
+      { id: 1, key: 'standard', version: 1, name: 'Standard dispensing', description: 'Every script, every check.', active: false, appliesTo: ['nzeps', 'paper', 'signature_exempt'], steps: standardSteps(false), created_at: '2026-09-02 21:10:00' },
+      { id: 2, key: 'standard', version: 2, name: 'Standard dispensing', description: 'Auto-confirms structured NZePS e-scripts at data entry; adds history checks and a ready SMS.', active: true, appliesTo: ['nzeps', 'paper', 'signature_exempt'], steps: standardSteps(true), created_at: '2026-10-14 02:45:00' },
+      { id: 3, key: 'phone-fax', version: 1, name: 'Phone & fax orders', description: 'Verbal and faxed orders: verify the original before anything else.', active: true, appliesTo: ['fax', 'phone'],
+        steps: [step('receive'), step('verify_original'), step('match_patient'), step('map_formulary'), step('data_entry'), step('check_stock'), step('screen'), step('clinical_check'), step('print_worksheet'), step('assemble'), step('final_check'), step('generate_label'), step('book_courier'), step('handover'), step('submit_claim')],
+        created_at: '2026-10-01 00:30:00' },
+      { id: 4, key: 'phone-fax', version: 2, name: 'Phone & fax orders', description: 'Draft imported from the old system: clinical check switched off.', active: false, appliesTo: ['fax', 'phone'],
+        steps: [step('receive'), step('verify_original'), step('match_patient'), step('map_formulary'), step('data_entry', { config: { autoFor: ['fax'] } }), step('check_stock'), step('screen'), step('clinical_check', { enabled: false }), step('print_worksheet'), step('assemble'), step('final_check'), step('generate_label'), step('handover')],
+        created_at: '2026-11-03 19:05:00' },
+    ];
+
+    const ts = (minAgo) => new Date(Date.now() - minAgo * 60000).toISOString().replace('T', ' ').slice(0, 19);
+    const run = (stepId, type, label, status, extra = {}) => ({ stepId, type, kind: KIND[type], label, status, output: null, error: null, started_at: null, finished_at: null, ...extra });
+    const jobFlows = {
+      42: { flow: { id: 2, key: 'standard', version: 2, name: 'Standard dispensing' }, current: 'clinical-check', steps: [
+        run('receive', 'receive', 'Receive', 'done', { output: { source: 'nzeps', scid: '1A2B3C4D5E…' }, started_at: ts(26), finished_at: ts(26) }),
+        run('match-patient', 'match_patient', 'Match patient', 'done', { output: { nhi: 'ZZZ0016', confidence: 0.98 }, started_at: ts(26), finished_at: ts(25) }),
+        run('verify-original', 'verify_original', 'Verify original', 'skipped', { output: { reason: 'Structured NZePS e-script: the broker copy is the original' }, started_at: ts(25), finished_at: ts(25) }),
+        run('map-formulary', 'map_formulary', 'Map to formulary', 'done', { output: { code: 'MET500', product: 'Metformin 500 mg' }, started_at: ts(25), finished_at: ts(25) }),
+        run('data-entry', 'data_entry', 'Data entry', 'done', { output: { autoConfirmed: true }, started_at: ts(25), finished_at: ts(25) }),
+        run('check-stock', 'check_stock', 'Check stock', 'done', { output: { onHand: 40, needed: 60, shortBy: 20 }, started_at: ts(25), finished_at: ts(24) }),
+        run('screen', 'screen', 'Clinical screening', 'done', { output: { findings: [{ severity: 'high' }, { severity: 'moderate' }], reviewer: 'mock' }, started_at: ts(24), finished_at: ts(23) }),
+        run('check-history', 'check_history', 'Check history', 'failed', { error: 'Dispensing history service timed out after 10s', started_at: ts(23), finished_at: ts(22) }),
+        run('clinical-check', 'clinical_check', 'Clinical check', 'waiting', { started_at: ts(22) }),
+        run('print-worksheet', 'print_worksheet', 'Print worksheet', 'running', { started_at: ts(1) }),
+        run('assemble', 'assemble', 'Assemble', 'pending'),
+        run('final-check', 'final_check', 'Final check', 'pending'),
+        run('generate-label', 'generate_label', 'Generate label', 'pending'),
+        run('notify-patient', 'notify_patient', 'Notify patient', 'pending'),
+        run('handover', 'handover', 'Hand over', 'pending'),
+        run('submit-claim', 'submit_claim', 'Submit claim', 'pending'),
+      ] },
+      43: { flow: { id: 3, key: 'phone-fax', version: 1, name: 'Phone & fax orders' }, current: 'handover', steps: [
+        run('receive', 'receive', 'Receive', 'done', { output: { source: 'fax' }, started_at: ts(180), finished_at: ts(180) }),
+        run('verify-original', 'verify_original', 'Verify original', 'done', { output: { hashMatch: true }, started_at: ts(180), finished_at: ts(179) }),
+        run('check-stock', 'check_stock', 'Check stock', 'done', { output: { onHand: 270, shortBy: 0 }, started_at: ts(170), finished_at: ts(170) }),
+        run('clinical-check', 'clinical_check', 'Clinical check', 'done', { output: { by: 'Priya Shah' }, started_at: ts(160), finished_at: ts(150) }),
+        run('print-worksheet', 'print_worksheet', 'Print worksheet', 'done', { output: { worksheetUrl: '/api/jobs/43/worksheet' }, started_at: ts(150), finished_at: ts(150) }),
+        run('final-check', 'final_check', 'Final check', 'done', { output: { by: 'Tom Rangi' }, started_at: ts(120), finished_at: ts(110) }),
+        run('book-courier', 'book_courier', 'Book courier', 'done', { output: { trackingRef: 'NZC-88213407', carrier: 'NZ Couriers' }, started_at: ts(108), finished_at: ts(108) }),
+        run('handover', 'handover', 'Hand over', 'waiting', { started_at: ts(108) }),
+        run('submit-claim', 'submit_claim', 'Submit claim', 'pending'),
+      ] },
+    };
+
+    // ───────── mock validator (guardrails from the contract) ─────────
+    function validate(def) {
+      const errors = [];
+      const steps = def?.steps ?? [];
+      if (!String(def?.name ?? '').trim()) errors.push('Flow name is required');
+      if (!def?.appliesTo?.length) errors.push('Choose at least one prescription source in appliesTo');
+      const ids = new Set();
+      for (const s of steps) {
+        if (ids.has(s.id)) errors.push(`Duplicate step id "${s.id}"`);
+        ids.add(s.id);
+        if (!KIND[s.type]) errors.push(`Unknown step type "${s.type}" (step ${s.id})`);
+      }
+      const pos = (type) => steps.findIndex((s) => s.type === type && s.enabled);
+      const byType = (type) => steps.find((s) => s.type === type);
+      for (const t of ['clinical_check', 'final_check']) {
+        const s = byType(t);
+        if (!s) errors.push(`${t} is required and missing`);
+        else if (!s.enabled) errors.push(`${t} must be enabled (step ${s.id})`);
+      }
+      const before = (a, b) => {
+        const ia = pos(a), ib = pos(b);
+        if (ia >= 0 && ib >= 0 && ia > ib) errors.push(`${a} must come before ${b} (step ${byType(a).id} is after ${byType(b).id})`);
+      };
+      before('screen', 'clinical_check'); before('clinical_check', 'assemble'); before('assemble', 'final_check');
+      before('final_check', 'handover'); before('print_worksheet', 'assemble');
+      for (const t of ['generate_label', 'book_courier']) {
+        const i = pos(t), f = pos('final_check');
+        if (i >= 0 && f >= 0 && i < f) errors.push(`${t} must come after final_check (step ${byType(t).id})`);
+      }
+      const de = byType('data_entry');
+      const bad = (de?.config?.autoFor ?? []).filter((x) => x === 'paper' || x === 'fax');
+      if (bad.length) errors.push(`data_entry can't auto-confirm ${bad.join(' or ')} scripts (step ${de.id}); only structured e-scripts`);
+      return { ok: errors.length === 0, errors };
+    }
+
+    // ───────── mock api(): same signature as public/app.js ─────────
+    const params = new URLSearchParams(location.search);
+    let role = params.get('role') === 'technician' ? 'technician' : 'pharmacist';
+    const users = { pharmacist: { id: 1, name: 'Priya Shah', initials: 'PS', role: 'pharmacist' }, technician: { id: 3, name: 'Lucy Chen', initials: 'LC', role: 'technician' } };
+    const clone = (v) => JSON.parse(JSON.stringify(v));
+    const err = (status, message, details) => Object.assign(new Error(message), { status, details });
+    window.__apiLog = [];
+    let api = async function mockApi(path, { method = 'GET', body } = {}) {
+      window.__apiLog.push({ method, path, body: body ? clone(body) : undefined });
+      await new Promise((r) => setTimeout(r, 40));
+      let m;
+      if (method === 'GET' && path === '/api/flows') return clone(flows);
+      if (method === 'GET' && path === '/api/flows/catalogue') return clone(catalogue);
+      if (method === 'POST' && path === '/api/flows/validate') return validate(body?.definition);
+      if (method === 'POST' && path === '/api/flows') {
+        if (!['pharmacist', 'admin'].includes(role)) throw err(403, 'Only a pharmacist or admin can create flows');
+        const v = validate(body.definition);
+        if (!v.ok) throw err(400, 'Flow failed validation', { errors: v.errors });
+        const key = body.key ?? body.definition.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const version = Math.max(0, ...flows.filter((f) => f.key === key).map((f) => f.version)) + 1;
+        const f = { id: nextId++, key, version, active: false, created_at: ts(0), ...clone(body.definition) };
+        flows.push(f);
+        return clone(f);
+      }
+      if (method === 'POST' && (m = path.match(/^\/api\/flows\/(\d+)\/activate$/))) {
+        if (!['pharmacist', 'admin'].includes(role)) throw err(403, 'Only a pharmacist or admin can activate flows');
+        const f = flows.find((x) => x.id === Number(m[1]));
+        if (!f) throw err(404, 'Flow not found');
+        flows.forEach((x) => { if (x.key === f.key) x.active = x.id === f.id; });
+        return clone(f);
+      }
+      if (method === 'GET' && (m = path.match(/^\/api\/jobs\/(\d+)\/flow$/))) {
+        const j = jobFlows[m[1]];
+        if (!j) throw err(404, 'No flow for this job');
+        return clone(j);
+      }
+      if (method === 'POST' && (m = path.match(/^\/api\/jobs\/(\d+)\/flow\/retry\/([^/]+)$/))) {
+        const j = jobFlows[m[1]];
+        const s = j?.steps.find((x) => x.stepId === decodeURIComponent(m[2]));
+        if (!s || s.status !== 'failed') throw err(409, 'Only a failed step can be retried');
+        await new Promise((r) => setTimeout(r, 200));
+        Object.assign(s, { status: 'done', error: null, output: { duplicates: 0, longestSupplyDays: 30 }, started_at: ts(0), finished_at: ts(0) });
+        return clone(j);
+      }
+      throw err(404, `Mock has no route for ${method} ${path}`);
+    };
+
+    // ───────── live mode: the real backend ─────────
+    const LIVE = params.has('live');
+    let liveJobs = [];
+    if (LIVE) {
+      const raw = async (path, { method = 'GET', body } = {}, uid) => {
+        const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json', ...(uid ? { 'X-User-Id': String(uid) } : {}) }, body: body ? JSON.stringify(body) : undefined });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw Object.assign(new Error(data?.error ?? res.statusText), { status: res.status, details: data?.details });
+        return data;
+      };
+      const list = await raw('/api/users');
+      for (const r of ['pharmacist', 'technician']) {
+        const u = list.find((x) => x.role === r);
+        if (u) users[r] = u;
+      }
+      api = (path, opts) => raw(path, opts, users[role].id);
+      const q = await raw('/api/queue', {}, users.pharmacist.id).catch(() => []);
+      liveJobs = [Number(params.get('job')) || q[0]?.id, q[1]?.id, 999999].map((x) => x ?? 999999);
+      document.querySelector('.case-desc').textContent = 'Flow UI harness · live backend';
+    }
+
+    function toast(msg, isError = false) {
+      const t = document.querySelector('#toast');
+      t.textContent = msg;
+      t.className = 'show' + (isError ? ' error' : '');
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => (t.className = ''), 3500);
+    }
+
+    // ───────── mount ─────────
+    function mountDesigner() {
+      const el = document.querySelector('#designer');
+      const fresh = el.cloneNode(false);
+      el.replaceWith(fresh);
+      window.designer = renderFlowDesigner(fresh, { api, toast, user: users[role] });
+    }
+    async function mountTimelines() {
+      const ids = LIVE ? liveJobs : [42, 43, 44];
+      for (const [sel, jobId, layout] of [['#timeline', ids[0], 'vertical'], ['#timeline-h', ids[1], 'horizontal'], ['#timeline-empty', ids[2], 'vertical']]) {
+        const el = document.querySelector(sel);
+        const fresh = el.cloneNode(false);
+        el.replaceWith(fresh);
+        await renderFlowTimeline(fresh, { api, jobId, user: users[role], layout });
+      }
+    }
+    function showTab(tab) {
+      document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.tab').forEach((s) => s.classList.toggle('active', s.id === `tab-${tab}`));
+      document.querySelector('#crumb').innerHTML = tab === 'flows' ? '<span>Flows</span>' : '<span>Queue</span> <span class="sep">›</span><b>Job timeline</b>';
+    }
+    document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+    const sel = document.querySelector('#user-select');
+    sel.value = role;
+    document.querySelector('#user-avatar').textContent = users[role].initials;
+    sel.onchange = () => { role = sel.value; document.querySelector('#user-avatar').textContent = users[role].initials; mountDesigner(); mountTimelines(); };
+    mountDesigner();
+    await mountTimelines();
+    showTab(params.get('view') === 'timeline' ? 'timeline' : 'flows');
+    window.__ready = true;
+  </script>
+</body>
+</html>
