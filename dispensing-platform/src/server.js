@@ -7,6 +7,10 @@ import { seed } from './seed.js';
 import { createMockAdapters } from './adapters/index.js';
 import { createPlatform } from './services/platform.js';
 import { createCounter } from './services/counter.js';
+import { createDefaultFormulary } from './formulary/index.js';
+import { createPrint, registerPrintRoutes } from './print/index.js';
+import { schema as flowSchema, createFlowEngine, AUTOMATION_USER } from './flow/engine.js';
+import { registerFlowRoutes } from './flow/routes.js';
 import { validateScid } from './domain/scid.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
@@ -18,11 +22,32 @@ export const DEFAULT_CONFIG = {
   accounts: { rx: '200', otc: '201' }, // accounting codes for the export
 };
 
-export function createApp({ dbPath = ':memory:', adapters = createMockAdapters(), config = DEFAULT_CONFIG, withSeed = true } = {}) {
+/**
+ * pipeline: run the automated flow engine on every intake / transition / fulfilment.
+ * Off by default so unit tests can drive each step by hand; the server turns it on.
+ * formulary: a formulary instance (default: NZF if configured, else local demo data).
+ */
+export function createApp({ dbPath = ':memory:', adapters = createMockAdapters(), config = DEFAULT_CONFIG, withSeed = true, pipeline = false, formulary = createDefaultFormulary() } = {}) {
   const db = openDb(dbPath);
   if (withSeed) seed(db);
   const platform = createPlatform({ db, adapters, config });
   const counter = createCounter({ db, platform, adapters, config });
+  const print = createPrint({ platform, config });
+
+  // Formulary checks are part of screening (and of the safety floor at sign-off).
+  if (formulary) platform.hooks.formulary = formulary;
+
+  db.exec(flowSchema);
+  const flows = createFlowEngine({ db, platform, adapters, config, hooks: { formulary, print } });
+  flows.seedDefaults();
+  if (pipeline) {
+    const flowSafe = async (fn) => { try { await fn(); } catch (err) { console.error('[flow]', err); } };
+    const isAutomation = (u) => u && u.name === AUTOMATION_USER.name && u.initials === AUTOMATION_USER.initials;
+    platform.hooks.afterIntake = (rx) => flowSafe(() => flows.onPrescription(rx));
+    // The engine's own actions (auto data entry, courier booking) must not re-enter it.
+    platform.hooks.afterTransition = (jobId, action, user) => (isAutomation(user) ? null : flowSafe(() => flows.onTransition(jobId, action)));
+    platform.hooks.afterFulfilment = (fid, action, user) => (isAutomation(user) ? null : flowSafe(() => flows.onFulfilment(fid)));
+  }
 
   // ── tiny router ──
   const routes = [];
@@ -54,10 +79,16 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
     const d = platform.getDocument(params.id, params.docId);
     return { __raw: d.data, type: d.mime, headers: { 'Content-Disposition': 'inline', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox" } };
   });
-  route('POST', '/api/items/:id/repeat', ({ params, user }) => platform.requestRepeat(params.id, user));
+  route('POST', '/api/items/:id/repeat', async ({ params, user }) => {
+    const job = platform.requestRepeat(params.id, user);
+    if (pipeline) { try { await flows.advance(job.id); } catch (err) { console.error('[flow]', err); } }
+    return platform.getJob(job.id, user);
+  });
 
   route('GET', '/api/queue', ({ query, user }) => platform.queue({ state: query.get('state') }, user));
   route('GET', '/api/jobs/:id', ({ params, user }) => platform.getJob(params.id, user));
+  registerFlowRoutes(route, { engine: flows, platform });
+  registerPrintRoutes(route, { print });
   route('POST', '/api/jobs/:id/screen', ({ params, user }) => platform.runScreening(params.id, user));
   route('POST', '/api/jobs/:id/supply-owing', ({ params, user }) => platform.supplyOwing(params.id, user));
   route('POST', '/api/jobs/:id/:action', ({ params, body, user }) => platform.transition(params.id, params.action.replace(/-/g, '_'), user, body));
@@ -121,7 +152,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
     }
   }
 
-  return { db, platform, counter, handle, server: createServer(handle) };
+  return { db, platform, counter, flows, print, handle, server: createServer(handle) };
 }
 
 function send(res, status, data) {
@@ -158,6 +189,6 @@ async function serveStatic(pathname, res) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = Number(process.env.PORT ?? 3000);
-  const { server } = createApp({ dbPath: process.env.DB_PATH ?? 'dispensing.db' });
+  const { server } = createApp({ dbPath: process.env.DB_PATH ?? 'dispensing.db', pipeline: true });
   server.listen(port, () => console.log(`Dispensing platform running at http://localhost:${port}`));
 }

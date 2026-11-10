@@ -345,12 +345,18 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
   }
 
   /** Full screening: deterministic rules + AI reviewer. Stores a pending screening awaiting pharmacist sign-off. */
-  async function runScreening(jobId, user) {
+  async function runScreening(jobId, user, { useAi = true } = {}) {
     if (!user) throw new DomainError('Sign in required', { status: 401 });
     const job = loadJob(jobId);
     if (!['queued', 'entered'].includes(job.state)) throw conflict(`Screening runs before the clinical check (job is ${job.state})`);
+    // Network-backed formulary sources fill their cache here (async), so the
+    // synchronous checks at sign-off read the same data.
+    if (hooks.formulary?.prefetch) {
+      const pre = screeningContext(job);
+      try { await hooks.formulary.prefetch([pre.medicine, ...pre.otherMeds]); } catch { /* falls back to local data; noted in findings */ }
+    }
     const { ctx, findings: rules } = ruleFindings(job);
-    const reviewer = adapters.reviewer;
+    const reviewer = useAi ? adapters.reviewer : null;
     let ai = { findings: [], counselling: null };
     let reviewerNote = null;
     if (reviewer) {
@@ -620,7 +626,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
         audit.record({ userId: user.id, action: 'broker.update_failed', entity: 'job', entityId: result, data: { error: err.message, ...u } });
       }
     }
-    await runHook('afterTransition', result, action);
+    await runHook('afterTransition', result, action, user);
     return getJob(result, user);
   }
 
@@ -718,7 +724,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
       audit.record({ userId: user.id, action: `fulfilment.${action}`, entity: 'fulfilment', entityId: cur.id, data: { ...pick(body, ['reason', 'proof']), ...(booking ?? {}) } });
       return getFulfilment(cur.id);
     });
-    await runHook('afterFulfilment', out.id, action);
+    await runHook('afterFulfilment', out.id, action, user);
     return getFulfilment(out.id);
   }
 
@@ -977,7 +983,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
   return {
     audit,
     getUser,
-    users: () => all('SELECT * FROM users ORDER BY role, name'),
+    users: () => all("SELECT * FROM users WHERE NOT (name = 'Automation' AND initials = 'AU') ORDER BY role, name"),
     medicines: () => all('SELECT m.*, COALESCE(s.on_hand, 0) AS on_hand FROM medicines m LEFT JOIN stock s ON s.medicine_id = m.id ORDER BY m.name'),
     patients: (q = '') => all('SELECT * FROM patients WHERE name LIKE ? OR nhi LIKE ? ORDER BY name LIMIT 100', `%${q}%`, `%${q}%`),
     cdRegister: (medicineId) => all(
