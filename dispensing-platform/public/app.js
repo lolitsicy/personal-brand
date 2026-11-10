@@ -1,3 +1,5 @@
+import { renderFlowDesigner, renderFlowTimeline } from './flow.js';
+
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const money = (c) => `$${(c / 100).toFixed(2)}`;
@@ -75,7 +77,7 @@ async function boot() {
   render();
 }
 
-const TAB_TITLE = { home: 'Today', queue: 'Queue', intake: 'Intake', prescriptions: 'Scripts', counter: 'Counter', fulfilment: 'Fulfilment', stock: 'Stock & CD', claims: 'Claims', safety: 'Safety log', audit: 'Audit' };
+const TAB_TITLE = { home: 'Today', queue: 'Queue', intake: 'Intake', prescriptions: 'Scripts', counter: 'Counter', fulfilment: 'Fulfilment', stock: 'Stock & CD', claims: 'Claims', safety: 'Safety log', audit: 'Audit', flows: 'Pharmacy flows' };
 function setCrumb(parts) {
   $('#crumb').innerHTML = parts.map((p, i) => (i === 0 ? `<span>${p}</span>` : `<span class="sep">›</span>${p.startsWith('<') ? p : `<b>${p}</b>`}`)).join(' ');
 }
@@ -90,7 +92,29 @@ function showTab(tab) {
 
 function render() {
   guard(updateNavCount)();
-  return guard(({ home: renderHome, queue: renderQueue, intake: renderIntake, prescriptions: renderPrescriptions, counter: renderCounter, fulfilment: renderFulfilment, stock: renderStock, claims: renderClaims, safety: renderSafety, audit: renderAudit })[currentTab])();
+  return guard(({ home: renderHome, queue: renderQueue, intake: renderIntake, prescriptions: renderPrescriptions, counter: renderCounter, fulfilment: renderFulfilment, stock: renderStock, claims: renderClaims, safety: renderSafety, audit: renderAudit, flows: renderFlows })[currentTab])();
+}
+
+// ───────────── flows + printing ─────────────
+const currentUser = () => users.find((u) => String(u.id) === userId);
+function renderFlows() {
+  const el = $('#flow-designer'); const fresh = el.cloneNode(false); el.replaceWith(fresh);
+  renderFlowDesigner(fresh, { api, toast, user: currentUser() });
+}
+
+/** Print views need the acting-user header, so fetch them and open as a blob. */
+async function openPrint(path) {
+  const w = window.open('', '_blank');
+  try {
+    const res = await fetch(path, { headers: userId ? { 'X-User-Id': userId } : {} });
+    if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? res.statusText);
+    const url = URL.createObjectURL(new Blob([await res.text()], { type: 'text/html' }));
+    w.location = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch (err) {
+    w?.close();
+    toast(err.message, true);
+  }
 }
 
 // ───────────── home ─────────────
@@ -247,6 +271,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   // toolbar above the panel
   $('#code-bar').innerHTML = `
     ${['queued', 'entered'].includes(j.state) ? '<button class="chip accent" id="rescreen">✦ Screen again</button>' : ''}
+    <button class="chip" id="print-worksheet" title="Print the standardised dispensing worksheet">⎙ Worksheet</button>
     <span class="chip">◉ ${esc(j.source)}</span>
     <span class="chip">${esc(j.patient_name)}</span>
     <span class="grow"></span>
@@ -326,12 +351,13 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   $('#job-pane').innerHTML = `
     <div class="code">${codeHtml}</div>
     <aside class="rail ${railOpen ? '' : 'closed'}">
-      <button class="chip accent rail-toggle" id="rail-toggle">✦ ${railTab === 'original' ? 'Original' : 'Reviewer'} ${railOpen ? '⌄' : '‹'}</button>
+      <button class="chip accent rail-toggle" id="rail-toggle">✦ ${({ original: 'Original', reviewer: 'Reviewer', flow: 'Flow' })[railTab]} ${railOpen ? '⌄' : '‹'}</button>
       <div class="rail-tabs">
         <button class="${railTab === 'original' ? 'on' : ''}" data-rail="original">Original script</button>
+        <button class="${railTab === 'flow' ? 'on' : ''}" data-rail="flow">Pipeline</button>
         <button class="${railTab === 'reviewer' ? 'on' : ''}" data-rail="reviewer">AI reviewer</button>
       </div>
-      ${railTab === 'original' ? originalHtml(j, o) : `
+      ${railTab === 'original' ? originalHtml(j, o) : railTab === 'flow' ? '<div id="job-flow"></div>' : `
         <div class="meta">${esc(j.screening?.reviewer ?? 'Not run yet')} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
         <div class="meta">Works on a de-identified case. Can add findings; can't clear or downgrade a rule.</div>
         ${counsel ? `<h4>Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}`}
@@ -348,6 +374,8 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
       ${!j.actions.length && !j.owing ? '<span class="muted">No actions for your role at this stage.</span>' : ''}
     </div>`;
 
+  if (railOpen && railTab === 'flow') renderFlowTimeline($('#job-flow'), { api, jobId: j.id, user: currentUser(), onChange: () => renderJobPane(j.id, { autoScreen: false }) });
+  $('#print-worksheet')?.addEventListener('click', () => openPrint(`/api/print/jobs/${j.id}/worksheet`));
   $('#rescreen')?.addEventListener('click', guard(async () => { await api(`/api/jobs/${j.id}/screen`, { method: 'POST' }); await renderJobPane(j.id, { autoScreen: false }); }));
   $('#rail-toggle').onclick = () => { railOpen = !railOpen; renderJobPane(j.id, { autoScreen: false }); };
   document.querySelectorAll('[data-rail]').forEach((b) => (b.onclick = () => { railTab = b.dataset.rail; railOpen = true; renderJobPane(j.id, { autoScreen: false }); }));
@@ -519,8 +547,9 @@ async function renderFulfilment() {
       <div class="muted">${esc(f.method.replace('_', ' '))}${f.address ? ` · ${esc(f.address)}` : ''}${f.tracking_ref ? ` · ${esc(f.provider)} <code>${esc(f.tracking_ref)}</code>` : ''}${f.pickup_code && f.method === 'pickup' ? ` · pickup code <code>${esc(f.pickup_code)}</code>` : ''}</div>
       <ul class="list" style="margin-top:8px">${f.jobs.map((j) => `<li><span>${esc(j.medicine)} ${esc(j.strength)} ×${j.quantity_supplied}${j.controlled_class ? ' <span class="tag cd">CD</span>' : ''}${j.owing ? ` <span class="tag warn">owing ${j.owing}</span>` : ''}</span><span class="tag">${esc(j.state)}</span></li>`).join('')}</ul>
       ${f.proof ? `<p class="muted">${esc(f.proof)}</p>` : ''}
-      <div class="actions">${f.ready || f.status !== 'open' ? acts.map(([a, l]) => `<button class="primary" data-f="${f.id}" data-a="${a}" data-cd="${f.hasControlled}">${l}</button>`).join('') : '<span class="muted">Waiting for remaining items…</span>'}</div></div>`;
+      <div class="actions"><button data-print-label="${f.id}">${['pickup', 'compliance_pack'].includes(f.method) ? '⎙ Bag label' : '⎙ Shipping label'}</button>${f.ready || f.status !== 'open' ? acts.map(([a, l]) => `<button class="primary" data-f="${f.id}" data-a="${a}" data-cd="${f.hasControlled}">${l}</button>`).join('') : '<span class="muted">Waiting for remaining items…</span>'}</div></div>`;
   }).join('') || '<p class="muted">Nothing released yet.</p>';
+  document.querySelectorAll('[data-print-label]').forEach((b) => (b.onclick = () => openPrint(`/api/print/fulfilments/${b.dataset.printLabel}/label`)));
   document.querySelectorAll('[data-f]').forEach((b) => (b.onclick = guard(async () => {
     const body = {};
     if (b.dataset.a === 'complete') {

@@ -101,6 +101,61 @@ adapter. The dispensing logic doesn't change.
 - **Counselling draft** in the patient's preferred language. Real
   translation needs the AI reviewer enabled.
 
+## End-to-end pipeline (pharmacy flows)
+
+![Pipeline](docs/pipeline.png)
+
+Every script runs through a **flow**: an ordered list of automatic steps and
+human checkpoints. Automatic steps run as soon as they can, and the script
+stops at each checkpoint until the right person acts.
+
+| Stage | Step | Who |
+|---|---|---|
+| Arrival | receive, match patient (NHI), verify original (integrity) | automatic |
+| Preparation | map to formulary, data entry, check stock, check history (incl. therapy running too long) | automatic, except data entry for written scripts (technician) |
+| Safety | clinical screening (rules + formulary + optional AI) | automatic |
+| | **clinical check** | **pharmacist, required** |
+| Make up | print worksheet (standardised A4), assemble | automatic, then technician |
+| | **final check** | **pharmacist, required** |
+| Out the door | generate label, book courier, hand over, notify patient, submit claim | automatic, except handover |
+
+- **Flow designer** (*Pharmacy flows*): add, remove, reorder and configure
+  steps. Saving creates a new version, which you then activate. Each script
+  keeps the flow version it started on.
+- **Guardrails can't be configured away.** The clinical and final checks are
+  always present and always done by a pharmacist. Screening must come before
+  the clinical check, and the worksheet before assembly. Written scripts can
+  never have data entry auto-confirmed.
+- **Automation is a technician-role user.** It can confirm structured
+  e-script data entry and book couriers. It can never do a pharmacist check.
+- Every step is recorded with its output, and every automatic step is audited.
+  A failed step can be retried. The pipeline timeline is the *Pipeline* tab
+  in the script view.
+
+![Flow designer](docs/flow-designer.png)
+
+## Formulary (NZF)
+
+`src/formulary/` adds formulary checks to screening: dose against the adult
+maximum, renal and hepatic rules, interactions (by ingredient, class or
+group), and **continuous therapy beyond a review limit** (e.g. opioids beyond
+14 days). The adapter uses the **NZ Formulary** when `NZF_BASE_URL` and
+`NZF_API_KEY` are set. Otherwise it falls back to `data/formulary.demo.json`,
+which is **demo data, not clinically validated**, and the pipeline warns about
+this. The NZF requires a content licence and API credentials. See
+`docs/formulary-sources.md` for what NZF, NZULM and Pharmac provide and what
+to request.
+
+## Printing
+
+- **Dispensing worksheet** (*⎙ Worksheet* in the script view): a standardised
+  A4 sheet with patient, prescriber, the original as received and its
+  integrity status, the received-vs-dispensing comparison, screening
+  decisions, counselling points, a label preview and a sign-off grid. It
+  carries a Code 128 barcode for scanning at the bench.
+- **Shipping label / bag label** (*Fulfilment*): 100 × 150 mm. Courier labels
+  never show medicine names. Controlled drugs force "signature required".
+
 ## The original script: what was received is what is reviewed
 
 - **E-scripts** are stored byte-for-byte as the e-prescription service

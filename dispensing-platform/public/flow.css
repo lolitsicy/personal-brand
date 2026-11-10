@@ -265,3 +265,5 @@ fieldset.fd-field-row legend { float: left; padding: 0; font-size: 12px; color: 
 .chip.fd-viewonly .fi { width: 12px; height: 12px; }
 .fd-srcopt.not-allowed span { border-style: dashed; color: var(--muted); }
 .fd-field-row select { padding: 5px 9px; max-width: 280px; justify-self: start; }
+.ft-warn { flex-basis: 100%; display: flex; gap: 6px; align-items: flex-start; color: var(--warn); font-size: 11.5px; line-height: 1.4; }
+.ft-warn .fi { width: 12px; height: 12px; margin-top: 2px; }

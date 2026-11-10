@@ -273,6 +273,7 @@
         const el = document.querySelector(sel);
         const fresh = el.cloneNode(false);
         el.replaceWith(fresh);
+        fresh.closest('.card').querySelector('h2').textContent = `Flow · job ${jobId}`;
         await renderFlowTimeline(fresh, { api, jobId, user: users[role], layout });
       }
     }

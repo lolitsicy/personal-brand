@@ -686,6 +686,15 @@ function safeHref(u) {
 
 /** Short human summary of a step run's output, plus leftover primitive fields. */
 const HIDDEN_KEYS = ['reason', 'skippedReason', 'awaiting', 'roles', 'userId', 'initials', 'role', 'hash', 'receivedAt', 'fulfilmentId', 'kind', 'automated', 'message'];
+/** Which plain fields are worth a glance, per step type (others fall back to the first few). */
+const PREFER = {
+  receive: ['source', 'scid'], match_patient: ['nhi'], verify_original: ['intact', 'amendments'], map_formulary: ['medicine'],
+  data_entry: ['by'], clinical_check: ['by'], assemble: ['by', 'quantitySupplied', 'owing'], final_check: ['by'], handover: ['by', 'method'],
+  check_stock: ['required'], check_history: ['daysSupply'], screen: ['reviewer'],
+  generate_label: ['method'], book_courier: ['provider'], notify_patient: ['channel', 'to'], submit_claim: ['status', 'claimRef', 'batchRef'],
+};
+const SEV_TAG = { hard_stop: 'danger', high: 'warn', moderate: '', info: '' };
+const SEV_WORD = { hard_stop: 'hard stop', high: 'high', moderate: 'moderate', info: 'info' };
 const clip = (v, n = 48) => { const t = String(v); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
 
 export function summariseOutput(out, type = '') {
@@ -703,15 +712,29 @@ export function summariseOutput(out, type = '') {
     }
   }
   if (out.automated === true) bits.push('<span class="tag">Automated</span>');
+  if (out.counts && typeof out.counts === 'object') {
+    used.add('counts');
+    const c = Object.entries(out.counts).filter(([, n]) => n > 0);
+    for (const [sv, n] of c) bits.push(`<span class="tag ${SEV_TAG[sv] ?? ''}">${esc(n)} ${esc(SEV_WORD[sv] ?? sv)}</span>`);
+    if (!c.length) bits.push('<span class="tag ok">No findings</span>');
+  }
+  for (const k of ['priorSupplies', 'openDuplicates', 'differences']) {
+    if (Array.isArray(out[k])) {
+      const n = take(k).length;
+      if (n) bits.push(`<span class="tag ${k === 'priorSupplies' ? '' : 'warn'}">${n} ${k === 'priorSupplies' ? 'prior suppl' + (n === 1 ? 'y' : 'ies') : k === 'openDuplicates' ? 'open duplicate' + (n === 1 ? '' : 's') : 'difference' + (n === 1 ? '' : 's')}</span>`);
+    }
+  }
+  if (out.durationTooLong === true) { used.add('durationTooLong'); bits.push('<span class="tag warn">Duration too long</span>'); }
   for (const k of ['trackingRef', 'tracking', 'trackingNumber']) if (k in out) bits.push(`<span class="ft-kv"><i>Tracking</i> <code>${esc(take(k))}</code></span>`);
   if (Array.isArray(out.findings)) {
     const f = take('findings');
     const worst = ['hard_stop', 'high', 'moderate', 'info'].find((sv) => f.some((x) => x?.severity === sv));
     bits.push(`<span class="tag ${worst === 'hard_stop' ? 'danger' : worst === 'high' ? 'warn' : ''}">${f.length} finding${f.length === 1 ? '' : 's'}</span>`);
   }
-  if (Array.isArray(out.warnings)) for (const w of take('warnings').slice(0, 3)) bits.push(`<span class="tag warn">${esc(clip(w, 90))}</span>`);
+  if (Array.isArray(out.warnings)) for (const w of take('warnings').slice(0, 3)) bits.push(`<span class="ft-warn">${ICON.alert}${esc(clip(w, 110))}</span>`);
+  const prefer = PREFER[type];
   for (const [k, v] of Object.entries(out)) {
-    if (used.has(k) || v == null || v === false || typeof v === 'object' || bits.length >= 5) continue;
+    if ((prefer && !prefer.includes(k)) || used.has(k) || /Id$/.test(k) || v == null || v === false || typeof v === 'object' || bits.length >= 5) continue;
     const label = ACRONYM[k.toLowerCase()] ?? k.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
     bits.push(`<span class="ft-kv"><i>${esc(label[0].toUpperCase() + label.slice(1))}</i> ${esc(typeof v === 'boolean' ? 'yes' : clip(v))}</span>`);
   }
