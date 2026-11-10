@@ -256,6 +256,23 @@ Ordered roughly by how much each one blocks you:
    wholesaler ordering, patient notifications (SMS), pharmacy support during
    opening hours.
 
+## Writing for people
+
+Every word on screen, in a printout or in an error message is written for
+pharmacy staff. Internal values never appear: no `clinically_checked`,
+`nzeps`, step type codes or flow keys.
+
+- All labels live in **`src/domain/labels.js`** (states, sources, fulfilment
+  methods, sale and claim statuses, roles, ledger entries, audit actions,
+  pipeline steps, reviewer names). The server uses it for messages and
+  printouts, and the browser loads it from `/labels.js`. A new value needs a
+  label added there.
+- Messages are sentences: "A technician can't do the clinical check. This
+  step needs a pharmacist." rather than `Role "technician" cannot clinical check`.
+- `test/ui-text.test.js` opens every screen, every script panel and the
+  worksheet in a browser, and fails if visible text contains snake_case,
+  kebab-case keys, source ids, reviewer ids or raw state names.
+
 ## Layout
 
 ```

@@ -1,3 +1,4 @@
+import { label, reviewerLabel } from '../domain/labels.js';
 // Printable dispensing worksheet (A4). One sheet travels with the basket from
 // data entry to handover: what was received, what is being dispensed, what the
 // screening found and who signed off each step. Self-contained HTML: no JS, no
@@ -58,7 +59,7 @@ function header({ job, pharmacy, printedBy, printedAt }) {
     ${kv([
       ['Worksheet', `<strong class="mono big">Rx ${esc(worksheetId(job))}</strong>${job.sequence > 0 ? ` <span class="tag">Repeat ${esc(job.sequence)}</span>` : ' <span class="tag">Original supply</span>'}`],
       ['Source', `${val(SOURCE_LABEL[job.source] ?? job.source)}${job.scid ? ` · SCID <span class="mono">${esc(job.scid)}</span>` : ''}`],
-      ['Status', val(String(job.state ?? '').replace(/_/g, ' '))],
+      ['Status', val(label('state', job.state))],
       ['Printed', `${esc(fmtDateTime(printedAt))} by ${val(printedBy?.name ?? printedBy)}`],
     ])}
   </div>
@@ -169,7 +170,7 @@ function screeningSection({ job, lookupUser }) {
   const sv = ack?.sourceVerified;
   body += `<p class="status-line">${signed
     ? `<strong>Signed off</strong> by ${val(checker)}${sv?.at ? ` at ${esc(fmtDateTime(sv.at))}` : ''}. ${box(true)} Checked against the original as received${sv?.differences?.length ? ` (differences: ${esc(sv.differences.join(', '))})` : ''}.`
-    : `<strong>Not yet signed off.</strong> ${box(false)} I have checked the script against the original as received.`}${job.screening?.reviewer ? ` <span class="muted">Reviewer: ${esc(job.screening.reviewer)}</span>` : ''}</p>`;
+    : `<strong>Not yet signed off.</strong> ${box(false)} I have checked the script against the original as received.`}${job.screening?.reviewer ? ` <span class="muted">Reviewer: ${esc(reviewerLabel(job.screening.reviewer))}</span>` : ''}</p>`;
 
   if (!findings.length) {
     body += `<p class="note">No findings from rules, formulary or AI review.</p>`;

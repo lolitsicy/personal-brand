@@ -79,7 +79,7 @@ test('roles are enforced: a technician cannot clinically check or final check', 
   const rx = await p.intakeFromSource('nzeps', METFORMIN_SCID, lucy);
   const [jobId] = jobsOf(rx);
   await p.transition(jobId, 'enter', lucy);
-  await assert.rejects(p.transition(jobId, 'clinical_check', lucy), /cannot clinical check/);
+  await assert.rejects(p.transition(jobId, 'clinical_check', lucy), /can't do the clinical check/);
 });
 
 test('the person who assembled cannot also do the final check', async () => {
@@ -126,7 +126,7 @@ test('repeats: limited to authorised count, broker ends at Dispensed', async () 
       jobId = p.getPrescription(rx.id).items[0].jobs.at(-1).id;
     }
   }
-  await assert.rejects(Promise.resolve().then(() => p.requestRepeat(itemId, lucy)), /completed; no repeats left/);
+  await assert.rejects(Promise.resolve().then(() => p.requestRepeat(itemId, lucy)), /No repeats left to dispense/);
   assert.match(adapters.scriptSources.nzeps.list()[0].items[0], /\(Dispensed\)/);
 });
 

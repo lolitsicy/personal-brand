@@ -11,6 +11,8 @@
 // Each action lists which roles may perform it. Side effects (stock, CD
 // register, labels, claims, broker status) live in the dispensing service.
 
+import { label } from './labels.js';
+
 export const STATES = [
   'queued',
   'entered',
@@ -44,13 +46,13 @@ export function planTransition(job, action, user) {
   if (!user) throw Object.assign(new Error('A signed-in user is required'), { status: 401 });
   if (!def.roles.includes(user.role) && user.role !== 'admin') {
     throw Object.assign(
-      new Error(`Role "${user.role}" cannot ${action.replace('_', ' ')} (needs ${def.roles.join(' or ')})`),
+      new Error(`A ${label('role', user.role).toLowerCase()} can't ${label('actionVerb', action)}. This step needs a ${def.roles.map((r) => label('role', r).toLowerCase()).join(' or ')}.`),
       { status: 403 },
     );
   }
   if (!def.from.includes(job.state)) {
     throw Object.assign(
-      new Error(`Cannot ${action.replace('_', ' ')} a job in state "${job.state}"`),
+      new Error(`Can't ${label('actionVerb', action)} now: this script is at "${label('state', job.state)}".`),
       { status: 409 },
     );
   }

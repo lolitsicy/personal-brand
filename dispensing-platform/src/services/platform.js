@@ -6,6 +6,7 @@ import { randomInt, createHash } from 'node:crypto';
 import { buildLabel } from '../domain/label.js';
 import { DomainError, notFound, forbidden, conflict } from '../domain/errors.js';
 import { createAudit } from './audit.js';
+import { label } from '../domain/labels.js';
 
 const OPEN_JOB_STATES = ['queued', 'entered', 'clinically_checked', 'assembled', 'checked', 'on_hold'];
 const STOCK_HELD_STATES = ['assembled', 'checked'];
@@ -234,7 +235,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
     return tx(db, () => {
       const item = one('SELECT * FROM prescription_items WHERE id = ?', Number(itemId));
       if (!item) throw notFound('Prescription item', itemId);
-      if (item.status !== 'active') throw conflict(`Item is ${item.status}; no repeats left to dispense`);
+      if (item.status !== 'active') throw conflict(`No repeats left to dispense (${label('item', item.status).toLowerCase()})`);
       const open = one(
         `SELECT id FROM dispense_jobs WHERE item_id = ? AND state IN (${OPEN_JOB_STATES.map(() => '?').join(',')})`,
         item.id, ...OPEN_JOB_STATES,
@@ -348,7 +349,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
   async function runScreening(jobId, user, { useAi = true } = {}) {
     if (!user) throw new DomainError('Sign in required', { status: 401 });
     const job = loadJob(jobId);
-    if (!['queued', 'entered'].includes(job.state)) throw conflict(`Screening runs before the clinical check (job is ${job.state})`);
+    if (!['queued', 'entered'].includes(job.state)) throw conflict(`Screening runs before the clinical check; this script is at "${label('state', job.state)}"`);
     // Network-backed formulary sources fill their cache here (async), so the
     // synchronous checks at sign-off read the same data.
     if (hooks.formulary?.prefetch) {
@@ -433,7 +434,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
 
   function attachFulfilment(job, { method = 'pickup', address, scheduledFor }) {
     if (!['pickup', 'delivery', 'courier', 'compliance_pack'].includes(method)) {
-      throw new DomainError(`Unknown fulfilment method "${method}"`);
+      throw new DomainError('Choose pickup, pharmacy delivery, courier or compliance pack');
     }
     const pat = patient(job.patient_id);
     const addr = method === 'pickup' ? null : (address || pat.address);
@@ -504,7 +505,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
     const changes = tx(db, () => {
       const job = loadJob(jobId);
       if (!['queued', 'entered'].includes(job.state)) {
-        throw conflict(`Scripts can only be edited before the clinical check (this one is ${job.state.replace('_', ' ')}). Put it on hold and ask a pharmacist.`);
+        throw conflict(`Scripts can only be edited before the clinical check (this one is at "${label('state', job.state)}"). Put it on hold and ask a pharmacist.`);
       }
       const c = applyAmendments(job, input, user, 'item.amended');
       if (c.quantity) run("UPDATE dispense_jobs SET quantity = ?, updated_at = datetime('now') WHERE id = ?", c.quantity.to, job.id);
@@ -682,7 +683,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
     return tx(db, () => {
       const job = loadJob(jobId);
       if (!job.owing) throw conflict('Nothing owing on this job');
-      if (!['assembled', 'checked', 'released', 'completed'].includes(job.state)) throw conflict(`Cannot supply owing in state "${job.state}"`);
+      if (!['assembled', 'checked', 'released', 'completed'].includes(job.state)) throw conflict(`Can't supply the owing while the script is at "${label('state', job.state)}"`);
       const supply = Math.min(onHand(job.medicine_id), job.owing);
       if (supply === 0) throw conflict('Still no stock on hand');
       moveStock(job.medicine_id, -supply, { reason: `Owing supplied Rx ${job.id}-${job.sequence}`, jobId: job.id, userId: user.id, kind: 'dispensed' });
@@ -729,7 +730,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
 
     if (action === 'dispatch') {
       if (!['delivery', 'courier'].includes(f.method)) throw conflict('Only delivery or courier fulfilments can be dispatched');
-      if (f.status !== 'open') throw conflict(`Fulfilment is ${f.status}`);
+      if (f.status !== 'open') throw conflict(`This order is ${label('fulfilment', f.status).toLowerCase()}`);
       if (!f.ready) throw conflict('Not every item in this order has been released yet');
       booking = f.method === 'courier'
         ? await adapters.couriers[body.provider ?? 'default'].book(f)
@@ -744,7 +745,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
           break;
         case 'complete': {
           const okFrom = ['pickup', 'compliance_pack'].includes(cur.method) ? ['open'] : ['out_for_delivery'];
-          if (!okFrom.includes(cur.status)) throw conflict(`Cannot complete a ${cur.method} fulfilment that is ${cur.status}`);
+          if (!okFrom.includes(cur.status)) throw conflict(`Can't hand over a ${label('method', cur.method).toLowerCase()} order that is ${label('fulfilment', cur.status).toLowerCase()}`);
           if (!cur.ready) throw conflict('Not every item in this order has been released yet');
           if (cur.hasControlled && !body.proof) throw new DomainError('Controlled drugs: record who collected/received the medicine (proof)');
           run("UPDATE fulfilments SET status = 'completed', proof = ?, completed_at = datetime('now') WHERE id = ?", body.proof ?? null, cur.id);

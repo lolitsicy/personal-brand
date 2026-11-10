@@ -1,4 +1,5 @@
 import { renderFlowDesigner, renderFlowTimeline } from './flow.js';
+import { label, humanize, reviewerLabel, sentence } from './labels.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -51,7 +52,7 @@ async function boot() {
   users = userList;
   document.querySelectorAll('[data-pharmacy]').forEach((el) => (el.textContent = cfg.pharmacy.name));
   const sel = $('#user-select');
-  sel.innerHTML = users.map((u) => `<option value="${u.id}">${esc(u.name)} (${u.role})</option>`).join('');
+  sel.innerHTML = users.map((u) => `<option value="${u.id}">${esc(u.name)} · ${esc(label('role', u.role))}</option>`).join('');
   if (!users.some((u) => String(u.id) === userId)) userId = String(users[0].id);
   sel.value = userId;
   const setAvatar = () => ($('#user-avatar').textContent = users.find((u) => String(u.id) === userId)?.initials ?? '');
@@ -143,7 +144,7 @@ async function renderHome() {
     card.innerHTML = `
       <div class="eyebrow">Next decision · ${esc(stepLabel)} · ${esc(reason)}</div>
       <div class="med">${esc(n.medicine)} <span class="muted" style="font-size:20px">${esc(n.form)}</span></div>
-      <div class="who">${esc(n.patient)} · NHI ${esc(n.nhi ?? '—')} · ${esc(n.source)} · waiting ${since(n.waitingSince)} ${n.controlled ? `<span class="tag cd">CD ${esc(n.controlled)}</span>` : ''}</div>
+      <div class="who">${esc(n.patient)} · NHI ${esc(n.nhi ?? '—')} · ${esc(label('source', n.source))} · waiting ${since(n.waitingSince)} ${n.controlled ? `<span class="tag cd">CD ${esc(n.controlled)}</span>` : ''}</div>
       ${n.finding ? `<div class="why">${esc(n.finding.message)}</div>` : '<div class="why">No findings that need a decision.</div>'}
       <div class="actions"><button class="primary" id="open-next">Open the script →</button></div>`;
     $('#open-next').onclick = guard(() => openJob(n.jobId));
@@ -158,7 +159,7 @@ async function renderHome() {
 
   const t = h.today;
   $('#kpis').innerHTML = [
-    ['Received today', t.received, 'supplies queued'],
+    ['Received today', t.received, 'new supplies'],
     ['Screened', t.screened, 'rules + reviewer'],
     ['Hard stops resolved', t.hardStops, `${t.overrides} overridden with a reason`],
     ['Reviewed findings', t.acknowledged, 'acknowledged by a pharmacist'],
@@ -167,7 +168,7 @@ async function renderHome() {
 
   barChart($('#days-chart'), h.days.map((d) => ({ label: d.day, value: d.n })));
 
-  $('#collections').innerHTML = h.collections.map((f) => `<li><span><b>${esc(f.patient_name)}</b><br/><span class="muted">${esc(f.method.replace('_', ' '))} · ${f.items} item${f.items === 1 ? '' : 's'}</span></span>
+  $('#collections').innerHTML = h.collections.map((f) => `<li><span><b>${esc(f.patient_name)}</b><br/><span class="muted">${esc(label('method', f.method))} · ${f.items} item${f.items === 1 ? '' : 's'}</span></span>
     ${f.pickup_code && f.method === 'pickup' ? `<code>${esc(f.pickup_code)}</code>` : f.tracking_ref ? `<span class="tag">${esc(f.tracking_ref)}</span>` : statusTag(f.status)}</li>`).join('') || '<li class="muted">Nothing waiting.</li>';
 }
 
@@ -211,7 +212,7 @@ let railOpen = true;
 let railTab = 'original';
 const openTrace = new Set();
 
-const SPECIALIST = { pharma: 'medication review', pharmacology: 'clinical pharmacology', regulatory: 'regulatory', advocacy: 'patient advocacy' };
+const SPECIALIST = { pharma: 'Medication review', pharmacology: 'Clinical pharmacology', regulatory: 'Regulatory', advocacy: 'Patient advocacy' };
 const LANG = { en: 'English', mi: 'te reo Māori', sm: 'Samoan', to: 'Tongan', zh: 'Chinese', hi: 'Hindi' };
 const SEV_LABEL = { hard_stop: 'Hard stop', high: 'Review', moderate: 'Check', info: 'Note' };
 const ICONS = {
@@ -288,19 +289,18 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
     .sort((a, b) => SPEC_ORDER.indexOf(a.specialist) - SPEC_ORDER.indexOf(b.specialist) || SEV_ORDER.indexOf(a.severity) - SEV_ORDER.indexOf(b.severity));
   const editable = j.actions.includes('clinical_check');
   const decisions = signedOff?.decisions ?? {};
-  const fileName = `${j.medicine.toLowerCase().replace(/\s+/g, '_')}_${j.strength.replace(/\s+/g, '')}.rx`;
-  setCrumb(['Queue', `<span class="file"><i>Rx</i><b>${esc(fileName)}</b></span>`, `<span class="when">${esc(new Date(j.created_at.replace(' ', 'T') + 'Z').toLocaleString('en-NZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</span>`]);
+  setCrumb(['Queue', `<span class="file"><i>Rx</i><b>${esc(`${j.medicine} ${j.strength}`)}</b><span class="muted">&nbsp;· ${esc(j.patient_name)}</span></span>`, `<span class="when">${esc(new Date(j.created_at.replace(' ', 'T') + 'Z').toLocaleString('en-NZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</span>`]);
 
   // toolbar above the panel
   $('#code-bar').innerHTML = `
     ${['queued', 'entered'].includes(j.state) ? `<button class="chip" id="rescreen">${ico('refresh')} Screen again</button>` : ''}
     <button class="chip" id="print-worksheet" title="Print the standardised dispensing worksheet">${ico('print')} Worksheet</button>
-    <span class="chip">${esc(({ nzeps: 'NZePS e-script', paper: 'Paper', fax: 'Fax', phone: 'Phone order', signature_exempt: 'Signature exempt' })[j.source] ?? j.source)}</span>
+    <span class="chip">${esc(label('source', j.source))}</span>
     <span class="chip">${esc(j.patient_name)}</span>
     <span class="grow"></span>
     ${j.controlled_class ? `<span class="chip">CD ${esc(j.controlled_class)}</span>` : ''}
-    <span class="chip"><span class="dot"></span>${j.scid ? `${esc(j.scid.slice(0, 6))}… · ` : ''}${since(j.created_at)} ago</span>
-    <span class="chip">${esc(j.state.replace('_', ' '))}</span>`;
+    <span class="chip"><span class="dot"></span>Received ${since(j.created_at)} ago</span>
+    <span class="chip">${esc(label('state', j.state))}</span>`;
 
   // ── the e-script panel: every field, with its flags and any difference from the original ──
   const age = ageOf(j.patient?.dob);
@@ -367,9 +367,9 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
         ${editing ? `<div class="rx-field rx-reason"><div class="rx-label">Reason for change</div><div class="rx-value"><input class="rx-in" name="reason" placeholder="Required, e.g. clarified with prescriber by phone" /></div><div></div></div>` : ''}
       </section>
       <section class="rx-sec"><h5>Other medicines (${j.medication_list?.length ?? 0})</h5>
-        ${(j.medication_list ?? []).map((m) => field(`med:${m.ingredient.toLowerCase()}`, esc(m.source), esc(m.name ?? m.ingredient))).join('') || '<div class="rx-empty">None on record</div>'}
+        ${(j.medication_list ?? []).map((m) => field(`med:${m.ingredient.toLowerCase()}`, esc(sentence(m.source)), esc(sentence(m.name ?? m.ingredient)))).join('') || '<div class="rx-empty">None on record</div>'}
       </section>
-      <section class="rx-sec"><h5>Flags for the pharmacist <span class="muted">· ${esc(j.screening?.reviewer ?? 'rules only')} · ${esc(j.screening?.status ?? 'not run')}</span></h5>
+      <section class="rx-sec"><h5>Flags for the pharmacist <span class="muted">· ${esc(j.screening ? reviewerLabel(j.screening.reviewer) : 'Rules only')} · ${esc(j.screening ? label('screening', j.screening.status) : 'Not run yet')}</span></h5>
         ${flagListHtml(findings, decisions, j.actions.includes('clinical_check'))}
       </section>
       ${j.label_text ? `<section class="rx-sec"><h5>Label</h5><pre class="label">${esc(j.label_text)}</pre></section>` : ''}
@@ -388,7 +388,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
         <button class="${railTab === 'reviewer' ? 'on' : ''}" data-rail="reviewer">AI reviewer</button>
       </div>
       ${railTab === 'original' ? originalHtml(j, o) : railTab === 'flow' ? '<div id="job-flow"></div>' : `
-        <div class="meta">${esc(j.screening?.reviewer ?? 'Not run yet')} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
+        <div class="meta">${esc(reviewerLabel(j.screening?.reviewer))} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>
         <div class="meta">Works on a de-identified case. Can add findings; can't clear or downgrade a rule.</div>
         ${counsel ? `<h4>Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}`}
     </aside>
@@ -450,7 +450,7 @@ function originalHtml(j, o) {
   return `
     <div class="meta">${kindLabel}</div>
     <div>${integrity}</div>
-    <div class="meta mono-hash">received ${esc(o.receivedAt)} · sha256 ${esc((o.hash ?? '').slice(0, 16))}…</div>
+    <div class="meta">Received ${esc(fmtWhen(o.receivedAt))} · fingerprint <span class="mono-hash">${esc((o.hash ?? '').slice(0, 12))}</span></div>
     ${doc}
     ${o.kind !== 'electronic' ? '<div class="meta"><b>The scan above is the original.</b> Read it against the script lines on the left; the table below only compares what was keyed at intake with what is being dispensed.</div>' : ''}
     ${o.compare.length ? `<h4>${o.kind === 'electronic' ? 'Received vs dispensing' : 'Keyed at intake vs dispensing'}</h4>
@@ -555,7 +555,7 @@ async function doAction(j, act) {
   }
   if (act === 'supply-owing') await api(`/api/jobs/${j.id}/supply-owing`, { method: 'POST' });
   else await api(`/api/jobs/${j.id}/${act.replace(/_/g, '-')}`, { method: 'POST', body });
-  toast(`${ACTION_LABEL[act] ?? act}: done`);
+  toast(`${ACTION_LABEL[act] ?? humanize(act)}: done`);
   if (act === 'release' || act === 'cancel') selectedJobId = null;
   render();
 }
@@ -613,7 +613,7 @@ async function renderPrescriptions() {
   const q = $('#rx-search').value;
   const rows = await api(`/api/prescriptions${q ? `?q=${encodeURIComponent(q)}` : ''}`);
   $('#rx-table').innerHTML = `<tr><th>#</th><th>Patient</th><th>Prescriber</th><th>Source</th><th>Items</th><th>Status</th></tr>` +
-    rows.map((r) => `<tr class="click" data-id="${r.id}"><td>${r.id}</td><td>${esc(r.patient_name)} <span class="muted">${esc(r.nhi ?? '')}</span></td><td>${esc(r.prescriber_name)}</td><td>${esc(r.source)}${r.scid ? `<br/><code>${esc(r.scid)}</code>` : ''}</td><td>${r.item_count}</td><td>${statusTag(r.status)}</td></tr>`).join('');
+    rows.map((r) => `<tr class="click" data-id="${r.id}"><td>${r.id}</td><td>${esc(r.patient_name)} <span class="muted">${esc(r.nhi ?? '')}</span></td><td>${esc(r.prescriber_name)}</td><td>${esc(label('source', r.source))}${r.scid ? `<br/><code>${esc(r.scid)}</code>` : ''}</td><td>${r.item_count}</td><td>${statusTag(r.status, 'prescription')}</td></tr>`).join('');
   document.querySelectorAll('#rx-table tr.click').forEach((tr) => (tr.onclick = guard(() => showRx(tr.dataset.id))));
 }
 
@@ -624,8 +624,8 @@ async function showRx(id) {
     <table><tr><th>Medicine</th><th>Directions</th><th>Qty</th><th>Supplies</th><th>Jobs</th><th></th></tr>
     ${rx.items.map((i) => `<tr><td>${esc(i.medicine)} ${esc(i.strength)} ${i.controlled_class ? `<span class="tag cd">CD ${i.controlled_class}</span>` : ''}</td><td>${esc(i.directions)}</td><td>${i.quantity}</td>
       <td>${i.dispensings_count} / ${i.repeats_authorised + 1}</td>
-      <td>${i.jobs.map((j) => `<span class="tag">${j.sequence === 0 ? 'Orig' : 'R' + j.sequence}: ${esc(j.state)}</span>`).join(' ')}</td>
-      <td>${i.status === 'active' ? `<button data-item="${i.id}">Dispense repeat</button>` : statusTag(i.status)}</td></tr>`).join('')}</table></div>`;
+      <td>${i.jobs.map((j) => `<span class="tag">${j.sequence === 0 ? 'Original' : 'Repeat ' + j.sequence}: ${esc(label('state', j.state))}</span>`).join(' ')}</td>
+      <td>${i.status === 'active' ? `<button data-item="${i.id}">Dispense repeat</button>` : statusTag(i.status, 'item')}</td></tr>`).join('')}</table></div>`;
   document.querySelectorAll('#rx-detail [data-item]').forEach((b) => (b.onclick = guard(async () => {
     await api(`/api/items/${b.dataset.item}/repeat`, { method: 'POST' });
     toast('Repeat added to the queue');
@@ -633,7 +633,30 @@ async function showRx(id) {
   })));
 }
 
-const statusTag = (s) => `<span class="tag ${['completed', 'accepted'].includes(s) ? 'ok' : ['cancelled', 'rejected', 'failed'].includes(s) ? 'danger' : ''}">${esc(s)}</span>`;
+const statusTag = (s, kind = 'state') => `<span class="tag ${['completed', 'accepted', 'paid'].includes(s) ? 'ok' : ['cancelled', 'rejected', 'failed'].includes(s) ? 'danger' : ''}">${esc(label(kind, s))}</span>`;
+/** Audit data as readable "Key: value" pairs, with internal values translated. */
+function auditDetail(data) {
+  if (!data || typeof data !== 'object') return '';
+  const VALUE_KIND = { from: 'state', to: 'state', source: 'source', method: 'method', status: 'state', type: 'step', kind: 'ledger', action: 'actionVerb' };
+  const HIDE = /hash|Hash|Id$|^id$|ref$|^key$/;
+  const KEY_LABEL = { type: 'Step', counts: 'Findings', sourceHash: 'Fingerprint' };
+  const fmt = (k, v) => {
+    if (v == null || v === '') return null;
+    if (typeof v === 'object') {
+      if (Array.isArray(v)) return v.length ? v.map((x) => (typeof x === 'object' ? '…' : humanize(x))).join(', ') : null;
+      if ('from' in v && 'to' in v) return `${v.from ?? '—'} → ${v.to ?? '—'}`;
+      const inner = Object.entries(v).map(([ik, iv]) => fmt(ik, iv) && `${humanize(ik)} ${fmt(ik, iv)}`).filter(Boolean);
+      return inner.length ? inner.join('; ') : null;
+    }
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (k === 'reviewer') return reviewerLabel(v);
+    return VALUE_KIND[k] ? label(VALUE_KIND[k], v) : String(v);
+  };
+  return Object.entries(data).filter(([k]) => !HIDE.test(k))
+    .map(([k, v]) => { const f = fmt(k, v); return f ? `<span class="kv"><i>${esc(KEY_LABEL[k] ?? humanize(k))}</i> ${esc(f)}</span>` : ''; })
+    .filter(Boolean).join(' ');
+}
+const fmtWhen = (ts) => (ts ? new Date(String(ts).replace(' ', 'T') + (String(ts).includes('Z') || String(ts).includes('+') ? '' : 'Z')).toLocaleString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—');
 
 // ───────────── fulfilment ─────────────
 async function renderFulfilment() {
@@ -644,9 +667,9 @@ async function renderFulfilment() {
     if ((f.status === 'open' && ['pickup', 'compliance_pack'].includes(f.method)) || f.status === 'out_for_delivery') acts.push(['complete', f.method === 'pickup' ? 'Collected' : 'Delivered']);
     if (f.status === 'out_for_delivery') acts.push(['fail', 'Failed delivery']);
     if (f.status === 'failed') acts.push(['retry', 'Retry']);
-    return `<div class="card"><div class="row space"><b>${esc(f.patient_name)}</b>${statusTag(f.status)}</div>
-      <div class="muted">${esc(f.method.replace('_', ' '))}${f.address ? ` · ${esc(f.address)}` : ''}${f.tracking_ref ? ` · ${esc(f.provider)} <code>${esc(f.tracking_ref)}</code>` : ''}${f.pickup_code && f.method === 'pickup' ? ` · pickup code <code>${esc(f.pickup_code)}</code>` : ''}</div>
-      <ul class="list" style="margin-top:8px">${f.jobs.map((j) => `<li><span>${esc(j.medicine)} ${esc(j.strength)} ×${j.quantity_supplied}${j.controlled_class ? ' <span class="tag cd">CD</span>' : ''}${j.owing ? ` <span class="tag warn">owing ${j.owing}</span>` : ''}</span><span class="tag">${esc(j.state)}</span></li>`).join('')}</ul>
+    return `<div class="card"><div class="row space"><b>${esc(f.patient_name)}</b>${statusTag(f.status, 'fulfilment')}</div>
+      <div class="muted">${esc(label('method', f.method))}${f.address ? ` · ${esc(f.address)}` : ''}${f.tracking_ref ? ` · ${esc(f.provider)} <code>${esc(f.tracking_ref)}</code>` : ''}${f.pickup_code && f.method === 'pickup' ? ` · pickup code <code>${esc(f.pickup_code)}</code>` : ''}</div>
+      <ul class="list" style="margin-top:8px">${f.jobs.map((j) => `<li><span>${esc(j.medicine)} ${esc(j.strength)} ×${j.quantity_supplied}${j.controlled_class ? ' <span class="tag cd">CD</span>' : ''}${j.owing ? ` <span class="tag warn">Owing ${j.owing}</span>` : ''}</span><span class="tag">${esc(label('state', j.state))}</span></li>`).join('')}</ul>
       ${f.proof ? `<p class="muted">${esc(f.proof)}</p>` : ''}
       <div class="actions"><button data-print-label="${f.id}">${ico('print')} ${['pickup', 'compliance_pack'].includes(f.method) ? 'Bag label' : 'Shipping label'}</button>${f.ready || f.status !== 'open' ? acts.map(([a, l]) => `<button class="primary" data-f="${f.id}" data-a="${a}" data-cd="${f.hasControlled}">${l}</button>`).join('') : '<span class="muted">Waiting for remaining items…</span>'}</div></div>`;
   }).join('') || '<p class="muted">Nothing released yet.</p>';
@@ -681,23 +704,23 @@ async function renderStock() {
   $('#reorder-table').innerHTML = '<tr><th>Product</th><th>On hand</th><th>Used 30d</th><th>Order</th></tr>' +
     (reorder.lines.map((l) => `<tr><td>${esc(l.name)}${l.controlled ? ' <span class="tag cd">CD</span>' : ''}</td><td>${l.onHand}</td><td>${l.used30}</td><td><b>${l.packs} × ${l.packSize}</b> = ${l.units}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Nothing below its reorder point.</td></tr>');
   $('#ledger-table').innerHTML = '<tr><th>When</th><th>Product</th><th>Change</th><th>Balance</th><th>Kind</th></tr>' +
-    ledger.slice(0, 60).map((l) => `<tr><td class="mono">${esc(l.at)}</td><td>${esc(l.medicine)} ${esc(l.strength)}</td><td>${l.change > 0 ? '+' : ''}${l.change}</td><td>${l.balance}</td><td><span class="tag">${esc(l.kind)}</span></td></tr>`).join('');
+    ledger.slice(0, 60).map((l) => `<tr><td>${esc(fmtWhen(l.at))}</td><td>${esc(l.medicine)} ${esc(l.strength)}</td><td>${l.change > 0 ? '+' : ''}${l.change}</td><td>${l.balance}</td><td><span class="tag">${esc(label('ledger', l.kind))}</span></td></tr>`).join('');
   $('#cd-table').innerHTML = '<tr><th>When</th><th>Medicine</th><th>Change</th><th>Balance</th><th>Reason</th><th>By</th></tr>' +
-    cd.map((c) => `<tr><td class="mono">${esc(c.at)}</td><td>${esc(c.medicine)} ${esc(c.strength)}</td><td>${c.change > 0 ? '+' : ''}${c.change}</td><td><b>${c.balance}</b></td><td>${esc(c.reason)}</td><td>${esc(c.user_name ?? '—')}</td></tr>`).join('');
+    cd.map((c) => `<tr><td>${esc(fmtWhen(c.at))}</td><td>${esc(c.medicine)} ${esc(c.strength)}</td><td>${c.change > 0 ? '+' : ''}${c.change}</td><td><b>${c.balance}</b></td><td>${esc(c.reason)}</td><td>${esc(c.user_name ?? '—')}</td></tr>`).join('');
 }
 
 // ───────────── claims / audit ─────────────
 async function renderClaims() {
   const rows = await api('/api/claims');
   $('#claims-table').innerHTML = '<tr><th>#</th><th>Job</th><th>NHI</th><th>Medicine</th><th>Qty</th><th>Subsidy</th><th>Patient charge</th><th>Status</th><th>Batch</th></tr>' +
-    rows.map((c) => `<tr><td>${c.id}</td><td>${c.job_id}</td><td>${esc(c.patient_nhi ?? '—')}</td><td>${esc(c.medicine_code)}</td><td>${c.quantity}</td><td>${money(c.subsidy_cents)}</td><td>${money(c.patient_charge_cents)}</td><td>${statusTag(c.status)}${c.response ? ` <span class="muted">${esc(c.response)}</span>` : ''}</td><td class="mono">${esc(c.batch_ref ?? '')}</td></tr>`).join('');
+    rows.map((c) => `<tr><td>${c.id}</td><td>${c.job_id}</td><td>${esc(c.patient_nhi ?? '—')}</td><td>${esc(c.medicine_code)}</td><td>${c.quantity}</td><td>${money(c.subsidy_cents)}</td><td>${money(c.patient_charge_cents)}</td><td>${statusTag(c.status, 'claim')}${c.response ? ` <span class="muted">${esc(c.response)}</span>` : ''}</td><td class="mono">${esc(c.batch_ref ?? '')}</td></tr>`).join('');
 }
 
 async function renderAudit() {
   const [rows, v] = await Promise.all([api('/api/audit'), api('/api/audit/verify')]);
   $('#audit-verify').innerHTML = v.ok ? `<span class="tag ok">Chain intact · ${v.checked} entries</span>` : `<span class="tag danger">Chain broken at #${v.brokenAt}</span>`;
   $('#audit-table').innerHTML = '<tr><th>#</th><th>When</th><th>User</th><th>Action</th><th>Entity</th><th>Detail</th></tr>' +
-    rows.map((r) => `<tr><td>${r.id}</td><td class="mono">${esc(r.at.replace('T', ' ').slice(0, 19))}</td><td>${esc(r.user_name ?? '—')}</td><td><code>${esc(r.action)}</code></td><td>${esc(r.entity)} ${r.entity_id ?? ''}</td><td class="mono">${esc(JSON.stringify(r.data))}</td></tr>`).join('');
+    rows.map((r) => `<tr><td>${r.id}</td><td>${esc(fmtWhen(r.at))}</td><td>${esc(r.user_name ?? 'System')}</td><td>${esc(label('audit', r.action))}</td><td>${esc(label('entity', r.entity))}${r.entity_id ? ` ${r.entity_id}` : ''}</td><td>${auditDetail(r.data)}</td></tr>`).join('');
 }
 
 // ───────────── counter ─────────────
@@ -723,7 +746,7 @@ async function renderCounter() {
   if (saleId) {
     const sale = await api(`/api/counter/sales/${saleId}`);
     const open = sale.status === 'open';
-    $('#sale-box').innerHTML = `<p>${sale.patient_name ? esc(sale.patient_name) : '<span class="muted">Walk-in</span>'} · ${statusTag(sale.status)}</p>
+    $('#sale-box').innerHTML = `<p>${sale.patient_name ? esc(sale.patient_name) : '<span class="muted">Walk-in</span>'} · ${statusTag(sale.status, 'sale')}</p>
       <table>${sale.lines.map((l) => `<tr><td>${l.kind === 'rx' ? '<span class="tag">Rx</span>' : ''}${esc(l.description)}${l.refunded ? ' <span class="tag danger">refunded</span>' : ''}</td><td>×${l.quantity}</td><td>${money(l.unit_cents * l.quantity)}</td><td>${open ? `<button data-rm="${l.id}">✕</button>` : ''}</td></tr>`).join('') || '<tr><td class="muted">Empty</td></tr>'}</table>
       <p class="total">${money(sale.total_cents)} <span class="muted" style="font-size:12px;font-weight:400">incl. GST ${money(sale.gst_cents)}</span></p>
       <div class="actions">${open ? `<button class="primary" data-pay="card">Card</button><button data-pay="cash">Cash</button>` : ''}${['paid', 'partially_refunded'].includes(sale.status) ? '<button class="danger" id="refund">Refund</button>' : ''}</div>`;
@@ -747,9 +770,9 @@ async function renderCounter() {
     <tr><td>Transactions</td><td>${eod.transactions}</td></tr><tr><td>Prescription</td><td>${money(eod.rxCents)}</td></tr>
     <tr><td>Over the counter</td><td>${money(eod.otcCents)}</td></tr><tr><td>Refunds</td><td>−${money(eod.refundsCents)}</td></tr>
     <tr><td><b>Net</b></td><td><b>${money(eod.netCents)}</b></td></tr><tr><td>GST included</td><td>${money(eod.gstCents)}</td></tr>
-    ${Object.entries(eod.byMethod).map(([m, c]) => `<tr><td class="muted">${esc(m)}</td><td class="muted">${money(c)}</td></tr>`).join('')}</table>`;
+    ${Object.entries(eod.byMethod).map(([m, c]) => `<tr><td class="muted">${esc(label('payment', m))}</td><td class="muted">${money(c)}</td></tr>`).join('')}</table>`;
   $('#sales-table').innerHTML = '<tr><th>#</th><th>Customer</th><th>Total</th><th>Status</th></tr>' +
-    sales.slice(0, 20).map((x) => `<tr class="click" data-sale="${x.id}"><td>${x.id}</td><td>${esc(x.patient_name ?? 'Walk-in')}</td><td>${money(x.total_cents)}</td><td>${statusTag(x.status)}</td></tr>`).join('');
+    sales.slice(0, 20).map((x) => `<tr class="click" data-sale="${x.id}"><td>${x.id}</td><td>${esc(x.patient_name ?? 'Walk-in')}</td><td>${money(x.total_cents)}</td><td>${statusTag(x.status, 'sale')}</td></tr>`).join('');
   document.querySelectorAll('[data-sale]').forEach((tr) => (tr.onclick = () => { saleId = Number(tr.dataset.sale); renderCounter(); }));
 }
 
@@ -757,8 +780,8 @@ async function renderSafety() {
   const rows = await api('/api/screening/overrides');
   $('#overrides-table').innerHTML = '<tr><th>When</th><th>Pharmacist</th><th>Patient</th><th>Medicine</th><th>Finding</th><th>Decision</th></tr>' +
     (rows.map((r) => `<tr><td class="mono">${esc(r.at)}</td><td>${esc(r.pharmacist)}</td><td>${esc(r.patient)}</td><td>${esc(r.medicine)}</td>
-      <td>${stag(r.severity, SEV_LABEL[r.severity])} <span class="muted">${r.origin === 'ai' ? 'AI reviewer' : r.origin === 'formulary' ? 'Formulary' : 'Rule'}</span><div>${esc(r.message)}</div></td>
-      <td><b>${esc(r.action)}</b>${r.reason ? `: ${esc(r.reason)}` : ''}${r.prescriberConfirmed ? '<br/><span class="muted">prescriber contacted</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No overrides yet.</td></tr>');
+      <td>${stag(r.severity, SEV_LABEL[r.severity])} <span class="muted">${esc(label('origin', r.origin))}</span><div>${esc(r.message)}</div></td>
+      <td><b>${esc(r.action === 'override' ? 'Overridden' : 'Reviewed')}</b>${r.reason ? `: ${esc(r.reason)}` : ''}${r.prescriberConfirmed ? '<br/><span class="muted">Prescriber contacted</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">No overrides yet.</td></tr>');
 }
 
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => guard(fn)(...a), ms); }; }

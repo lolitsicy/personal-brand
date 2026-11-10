@@ -175,7 +175,13 @@ async function readJson(req) {
   }
 }
 
+const LABELS_FILE = fileURLToPath(new URL('./domain/labels.js', import.meta.url));
+
 async function serveStatic(pathname, res) {
+  if (pathname === '/labels.js') {
+    res.writeHead(200, { 'Content-Type': 'text/javascript' });
+    return res.end(await readFile(LABELS_FILE));
+  }
   const rel = normalize(pathname === '/' ? '/index.html' : pathname).replace(/^(\.\.[/\\])+/, '');
   const file = join(PUBLIC_DIR, rel);
   if (!file.startsWith(PUBLIC_DIR)) return send(res, 403, { error: 'Forbidden' });

@@ -321,7 +321,6 @@ export function renderFlowDesigner(container, { api, toast = () => {}, user } = 
       return `<div class="fd-group">
         <div class="fd-group-head">
           <div class="fd-group-name">${esc(head.name)}</div>
-          <div class="fd-group-key mono">${esc(key)}</div>
           <div class="fd-applies">${(head.appliesTo ?? []).map((a) => `<span class="chip fd-src">${esc(SOURCE_LABEL[a] ?? a)}</span>`).join('') || '<span class="fd-dim">No sources</span>'}</div>
         </div>
         <ul class="fd-versions">${versions.map((v) => `
@@ -408,9 +407,8 @@ export function renderFlowDesigner(container, { api, toast = () => {}, user } = 
             <div class="fd-step-label">${esc(m.label)}${req ? `<span class="fd-lock" title="Required by guardrails: can't be disabled or removed">${ICON.lock}<span>Required</span></span>` : ''}</div>
             <div class="fd-step-meta">
               ${human ? `<span class="fd-kind human">${esc(role)} checkpoint</span>` : '<span class="fd-kind auto">Automatic</span>'}
-              <code>${esc(st.type)}</code>
               ${st.enabled ? '' : '<span class="fd-kind offtag">Disabled</span>'}
-              ${st.type === 'data_entry' && st.config?.autoFor?.length ? `<span class="fd-dim">auto for ${st.config.autoFor.map((x) => esc(SOURCE_LABEL[x] ?? x)).join(', ')}</span>` : ''}
+              ${st.type === 'data_entry' && st.config?.autoFor?.length ? `<span class="fd-dim">Confirmed automatically for ${st.config.autoFor.map((x) => esc(SOURCE_LABEL[x] ?? x)).join(', ')}</span>` : ''}
             </div>
           </div>
           <div class="fd-step-actions">
@@ -480,7 +478,7 @@ export function renderFlowDesigner(container, { api, toast = () => {}, user } = 
       <fieldset class="fd-applies-field"><legend>Applies to prescriptions from</legend>
         <div class="fd-srcs">${SOURCES.map(([v, l]) => `<label class="fd-srcopt"><input type="checkbox" data-field="appliesTo" value="${v}" ${d.appliesTo.includes(v) ? 'checked' : ''} ${ro} /><span>${esc(l)}</span></label>`).join('')}</div>
       </fieldset>
-      ${s.draft.key ? `<div class="fd-dim fd-keyline">Key <code>${esc(s.draft.key)}</code> · saving creates a new version</div>` : '<div class="fd-dim fd-keyline">Saving creates a new flow; its key is derived from the name.</div>'}`;
+      <div class="fd-dim fd-keyline">${s.draft.key ? 'Saving creates a new version of this flow.' : 'Saving creates a new flow.'}</div>`;
   }
 
   function renderPalette() {
@@ -697,6 +695,15 @@ const SEV_TAG = { hard_stop: 'danger', high: 'warn', moderate: '', info: '' };
 const SEV_WORD = { hard_stop: 'hard stop', high: 'high', moderate: 'moderate', info: 'info' };
 const clip = (v, n = 48) => { const t = String(v); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
 
+// Internal values in step outputs, shown in plain words.
+const VALUE_LABEL = {
+  source: { nzeps: 'NZePS e-script', paper: 'Paper script', signature_exempt: 'Signature-exempt script', fax: 'Fax', phone: 'Phone order' },
+  method: { pickup: 'Pickup in store', delivery: 'Pharmacy delivery', courier: 'Courier', compliance_pack: 'Compliance pack' },
+  state: { queued: 'Received', entered: 'Data entry done', clinically_checked: 'Clinically checked', assembled: 'Assembled', checked: 'Final checked', released: 'Released', completed: 'Completed', on_hold: 'On hold', cancelled: 'Cancelled' },
+  reviewer: { 'mock-reviewer': 'Offline reviewer (demo)' },
+  channel: { sms: 'Text message', email: 'Email' },
+};
+
 export function summariseOutput(out, type = '') {
   if (!out || typeof out !== 'object') return out == null || out === '' ? '' : `<span class="ft-kv">${esc(clip(out))}</span>`;
   const used = new Set(HIDDEN_KEYS);
@@ -736,7 +743,8 @@ export function summariseOutput(out, type = '') {
   for (const [k, v] of Object.entries(out)) {
     if ((prefer && !prefer.includes(k)) || used.has(k) || /Id$/.test(k) || v == null || v === false || typeof v === 'object' || bits.length >= 5) continue;
     const label = ACRONYM[k.toLowerCase()] ?? k.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
-    bits.push(`<span class="ft-kv"><i>${esc(label[0].toUpperCase() + label.slice(1))}</i> ${esc(typeof v === 'boolean' ? 'yes' : clip(v))}</span>`);
+    const shown = typeof v === 'boolean' ? 'Yes' : VALUE_LABEL[k]?.[v] ?? clip(v);
+    bits.push(`<span class="ft-kv"><i>${esc(label[0].toUpperCase() + label.slice(1))}</i> ${esc(shown)}</span>`);
   }
   return bits.join('');
 }

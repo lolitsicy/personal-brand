@@ -1,5 +1,6 @@
 import { tx } from '../db.js';
 import { DomainError, notFound, conflict, forbidden } from '../domain/errors.js';
+import { label } from '../domain/labels.js';
 
 // Point of sale: one basket for released scripts and over-the-counter
 // products, payment, refunds, pickup by code, end of day and an accounting
@@ -36,7 +37,7 @@ export function createCounter({ db, platform, adapters, config }) {
 
   function requireOpen(id) {
     const sale = getSale(id);
-    if (sale.status !== 'open') throw conflict(`Sale is ${sale.status}`);
+    if (sale.status !== 'open') throw conflict(`This sale is ${label('sale', sale.status).toLowerCase()}`);
     return sale;
   }
 
@@ -48,8 +49,8 @@ export function createCounter({ db, platform, adapters, config }) {
       Number(jobId),
     );
     if (!job) throw notFound('Dispense job', jobId);
-    if (job.state !== 'released') throw conflict(`Rx ${job.id} is ${job.state}; only released scripts can be sold`);
-    if (job.method !== 'pickup') throw conflict(`Rx ${job.id} is set for ${job.method}, not counter pickup`);
+    if (job.state !== 'released') throw conflict(`Rx ${job.id} is at "${label('state', job.state)}"; only released scripts can be sold`);
+    if (job.method !== 'pickup') throw conflict(`Rx ${job.id} is set for ${label('method', job.method).toLowerCase()}, not counter pickup`);
     if (sale.patient_id && sale.patient_id !== job.patient_id) throw conflict('That script belongs to a different patient');
     const dup = one(
       "SELECT l.id FROM sale_lines l JOIN sales s ON s.id = l.sale_id WHERE l.job_id = ? AND s.status IN ('open','paid') AND l.refunded = 0",
@@ -93,7 +94,7 @@ export function createCounter({ db, platform, adapters, config }) {
     const f = one("SELECT id FROM fulfilments WHERE pickup_code = ? AND method = 'pickup'", String(code).trim().toUpperCase());
     if (!f) throw notFound('Pickup code', code);
     const ful = getFulfilment(f.id);
-    if (ful.status !== 'open') throw conflict(`This pickup is ${ful.status}`);
+    if (ful.status !== 'open') throw conflict(`This pickup is ${label('fulfilment', ful.status).toLowerCase()}`);
     if (!ful.ready) throw conflict('Not every item in this order is ready yet');
     return tx(db, () => {
       const sale = requireOpen(saleId);
@@ -150,7 +151,7 @@ export function createCounter({ db, platform, adapters, config }) {
     if (!user || !['pharmacist', 'admin'].includes(user.role)) throw forbidden('Only a pharmacist can authorise refunds');
     if (!reason) throw new DomainError('A refund reason is required');
     const sale = getSale(saleId);
-    if (!['paid', 'partially_refunded'].includes(sale.status)) throw conflict(`Cannot refund a ${sale.status} sale`);
+    if (!['paid', 'partially_refunded'].includes(sale.status)) throw conflict(`Can't refund a sale that is ${label('sale', sale.status).toLowerCase()}`);
     const targets = sale.lines.filter((l) => !l.refunded && (!lineIds || lineIds.map(Number).includes(l.id)));
     if (!targets.length) throw conflict('Nothing left to refund');
     const amount = targets.reduce((t, l) => t + l.unit_cents * l.quantity, 0);
