@@ -279,77 +279,84 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
     <span class="chip"><span class="dot"></span>${j.scid ? `${esc(j.scid.slice(0, 6))}… · ` : ''}${since(j.created_at)} ago</span>
     <span class="chip">${esc(j.state.replace('_', ' '))}</span>`;
 
-  // script as numbered lines
-  const L = [];
-  const line = (tx, extra = {}) => L.push({ tx, ...extra });
-  const kv = (k, v) => `<span class="k">${k}</span> ${v}`;
+  // ── the e-script panel: every field, with its flags and any difference from the original ──
   const age = ageOf(j.patient?.dob);
-  line(`<span class="k">rx</span> <span class="id">${esc(j.id)}-${esc(j.sequence)}</span> <span class="c">// ${j.sequence === 0 ? 'original supply' : `repeat ${j.sequence}`} of ${j.repeats_authorised + 1}${j.scid ? ` · SCID ${esc(j.scid)}` : ''}</span>`);
-  line('{');
-  line(`    ${kv('patient', `<span class="s">"${esc(j.patient_name)}"</span>`)}, ${kv('nhi', `<span class="id">${esc(j.nhi ?? '—')}</span>`)}${age != null ? `, ${kv('age', `<span class="num">${age}</span>`)}` : ''}${j.patient?.egfr != null ? `, ${kv('egfr', `<span class="num">${j.patient.egfr}</span>`)}` : ''}`);
-  line(`    ${kv('allergies', `[${(j.patient?.allergies ?? []).map((a) => `<span class="s">"${esc(a)}"</span>`).join(', ')}]`)}`);
-  line(`    ${kv('prescriber', `<span class="s">"${esc(j.prescriber_name)}"</span>`)}`);
-  line('');
-  line(`    <span class="c">// what was prescribed</span>`);
-  line(`    ${kv('medicine', `<span class="id">${esc(j.medicine)}</span> <span class="num">${esc(j.strength)}</span> ${esc(j.form)}`)}`);
-  const differs = (field) => j.original?.compare?.find((c) => c.field === field && !c.match);
-  const srcWord = j.original?.kind === 'electronic' ? 'Original' : 'Keyed';
-  const diffBadge = (field) => (differs(field) ? { flag: 'high', badge: `<span class="badge high">≠ ${srcWord}: ${esc(differs(field).received)}</span>` } : {});
-  line(`    ${kv('directions', `<span class="s">"${esc(j.directions)}"</span>`)}`, diffBadge('Directions'));
-  line(`    ${kv('quantity', `<span class="num">${j.quantity}</span>`)}${j.quantity_supplied ? ` <span class="c">// supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="c">// on hand ${j.on_hand}</span>`, diffBadge('Quantity'));
-  if (j.dose_units && j.doses_per_day) line(`    ${kv('dose', `<span class="num">${j.dose_units}</span> × <span class="num">${j.doses_per_day}</span>/day`)}`);
-  line('');
-  line(`    <span class="c">// medication list (${j.medication_list?.length ?? 0} other)</span>`);
-  for (const m of j.medication_list ?? []) line(`    <span class="k">also</span> <span class="id">${esc(m.ingredient)}</span> <span class="c">// ${esc(m.source)}</span>`);
-  line('');
-  line(`    <span class="c">// screening: ${esc(j.screening?.reviewer ?? 'rules only')} · ${esc(j.screening?.status ?? 'not run')}</span>`);
-  let lastSpec = null;
-  for (const f of findings) {
-    if (f.specialist !== lastSpec) { line(`    <span class="c">// ${esc(SPECIALIST[f.specialist] ?? f.specialist)}</span>`); lastSpec = f.specialist; }
-    const flagged = ['hard_stop', 'high', 'moderate'].includes(f.severity);
-    const d = decisions[f.id];
-    const sevClass = d ? 'ok' : f.severity;
-    const badge = d ? `<span class="badge ok">✓ ${esc(d.action === 'override' ? 'Overridden' : 'Reviewed')}</span>`
-      : f.origin === 'ai' && f.severity === 'info' ? '<span class="badge ai">AI</span>'
-      : flagged ? `<span class="badge ${f.severity}">${SEV_ICON[f.severity]} ${SEV_LABEL[f.severity]}</span>` : '';
-    L.push({
-      flag: flagged || !!d ? sevClass : null, fid: f.id,
-      tx: `    <span class="k">${f.origin === 'ai' ? 'ai' : 'rule'}</span>.<span class="id">${esc(f.code.toLowerCase())}</span>(${f.severity === 'hard_stop' || f.severity === 'high' ? `<span class="hl ${f.severity}">${esc(f.message)}</span>` : `<span class="s">"${esc(f.message)}"</span>`});`,
-      badge,
-    });
-    if (openTrace.has(f.id)) {
-      L.push({ sub: `<div class="trace">// rule:   ${esc(f.trace?.rule ?? '')}\n// source: ${esc(f.trace?.source ?? '')}\n// inputs: ${esc(typeof f.trace?.inputs === 'string' ? f.trace.inputs : JSON.stringify(f.trace?.inputs))}</div>` });
+  const o = j.original;
+  const canEdit = ['queued', 'entered'].includes(j.state) && ['technician', 'pharmacist', 'admin'].includes(currentUser()?.role);
+  const editing = canEdit && editJobId === j.id;
+  const flags = fieldFlags(findings);
+  const srcWord = o?.kind === 'electronic' ? 'Original' : 'Keyed';
+  const diff = (field) => o?.compare?.find((c) => c.field === field && !c.match);
+  const worst = (list) => list.reduce((w, f) => (SEV_ORDER.indexOf(f.severity) < SEV_ORDER.indexOf(w) ? f.severity : w), 'info');
+  // One chip per kind of flag on a field (rule and formulary may both raise it); show the most severe.
+  const chips = (key) => {
+    const byLabel = new Map();
+    for (const f of (flags[key] ?? []).filter((x) => x.severity !== 'info')) {
+      const label = shortFlag(f), cur = byLabel.get(label);
+      const rank = (x) => (decisions[x.id] ? 9 : SEV_ORDER.indexOf(x.severity));
+      if (!cur || rank(f) < rank(cur)) byLabel.set(label, f);
     }
-    if (editable && f.severity === 'hard_stop') {
-      L.push({ sub: `<div class="decide" data-fid="${esc(f.id)}" data-kind="override"><input type="text" placeholder="Override reason (required)" data-reason /><label><input type="checkbox" data-prescriber /> Prescriber contacted</label></div>` });
-    } else if (editable && f.severity === 'high') {
-      L.push({ sub: `<div class="decide" data-fid="${esc(f.id)}" data-kind="ack"><label><input type="checkbox" data-ack /> Reviewed</label><input type="text" placeholder="Note (optional)" data-note /></div>` });
-    } else if (d && (d.reason || d.note)) {
-      L.push({ sub: `<div class="trace">// ${esc(d.action)}: ${esc(d.reason ?? d.note)}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` });
-    }
-  }
-  if (!findings.length) line(`    <span class="c">// no findings</span>`);
-  if (j.label_text) {
-    line('');
-    line(`    <span class="c">// label</span>`);
-    L.push({ sub: `<pre class="label">${esc(j.label_text)}</pre>` });
-  }
-  line('}');
-
-  let n = 0;
-  const codeHtml = L.map((l) => {
-    if (l.sub) return `<div class="sub"><div>${l.sub}</div></div>`;
-    n++;
-    return `<div class="ln ${l.flag ? `flag ${l.flag}` : ''}" ${l.fid ? `data-trace="${esc(l.fid)}" title="Click to show the reasoning trace"` : ''}>
-      <span class="g">${l.flag ? `<span class="gd ${l.flag}"></span>` : ''}</span><span class="no">${n}</span><span class="tx">${l.tx || ' '}</span><span>${l.badge ?? ''}</span></div>`;
-  }).join('');
+    return [...byLabel.entries()].map(([label, f]) =>
+      `<a class="fflag ${decisions[f.id] ? 'ok' : f.severity}" href="#flag-${esc(f.id)}" title="${esc(f.message)}">${decisions[f.id] ? '✓' : SEV_ICON[f.severity]} ${esc(label)}</a>`).join('');
+  };
+  const field = (key, label, valueHtml, { diffField, input } = {}) => {
+    const list = (flags[key] ?? []).filter((f) => f.severity !== 'info' && !decisions[f.id]);
+    const d = diffField ? diff(diffField) : null;
+    const sev = list.length ? worst(list) : d ? 'high' : '';
+    return `<div class="rx-field ${sev ? `sev-${sev}` : ''}">
+      <div class="rx-label">${label}</div>
+      <div class="rx-value">${editing && input ? input : valueHtml}
+        ${d && !editing ? `<div class="rx-orig">${srcWord}: <s>${esc(d.received)}</s></div>` : ''}</div>
+      <div class="rx-flags">${chips(key)}${d ? `<span class="fflag high">≠ Changed</span>` : ''}</div>
+    </div>`;
+  };
+  const num = (name, val, attrs = '') => `<input class="rx-in" type="number" name="${name}" value="${esc(val ?? '')}" ${attrs} />`;
+  const dailyMg = j.dose_units && j.doses_per_day && j.unit_mg ? j.dose_units * j.doses_per_day * j.unit_mg : null;
+  const p = o?.payload ?? {};
+  const escriptHtml = `
+    <form class="rx-panel" id="rx-form" onsubmit="return false">
+      <div class="rx-top">
+        <div><div class="rx-kind">${o?.kind === 'electronic' ? 'NZ e-prescription' : o?.kind === 'document' ? 'Written prescription (scanned)' : 'Verbal order'}</div>
+          <div class="rx-scidline">${j.scid ? `SCID <b>${esc(j.scid)}</b> · ` : ''}Rx ${esc(j.id)}-${esc(j.sequence)} · ${j.sequence === 0 ? 'original supply' : `repeat ${j.sequence}`}</div></div>
+        <div class="rx-top-right">${o?.intact ? '<span class="fflag ok">✓ Original intact</span>' : '<span class="fflag hard_stop">✗ Integrity failed</span>'}
+          ${editing ? '<span class="fflag high">Editing</span>' : ''}</div>
+      </div>
+      <div class="rx-cols">
+        <section class="rx-sec"><h5>Prescriber</h5>
+          ${field('prescriber', 'Name', esc(j.prescriber_name))}
+          ${field('prescriber_ids', 'CPN · Practice', esc([p.prescriber?.cpn, p.prescriber?.facilityName].filter(Boolean).join(' · ') || '—'))}
+          ${field('prescribed', 'Prescribed', esc(p.prescribedAt ?? '—'))}
+        </section>
+        <section class="rx-sec"><h5>Patient</h5>
+          ${field('patient', 'Name · NHI', `${esc(j.patient_name)} · <span class="mono">${esc(j.nhi ?? '—')}</span>`)}
+          ${field('age', 'DOB · Age', `${esc(j.patient?.dob ?? '—')}${age != null ? ` · ${age}` : ''}`)}
+          ${field('allergies', 'Allergies', (j.patient?.allergies ?? []).length ? j.patient.allergies.map((a) => `<b>${esc(a)}</b>`).join(', ') : 'None recorded')}
+          ${field('egfr', 'eGFR', j.patient?.egfr != null ? `${j.patient.egfr} mL/min/1.73m²` : 'Not recorded')}
+        </section>
+      </div>
+      <section class="rx-sec rx-item"><h5>Medicine</h5>
+        ${field('medicine', 'Medicine', `<span class="rx-med">${esc(j.medicine)} ${esc(j.strength)} ${esc(j.form)}</span> <span class="mono muted">${esc(j.medicine_code ?? '')}</span>${j.controlled_class ? ` <span class="fflag cd">CD Class ${esc(j.controlled_class)}</span>` : ''}`, { diffField: 'Medicine' })}
+        ${field('directions', 'Directions', `<span class="rx-dir">${esc(j.directions)}</span>`, { diffField: 'Directions', input: `<textarea class="rx-in" name="directions" rows="2">${esc(j.directions)}</textarea>` })}
+        ${field('dose', 'Dose', j.dose_units && j.doses_per_day ? `${j.dose_units} × ${j.doses_per_day} a day${dailyMg ? ` <span class="muted">(${dailyMg} mg/day)</span>` : ''}` : '<span class="muted">Free text only</span>', { diffField: 'Dose', input: `${num('doseUnits', j.dose_units, 'step="0.5" min="0"')} units × ${num('dosesPerDay', j.doses_per_day, 'step="1" min="0"')} a day` })}
+        ${field('quantity', 'Quantity', `<b>${j.quantity}</b>${j.quantity_supplied ? ` <span class="muted">· supplied ${j.quantity_supplied}${j.owing ? `, owing ${j.owing}` : ''}</span>` : ''} <span class="muted">· ${j.on_hand} on hand</span>`, { diffField: 'Quantity', input: num('quantity', j.quantity, 'min="1" step="1"') })}
+        ${field('repeats', 'Repeats', `${j.repeats_authorised} <span class="muted">· this is supply ${j.sequence + 1} of ${j.repeats_authorised + 1}</span>`, { diffField: 'Repeats', input: num('repeats', j.repeats_authorised, 'min="0" step="1"') })}
+        ${field('period', 'Supply period', j.period_days ? `${j.period_days} days` : '—', { diffField: 'Supply period', input: `${num('periodDays', j.period_days, 'min="1" step="1"')} days` })}
+        ${editing ? `<div class="rx-field rx-reason"><div class="rx-label">Reason for change</div><div class="rx-value"><input class="rx-in" name="reason" placeholder="Required, e.g. clarified with prescriber by phone" /></div><div></div></div>` : ''}
+      </section>
+      <section class="rx-sec"><h5>Other medicines (${j.medication_list?.length ?? 0})</h5>
+        ${(j.medication_list ?? []).map((m) => field(`med:${m.ingredient.toLowerCase()}`, esc(m.source), esc(m.name ?? m.ingredient))).join('') || '<div class="rx-empty">None on record</div>'}
+      </section>
+      <section class="rx-sec"><h5>Flags for the pharmacist <span class="muted">· ${esc(j.screening?.reviewer ?? 'rules only')} · ${esc(j.screening?.status ?? 'not run')}</span></h5>
+        ${flagListHtml(findings, decisions, j.actions.includes('clinical_check'))}
+      </section>
+      ${j.label_text ? `<section class="rx-sec"><h5>Label</h5><pre class="label">${esc(j.label_text)}</pre></section>` : ''}
+    </form>`;
 
   const counsel = j.screening?.counselling;
   const aiCount = findings.filter((f) => f.origin === 'ai' && f.code !== 'AI_STATUS').length;
   const aiStatus = findings.find((f) => f.code === 'AI_STATUS');
-  const o = j.original;
   $('#job-pane').innerHTML = `
-    <div class="code">${codeHtml}</div>
+    <div class="code rx-scroll">${escriptHtml}</div>
     <aside class="rail ${railOpen ? '' : 'closed'}">
       <button class="chip accent rail-toggle" id="rail-toggle">✦ ${({ original: 'Original', reviewer: 'Reviewer', flow: 'Flow' })[railTab]} ${railOpen ? '⌄' : '‹'}</button>
       <div class="rail-tabs">
@@ -363,15 +370,14 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
         ${counsel ? `<h4>Counselling draft · ${esc(LANG[counsel.language] ?? counsel.language)}</h4><div class="counsel">${esc(counsel.text)}</div>` : ''}`}
     </aside>
     <div class="code-actions">
-      ${j.actions.includes('enter') ? `<div class="amend"><span class="muted">Amend at entry (optional):</span>
-        <input id="amend-directions" value="${esc(j.directions)}" aria-label="Directions" />
-        <input id="amend-quantity" type="number" min="1" value="${j.quantity}" aria-label="Quantity" style="width:90px" />
-        <input id="amend-reason" placeholder="Reason for any change" /></div>` : ''}
-      ${j.actions.includes('clinical_check') ? `<label class="verify"><input type="checkbox" id="src-verified" /> ${o?.kind === 'document' ? 'Read against the scanned original' : o?.kind === 'verbal' ? 'Verbal order confirmed with prescriber' : 'Checked against the original e-script'}${o?.compare?.some((c) => !c.match) ? ` <span class="tag warn">${o.compare.filter((c) => !c.match).length} difference${o.compare.filter((c) => !c.match).length === 1 ? '' : 's'}</span>` : ''}</label>` : ''}
+      ${editing ? `<button id="edit-cancel">Cancel</button><button class="primary" id="edit-save">Save changes</button><span class="muted">Saving re-runs screening. The original as received is kept unchanged.</span>`
+      : `${canEdit ? '<button id="edit-start">✎ Edit e-script</button>' : ''}
+      ${j.actions.includes('clinical_check') ? `<label class="verify"><input type="checkbox" id="src-verified" /> ${o?.kind === 'document' ? 'Read against the scanned original' : o?.kind === 'verbal' ? 'Verbal order confirmed with prescriber' : 'Checked against the original e-script'}${o?.compare?.some((c) => !c.match) ? ` <span class="tag warn">${o.compare.filter((c) => !c.match).length} change${o.compare.filter((c) => !c.match).length === 1 ? '' : 's'}</span>` : ''}</label>` : ''}
       ${j.actions.includes('release') ? `<select id="rel-method"><option value="pickup">Pickup in store</option><option value="delivery">Pharmacy delivery</option><option value="courier">Courier</option><option value="compliance_pack">Compliance pack</option></select><input id="rel-address" placeholder="Delivery address (defaults to patient's)" />` : ''}
-      ${j.actions.map((a) => `<button data-act="${a}" class="${a === 'cancel' ? 'danger' : a === 'hold' ? '' : 'primary'}">${ACTION_LABEL[a] ?? a}</button>`).join('')}
+      <span class="grow"></span>
+      ${j.actions.filter((a) => a === 'hold' || a === 'cancel').map((a) => `<button data-act="${a}" class="${a === 'cancel' ? 'danger' : ''}">${ACTION_LABEL[a]}</button>`).join('')}
       ${j.owing ? '<button data-act="supply-owing">Supply owing</button>' : ''}
-      ${!j.actions.length && !j.owing ? '<span class="muted">No actions for your role at this stage.</span>' : ''}
+      ${nextStep(j) ? `<button class="primary submit" data-act="${nextStep(j).act}">Submit → ${esc(nextStep(j).label)}</button>` : !j.owing ? '<span class="muted">Nothing for your role at this stage.</span>' : ''}`}
     </div>`;
 
   if (railOpen && railTab === 'flow') renderFlowTimeline($('#job-flow'), { api, jobId: j.id, user: currentUser(), onChange: () => renderJobPane(j.id, { autoScreen: false }) });
@@ -383,6 +389,17 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
     const fid = el.dataset.trace;
     openTrace.has(fid) ? openTrace.delete(fid) : openTrace.add(fid);
     renderJobPane(j.id, { autoScreen: false });
+  }));
+  $('#edit-start')?.addEventListener('click', () => { editJobId = j.id; renderJobPane(j.id, { autoScreen: false }); });
+  $('#edit-cancel')?.addEventListener('click', () => { editJobId = null; renderJobPane(j.id, { autoScreen: false }); });
+  $('#edit-save')?.addEventListener('click', guard(async () => {
+    const f = Object.fromEntries(new FormData($('#rx-form')));
+    const body = { reason: f.reason };
+    for (const k of ['directions', 'doseUnits', 'dosesPerDay', 'quantity', 'repeats', 'periodDays']) if (k in f) body[k] = k === 'directions' ? f[k] : (f[k] === '' ? null : Number(f[k]));
+    await api(`/api/jobs/${j.id}/amend`, { method: 'POST', body });
+    editJobId = null;
+    toast('E-script updated and re-screened');
+    render();
   }));
   document.querySelectorAll('#job-pane .decide').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
   document.querySelectorAll('#job-pane [data-act]').forEach((b) => (b.onclick = guard(() => doAction(j, b.dataset.act))));
@@ -417,8 +434,72 @@ function originalHtml(j, o) {
       <table class="cmp"><tr><th></th><th>${o.kind === 'electronic' ? 'Received' : 'Keyed'}</th><th>Dispensing</th></tr>
       ${o.compare.map((c) => `<tr class="${c.match ? '' : 'diff'}"><td>${c.match ? '✓' : '≠'} ${esc(c.field)}</td><td>${esc(c.received)}</td><td>${esc(c.dispensing)}</td></tr>`).join('')}</table>`
       : ''}
-    ${o.amendments.length ? `<h4>Amended at data entry</h4>${o.amendments.map((a) => `<div class="meta">${esc(a.byName ?? '')}: ${Object.entries(a.changes).map(([k, v]) => `${esc(k)} ${esc(v.from)} → ${esc(v.to)}`).join('; ')}<br/>“${esc(a.reason)}”</div>`).join('')}` : ''}
+    ${o.amendments.length ? `<h4>Changes to the script</h4>${o.amendments.map((a) => `<div class="meta">${esc(a.byName ?? '')}: ${Object.entries(a.changes).map(([k, v]) => `${esc(k)} ${esc(v.from)} → ${esc(v.to)}`).join('; ')}<br/>“${esc(a.reason)}”</div>`).join('')}` : ''}
     ${o.payload ? `<details class="raw"><summary>Raw message (${esc(o.payloadRole)})</summary><pre>${esc(JSON.stringify(o.payload, null, 2))}</pre></details>` : ''}`;
+}
+
+let editJobId = null;
+
+const NEXT = {
+  queued: ['enter', 'Confirm data entry'], entered: ['clinical_check', 'Clinical check'],
+  clinically_checked: ['assemble', 'Assembled'], assembled: ['final_check', 'Final check'],
+  checked: ['release', 'Release'], on_hold: ['resume', 'Resume'],
+};
+function nextStep(j) {
+  const n = NEXT[j.state];
+  return n && j.actions.includes(n[0]) ? { act: n[0], label: n[1] } : null;
+}
+
+/** Which e-script field each finding belongs on. */
+function fieldFlags(findings) {
+  const map = {};
+  const put = (k, f) => (map[k] ??= []).push(f);
+  for (const f of findings) {
+    const subject = (f.id.split(':')[1] ?? '').toLowerCase();
+    const c = f.code.replace(/^NZF_/, '');
+    if (c === 'ALLERGY') { put('medicine', f); put('allergies', f); }
+    else if (['DOSE_CEILING', 'DOSE', 'DOSE_UNSTRUCTURED'].includes(c)) { put('dose', f); put('directions', f); }
+    else if (c.startsWith('RENAL')) { put('medicine', f); put('egfr', f); }
+    else if (c === 'HEPATIC') put('medicine', f);
+    else if (['INTERACTION', 'DUPLICATE', 'THERAPEUTIC_DUPLICATION'].includes(c)) {
+      put('medicine', f);
+      const other = f.trace?.inputs?.other?.ingredient ?? f.trace?.inputs?.with ?? subject;
+      if (other) put(`med:${String(other).toLowerCase()}`, f);
+    }
+    else if (c === 'EARLY_REPEAT') put('repeats', f);
+    else if (c === 'DURATION') { put('quantity', f); put('period', f); }
+    else if (c === 'OLDER_ADULT_CNS') { put('medicine', f); put('age', f); }
+    else if (['LASA', 'CONTROLLED'].includes(c)) put('medicine', f);
+    else if (c === 'LANGUAGE') put('patient', f);
+  }
+  return map;
+}
+
+function shortFlag(f) {
+  const c = f.code.replace(/^NZF_/, '');
+  return ({ ALLERGY: 'Allergy', DOSE_CEILING: 'Over max dose', DOSE: 'Over max dose', DOSE_UNSTRUCTURED: 'Check dose', RENAL_AVOID: 'Renal: avoid', RENAL_ADJUST: 'Renal dose', RENAL: 'Renal', HEPATIC: 'Hepatic', INTERACTION: 'Interaction', DUPLICATE: 'Duplicate', THERAPEUTIC_DUPLICATION: 'Same class', EARLY_REPEAT: 'Early repeat', DURATION: 'Long course', OLDER_ADULT_CNS: 'Falls risk', LASA: 'Look-alike', CONTROLLED: 'Controlled' })[c] ?? c.toLowerCase().replace(/_/g, ' ');
+}
+
+function flagListHtml(findings, decisions, editable) {
+  const shown = findings.filter((f) => f.code !== 'AI_STATUS' || f.message);
+  if (!shown.length) return '<div class="rx-empty">No flags.</div>';
+  return shown.map((f) => {
+    const d = decisions[f.id];
+    const sev = d ? 'ok' : f.severity;
+    const decide = editable && f.severity === 'hard_stop'
+      ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="override"><input type="text" placeholder="Override reason (required)" data-reason /><label><input type="checkbox" data-prescriber /> Prescriber contacted</label></div>`
+      : editable && f.severity === 'high'
+        ? `<div class="decide" data-fid="${esc(f.id)}" data-kind="ack"><label><input type="checkbox" data-ack /> Reviewed</label><input type="text" placeholder="Note (optional)" data-note /></div>`
+        : d ? `<div class="rx-decision">✓ ${esc(d.action === 'override' ? 'Overridden' : 'Reviewed')}${d.reason || d.note ? `: ${esc(d.reason ?? d.note)}` : ''}${d.prescriberConfirmed ? ' · prescriber contacted' : ''}</div>` : '';
+    return `<div class="rx-flag sev-${sev}" id="flag-${esc(f.id)}">
+      <div class="rx-flag-head"><span class="badge ${sev === 'ok' ? 'ok' : f.severity}">${d ? '✓' : SEV_ICON[f.severity]} ${d ? 'Done' : SEV_LABEL[f.severity]}</span>
+        <span class="rx-origin">${f.origin === 'ai' ? 'AI' : f.origin === 'formulary' ? 'Formulary' : 'Rule'}</span>
+        <span class="rx-flag-msg">${esc(f.message)}</span>
+        <button type="button" class="rx-why" data-trace="${esc(f.id)}">${openTrace.has(f.id) ? 'Hide' : 'Why?'}</button></div>
+      ${openTrace.has(f.id) ? `<div class="rx-trace"><b>Rule</b> ${esc(f.trace?.rule ?? '')}<br/><b>Source</b> ${esc(f.trace?.source ?? '')}${f.trace?.link ? ` · <a href="${esc(f.trace.link)}" target="_blank" rel="noopener">reference</a>` : ''}<br/><b>Inputs</b> <code>${esc(typeof f.trace?.inputs === 'string' ? f.trace.inputs : JSON.stringify(f.trace?.inputs))}</code></div>` : ''}
+      ${decide}
+    </div>`;
+  }).join('');
 }
 
 function collectDecisions() {
@@ -444,10 +525,7 @@ async function doAction(j, act) {
     body.decisions = collectDecisions();
     body.sourceVerified = !!$('#src-verified')?.checked;
   }
-  if (act === 'enter') {
-    const dir = $('#amend-directions').value.trim(), qty = Number($('#amend-quantity').value), reason = $('#amend-reason').value.trim();
-    if (dir !== j.directions || qty !== j.quantity) body.amend = { directions: dir, quantity: qty, reason };
-  }
+
   if (act === 'release') {
     body.method = $('#rel-method').value;
     body.address = $('#rel-address').value || undefined;

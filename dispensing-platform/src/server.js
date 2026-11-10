@@ -90,6 +90,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
   registerFlowRoutes(route, { engine: flows, platform });
   registerPrintRoutes(route, { print });
   route('POST', '/api/jobs/:id/screen', ({ params, user }) => platform.runScreening(params.id, user));
+  route('POST', '/api/jobs/:id/amend', ({ params, body, user }) => platform.amend(params.id, user, body));
   route('POST', '/api/jobs/:id/supply-owing', ({ params, user }) => platform.supplyOwing(params.id, user));
   route('POST', '/api/jobs/:id/:action', ({ params, body, user }) => platform.transition(params.id, params.action.replace(/-/g, '_'), user, body));
 

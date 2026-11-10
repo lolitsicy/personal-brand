@@ -156,6 +156,23 @@ to request.
 - **Shipping label / bag label** (*Fulfilment*): 100 × 150 mm. Courier labels
   never show medicine names. Controlled drugs force "signature required".
 
+## The e-script panel: review, edit, submit
+
+- The script view shows the e-script as a prescription (prescriber, patient,
+  medicine, other medicines). **Each flag sits on the field it concerns:**
+  an allergy marks the medicine and the allergy list, a renal flag marks the
+  medicine and the eGFR, and an interaction marks the medicine and the other
+  drug. Each chip links to the full flag, its reasoning and the decision.
+- Any field that differs from the original shows **"Original: …"** and a
+  **≠ Changed** marker.
+- **✎ Edit e-script** (technician or pharmacist, **before the clinical check
+  only**): directions, dose, quantity, repeats and supply period. Saving
+  needs a reason, records before and after, never touches the stored
+  original, and **re-runs screening**. For example, a dose edit above the
+  ceiling becomes a hard stop. Class B drugs can't be given repeats.
+- **Submit → next step** performs the next workflow action for your role:
+  confirm data entry, clinical check, assembled, final check, release.
+
 ## The original script: what was received is what is reviewed
 
 - **E-scripts** are stored byte-for-byte as the e-prescription service

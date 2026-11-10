@@ -452,6 +452,71 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
     return f.id;
   }
 
+  // ───────────────────────── manual edits to the script ─────────────────────────
+
+  const EDITABLE = {
+    directions: { col: 'directions', parse: (v) => String(v ?? '').trim(), ok: (v) => v.length > 0, err: 'Directions cannot be empty' },
+    quantity: { col: 'quantity', parse: Number, ok: (v) => Number.isInteger(v) && v > 0, err: 'Quantity must be a positive whole number' },
+    repeats: { col: 'repeats_authorised', parse: Number, ok: (v) => Number.isInteger(v) && v >= 0 && v <= 12, err: 'Repeats must be a whole number from 0 to 12' },
+    doseUnits: { col: 'dose_units', parse: (v) => (v === '' || v == null ? null : Number(v)), ok: (v) => v == null || (v > 0 && v <= 100), err: 'Units per dose must be a positive number' },
+    dosesPerDay: { col: 'doses_per_day', parse: (v) => (v === '' || v == null ? null : Number(v)), ok: (v) => v == null || (v > 0 && v <= 24), err: 'Doses per day must be between 0 and 24' },
+    periodDays: { col: 'period_days', parse: (v) => (v === '' || v == null ? null : Number(v)), ok: (v) => v == null || (Number.isInteger(v) && v > 0 && v <= 365), err: 'Supply period must be 1 to 365 days' },
+  };
+
+  /**
+   * Apply manual edits to the dispensing record (never to the stored original).
+   * Every change needs a reason, keeps its before/after, is audited, and shows as a
+   * difference against the original at the clinical check. Must run inside a transaction.
+   */
+  function applyAmendments(job, input, user, auditAction) {
+    if (!input) return {};
+    const item = one('SELECT i.*, m.controlled_class, m.name AS medicine_name FROM prescription_items i JOIN medicines m ON m.id = i.medicine_id WHERE i.id = ?', job.item_id);
+    const changes = {};
+    for (const [key, def] of Object.entries(EDITABLE)) {
+      if (input[key] === undefined) continue;
+      const to = def.parse(input[key]);
+      if (!def.ok(to) || Number.isNaN(to)) throw new DomainError(def.err);
+      const from = item[def.col];
+      if (String(from ?? '') !== String(to ?? '')) changes[key] = { from, to };
+    }
+    if (!Object.keys(changes).length) return {};
+    if (!input.reason?.trim()) throw new DomainError('Give a reason for changing the script');
+    if (changes.repeats && item.controlled_class === 'B' && changes.repeats.to > 0) {
+      throw new DomainError(`${item.medicine_name}: Class B controlled drugs cannot carry repeats`);
+    }
+    if (changes.repeats && changes.repeats.to + 1 < item.dispensings_count + 1) {
+      throw new DomainError('Repeats cannot be reduced below supplies already made');
+    }
+    const log = JSON.parse(item.amendments || '[]');
+    log.push({ changes, reason: input.reason.trim(), by: user.id, byName: user.name, at: new Date().toISOString() });
+    const cols = Object.entries(changes).map(([k]) => EDITABLE[k].col);
+    run(
+      `UPDATE prescription_items SET ${cols.map((c) => `${c} = ?`).join(', ')}, amendments = ? WHERE id = ?`,
+      ...Object.values(changes).map((c) => c.to), JSON.stringify(log), item.id,
+    );
+    audit.record({ userId: user.id, action: auditAction, entity: 'job', entityId: job.id, data: { changes, reason: input.reason.trim() } });
+    return changes;
+  }
+
+  /** Edit the script before the clinical check, then re-screen so flags reflect the edit. */
+  async function amend(jobId, user, input = {}) {
+    if (!user || !['technician', 'pharmacist', 'admin'].includes(user.role)) throw forbidden('Only dispensary staff can edit a script');
+    const changes = tx(db, () => {
+      const job = loadJob(jobId);
+      if (!['queued', 'entered'].includes(job.state)) {
+        throw conflict(`Scripts can only be edited before the clinical check (this one is ${job.state.replace('_', ' ')}). Put it on hold and ask a pharmacist.`);
+      }
+      const c = applyAmendments(job, input, user, 'item.amended');
+      if (c.quantity) run("UPDATE dispense_jobs SET quantity = ?, updated_at = datetime('now') WHERE id = ?", c.quantity.to, job.id);
+      return c;
+    });
+    if (!Object.keys(changes).length) throw new DomainError('Nothing changed');
+    // Fresh screening on the edited script (the previous one is superseded).
+    if (loadJob(jobId).state === 'entered') await runScreening(jobId, user);
+    await runHook('afterTransition', Number(jobId), 'amend', user);
+    return getJob(jobId, user);
+  }
+
   // ───────────────────────── workflow transitions ─────────────────────────
 
   async function transition(jobId, action, user, body = {}) {
@@ -464,27 +529,9 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
       switch (action) {
         case 'enter': {
           set.entered_by = user.id;
-          // Data entry may amend directions or quantity (e.g. to match a subsidy pack). Every change
-          // keeps the original, needs a reason, and shows as a difference at the clinical check.
-          const a = body.amend ?? {};
-          const changes = {};
-          if (a.directions != null && String(a.directions).trim() && String(a.directions).trim() !== job.directions) changes.directions = { from: job.directions, to: String(a.directions).trim() };
-          if (a.quantity != null && Number(a.quantity) !== job.item_quantity) {
-            if (!(Number.isInteger(Number(a.quantity)) && Number(a.quantity) > 0)) throw new DomainError('Amended quantity must be a positive whole number');
-            changes.quantity = { from: job.item_quantity, to: Number(a.quantity) };
-          }
-          if (Object.keys(changes).length) {
-            if (!a.reason?.trim()) throw new DomainError('Give a reason for amending the script at data entry');
-            const item = one('SELECT amendments FROM prescription_items WHERE id = ?', job.item_id);
-            const log = JSON.parse(item.amendments || '[]');
-            log.push({ changes, reason: a.reason.trim(), by: user.id, byName: user.name, at: new Date().toISOString() });
-            run(
-              'UPDATE prescription_items SET directions = ?, quantity = ?, amendments = ? WHERE id = ?',
-              changes.directions?.to ?? job.directions, changes.quantity?.to ?? job.item_quantity, JSON.stringify(log), job.item_id,
-            );
-            if (changes.quantity) set.quantity = changes.quantity.to;
-            audit.record({ userId: user.id, action: 'item.amended_at_entry', entity: 'job', entityId: job.id, data: { changes, reason: a.reason.trim() } });
-          }
+          // Data entry may amend the script (e.g. to match a subsidy pack). See applyAmendments.
+          const changes = applyAmendments(job, body.amend, user, 'item.amended_at_entry');
+          if (changes.quantity) set.quantity = changes.quantity.to;
           break;
         }
 
@@ -799,6 +846,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
           ['Quantity', String(src.quantity), String(item.quantity)],
           ['Repeats', String(src.repeats ?? 0), String(item.repeats_authorised)],
           ['Dose', dose(src.doseUnits, src.dosesPerDay), dose(item.dose_units, item.doses_per_day)],
+          ['Supply period', src.periodDays ? `${src.periodDays} days` : '—', item.period_days ? `${item.period_days} days` : '—'],
         ].map(([field, rec, disp, label]) => ({ field, received: rec ?? '—', dispensing: label ?? disp ?? '—', match: String(rec ?? '').trim() === String(disp ?? '').trim() }));
       }
     }
@@ -844,7 +892,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
 
   const JOB_VIEW = `
     SELECT j.*, i.medicine_id, i.item_ref, i.directions, i.dose_units, i.doses_per_day, i.repeats_authorised, i.dispensings_count, i.period_days, i.prescription_id,
-           m.name AS medicine, m.strength, m.form, m.controlled_class, m.code AS medicine_code,
+           m.name AS medicine, m.strength, m.form, m.controlled_class, m.code AS medicine_code, m.unit_mg,
            p.scid, p.source, pa.id AS patient_id, pa.name AS patient_name, pa.nhi,
            pr.name AS prescriber_name
     FROM dispense_jobs j
@@ -994,6 +1042,7 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
     ),
     adjustStock,
     runScreening,
+    amend,
     overridesLog,
     stockLedger: (medicineId) => all(
       `SELECT l.*, m.name AS medicine, m.strength FROM stock_ledger l JOIN medicines m ON m.id = l.medicine_id
