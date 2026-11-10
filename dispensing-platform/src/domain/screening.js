@@ -54,7 +54,14 @@ function ageFrom(dob) {
  * }
  * @returns findings[]
  */
-export function screen({ medicine, item, patient, otherMeds = [], lastRelease = null }) {
+/**
+ * clinical: run checks that depend on clinical reference content (dose limits,
+ * renal thresholds, interactions, class duplication, older-adult cautions).
+ * These stay OFF in production until licensed NZ Formulary data is connected;
+ * hand-written thresholds must never go live. Allergy, same-medicine
+ * duplication, early repeats and controlled-drug markers always run.
+ */
+export function screen({ medicine, item, patient, otherMeds = [], lastRelease = null }, { clinical = true } = {}) {
   const out = [];
   const ingredient = medicine.ingredient.toLowerCase();
   const allergies = JSON.parse(patient.allergies || '[]').map((a) => a.toLowerCase());
@@ -70,8 +77,8 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
     }));
   }
 
-  // ── Dose ceiling ── hard stop
-  if (medicine.max_daily_mg && medicine.unit_mg && item.dose_units && item.doses_per_day) {
+  // ── Dose ceiling ── hard stop (clinical content)
+  if (!clinical) { /* skipped until licensed */ } else if (medicine.max_daily_mg && medicine.unit_mg && item.dose_units && item.doses_per_day) {
     const daily = medicine.unit_mg * item.dose_units * item.doses_per_day;
     if (daily > medicine.max_daily_mg) {
       out.push(finding({
@@ -80,7 +87,7 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
         trace: { inputs: { unitMg: medicine.unit_mg, doseUnits: item.dose_units, dosesPerDay: item.doses_per_day, dailyMg: daily }, rule: `daily mg = unit mg × units/dose × doses/day > ${medicine.max_daily_mg}`, source: 'Formulary dose ceiling (demo)' },
       }));
     }
-  } else if (medicine.max_daily_mg) {
+  } else if (clinical && medicine.max_daily_mg) {
     out.push(finding({
       code: 'DOSE_UNSTRUCTURED', subject: ingredient, severity: 'moderate', specialist: 'pharma',
       message: 'Dose is free text only, so the dose ceiling could not be checked automatically. Check the directions manually.',
@@ -88,8 +95,8 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
     }));
   }
 
-  // ── Renal dosing ──
-  if (patient.egfr != null) {
+  // ── Renal dosing ── (clinical content)
+  if (clinical && patient.egfr != null) {
     if (medicine.renal_avoid_egfr != null && patient.egfr < medicine.renal_avoid_egfr) {
       out.push(finding({
         code: 'RENAL_AVOID', subject: ingredient, severity: 'hard_stop', specialist: 'pharma',
@@ -116,6 +123,7 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
       }));
       continue;
     }
+    if (!clinical) continue; // class duplication and interactions need clinical reference data
     if (medicine.therapeutic_class && other.therapeutic_class === medicine.therapeutic_class) {
       out.push(finding({
         code: 'THERAPEUTIC_DUPLICATION', subject: oi, severity: 'high', specialist: 'pharma',
@@ -146,7 +154,7 @@ export function screen({ medicine, item, patient, otherMeds = [], lastRelease = 
   }
 
   // ── Older adult + CNS depressant ──
-  if (age != null && age >= 65 && CNS_DEPRESSANTS.has(ingredient)) {
+  if (clinical && age != null && age >= 65 && CNS_DEPRESSANTS.has(ingredient)) {
     out.push(finding({
       code: 'OLDER_ADULT_CNS', subject: ingredient, severity: 'moderate', specialist: 'pharma',
       message: `Patient is ${age}: ${medicine.name} increases falls and confusion risk in older adults`,

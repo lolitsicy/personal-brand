@@ -101,6 +101,23 @@ adapter. The dispensing logic doesn't change.
 - **Counselling draft** in the patient's preferred language. Real
   translation needs the AI reviewer enabled.
 
+## Version 1 scope: what runs by default
+
+| Check | Default | Why |
+|---|---|---|
+| Pharmacist clinical check and final check | **On (required)** | Legal requirement; can't be configured away |
+| Original vs dispensing comparison | **On** | Catches transcription errors; needs no licensed data |
+| Allergy (incl. drug class), same-medicine duplicates, early repeats, controlled-drug markers | **On** | Basic safety and supply rules from the patient record and the script |
+| Interactions, dose limits, kidney/liver dosing, class duplication, therapy running too long, look-alike names | **Off until the NZ Formulary is connected** | Needs licensed, maintained clinical content; hand-written thresholds must never go live |
+| AI reviewer | **Off** | Not part of version 1 (regulatory, privacy and validation risk) |
+
+Switches (environment variables):
+- `NZF_BASE_URL` + `NZF_API_KEY` → clinical checks run on the licensed NZ Formulary (`licensed`)
+- `CLINICAL_CHECKS=demo` → clinical checks on demo data, **for demos and tests only**
+- `AI_REVIEWER=claude` (or `mock` for the offline stand-in) → AI reviewer on
+
+The UI states which checks are off and why, so a missing alert is never mistaken for "no problem".
+
 ## End-to-end pipeline (pharmacy flows)
 
 ![Pipeline](docs/pipeline.png)

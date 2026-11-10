@@ -10,6 +10,11 @@ import { defaultFlows } from '../src/flow/defaults.js';
 import { registerFlowRoutes } from '../src/flow/routes.js';
 import { createFormulary, createLocalFormularySource } from '../src/formulary/index.js';
 
+// Tests below exercise the optional clinical checks (demo data) and the offline AI reviewer;
+// both are off by default in the product (see test/scope.test.js).
+process.env.CLINICAL_CHECKS ??= 'demo';
+process.env.AI_REVIEWER ??= 'mock';
+
 const METFORMIN_SCID = makeScid('1A2B3C4D5E6F7G8H9'); // Aroha: metformin + atorvastatin
 const AMOX_SCID = makeScid('B7C8D9E0F1G2H3J4K'); // James: amoxicillin (15, only 10 in stock; penicillin allergy)
 const PNG_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -196,7 +201,7 @@ test('e-script runs from intake to waiting at the clinical check, data entry aut
   assert.equal(de.output.by, 'Automation');
   assert.equal(de.output.role, 'technician');
   assert.equal(de.output.autoConfirmed, true);
-  assert.match(stepOf(tl, 'map_formulary').output.reason, /No formulary module/);
+  assert.match(stepOf(tl, 'map_formulary').output.reason, /NZ Formulary not connected/);
   assert.deepEqual({ onHand: stepOf(tl, 'check_stock').output.onHand, shortBy: stepOf(tl, 'check_stock').output.shortBy }, { onHand: 500, shortBy: 0 });
   assert.equal(stepOf(tl, 'match_patient').output.nhi, 'ZZZ0016');
   assert.ok(stepOf(tl, 'screen').output.screeningId);

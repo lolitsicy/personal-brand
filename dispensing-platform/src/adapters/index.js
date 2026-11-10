@@ -27,9 +27,15 @@ import { createMockReviewer } from './reviewer.mock.js';
 import { createClaudeReviewer } from './reviewer.claude.js';
 import { createMockPayments } from './payments.mock.js';
 
-/** AI reviewer is opt-in: set AI_REVIEWER=claude to send de-identified cases to Claude. */
+/**
+ * AI reviewer: OFF by default (not part of version 1).
+ * AI_REVIEWER=claude sends de-identified cases to Claude; AI_REVIEWER=mock uses
+ * the offline stand-in (demos and tests).
+ */
 export function createReviewer(kind = process.env.AI_REVIEWER) {
-  return kind === 'claude' ? createClaudeReviewer() : createMockReviewer();
+  if (kind === 'claude') return createClaudeReviewer();
+  if (kind === 'mock') return createMockReviewer();
+  return null;
 }
 
 export function createMockAdapters() {

@@ -4,6 +4,11 @@ import { createApp } from '../src/server.js';
 import { createMockAdapters } from '../src/adapters/index.js';
 import { makeScid } from '../src/domain/scid.js';
 
+// Tests below exercise the optional clinical checks (demo data) and the offline AI reviewer;
+// both are off by default in the product (see test/scope.test.js).
+process.env.CLINICAL_CHECKS ??= 'demo';
+process.env.AI_REVIEWER ??= 'mock';
+
 const METFORMIN_SCID = makeScid('1A2B3C4D5E6F7G8H9'); // Aroha: metformin + atorvastatin, 2 repeats
 const AMOX_SCID = makeScid('B7C8D9E0F1G2H3J4K'); // James (amoxicillin allergy)
 const OXY_SCID = makeScid('C1D2E3F4G5H6J7K8L'); // Grace: oxycodone (Class B) + paracetamol

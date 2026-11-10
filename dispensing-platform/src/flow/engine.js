@@ -420,7 +420,7 @@ export function createFlowEngine({ db, platform, adapters = {}, hooks = {}, conf
     },
 
     async map_formulary({ job }) {
-      if (typeof hooks.formulary?.lookup !== 'function') return skipped('No formulary module installed');
+      if (typeof hooks.formulary?.lookup !== 'function') return skipped('NZ Formulary not connected yet, so interaction and dosing checks are off');
       const med = { id: job.medicine_id, code: job.medicine_code, name: job.medicine_name, ingredient: job.ingredient, strength: job.strength, form: job.form };
       const hit = await hooks.formulary.lookup(med);
       if (!hit) return done({ matched: false, medicine: med.code, warnings: [`${med.name} ${med.strength} was not found in the formulary`] });
@@ -511,7 +511,7 @@ export function createFlowEngine({ db, platform, adapters = {}, hooks = {}, conf
     },
 
     async print_worksheet({ job }) {
-      if (typeof hooks.print?.worksheetUrl !== 'function') return skipped('No print module installed');
+      if (typeof hooks.print?.worksheetUrl !== 'function') return skipped('Printing is not set up');
       const url = await hooks.print.worksheetUrl(job.id);
       if (!url) return failed('Print module returned no worksheet');
       return done({ url });

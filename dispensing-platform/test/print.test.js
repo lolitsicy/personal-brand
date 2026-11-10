@@ -8,6 +8,11 @@ import { renderWorksheet, WORKSHEET_SECTIONS } from '../src/print/worksheet.js';
 import { renderShippingLabel } from '../src/print/shipping-label.js';
 import { registerPrintRoutes, PRINT_CSP } from '../src/print/routes.js';
 
+// Tests below exercise the optional clinical checks (demo data) and the offline AI reviewer;
+// both are off by default in the product (see test/scope.test.js).
+process.env.CLINICAL_CHECKS ??= 'demo';
+process.env.AI_REVIEWER ??= 'mock';
+
 const METFORMIN_SCID = makeScid('1A2B3C4D5E6F7G8H9'); // Aroha: metformin + atorvastatin, 2 repeats
 const OXY_SCID = makeScid('C1D2E3F4G5H6J7K8L'); // Grace: oxycodone (Class B) + paracetamol
 const PNG_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';

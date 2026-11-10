@@ -21,6 +21,7 @@ const ACTION_LABEL = {
 let userId = localStorageGet('userId');
 let currentTab = 'home';
 let users = [];
+let appConfig = { clinicalChecks: 'off', aiReviewer: false };
 
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
@@ -50,6 +51,7 @@ const guard = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toas
 async function boot() {
   const [cfg, userList] = await Promise.all([api('/api/config'), api('/api/users')]);
   users = userList;
+  appConfig = cfg;
   document.querySelectorAll('[data-pharmacy]').forEach((el) => (el.textContent = cfg.pharmacy.name));
   const sel = $('#user-select');
   sel.innerHTML = users.map((u) => `<option value="${u.id}">${esc(u.name)} · ${esc(label('role', u.role))}</option>`).join('');
@@ -370,6 +372,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
         ${(j.medication_list ?? []).map((m) => field(`med:${m.ingredient.toLowerCase()}`, esc(sentence(m.source)), esc(sentence(m.name ?? m.ingredient)))).join('') || '<div class="rx-empty">None on record</div>'}
       </section>
       <section class="rx-sec"><h5>Flags for the pharmacist <span class="muted">· ${esc(j.screening ? reviewerLabel(j.screening.reviewer) : 'Rules only')} · ${esc(j.screening ? label('screening', j.screening.status) : 'Not run yet')}</span></h5>
+        ${appConfig.clinicalChecks === 'off' ? `<div class="rx-note">${ico('info')}<span>Interaction, dosing and kidney-function checks are off until the NZ Formulary is connected. Allergy, duplicate-medicine, early-repeat and original-script checks are running.</span></div>` : appConfig.clinicalChecks === 'demo' ? `<div class="rx-note warn">${ico('alert')}<span>Clinical checks are using demo data that has not been clinically validated. Not for real patients.</span></div>` : ''}
         ${flagListHtml(findings, decisions, j.actions.includes('clinical_check'))}
       </section>
       ${j.label_text ? `<section class="rx-sec"><h5>Label</h5><pre class="label">${esc(j.label_text)}</pre></section>` : ''}
@@ -378,6 +381,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
   const counsel = j.screening?.counselling;
   const aiCount = findings.filter((f) => f.origin === 'ai' && f.code !== 'AI_STATUS').length;
   const aiStatus = findings.find((f) => f.code === 'AI_STATUS');
+  if (railTab === 'reviewer' && !appConfig.aiReviewer) railTab = 'original';
   $('#job-pane').innerHTML = `
     <div class="code rx-scroll">${escriptHtml}</div>
     <aside class="rail ${railOpen ? '' : 'closed'}">
@@ -385,7 +389,7 @@ async function renderJobPane(id, { autoScreen = true } = {}) {
       <div class="rail-tabs">
         <button class="${railTab === 'original' ? 'on' : ''}" data-rail="original">Original script</button>
         <button class="${railTab === 'flow' ? 'on' : ''}" data-rail="flow">Pipeline</button>
-        <button class="${railTab === 'reviewer' ? 'on' : ''}" data-rail="reviewer">AI reviewer</button>
+        ${appConfig.aiReviewer ? `<button class="${railTab === 'reviewer' ? 'on' : ''}" data-rail="reviewer">AI reviewer</button>` : ''}
       </div>
       ${railTab === 'original' ? originalHtml(j, o) : railTab === 'flow' ? '<div id="job-flow"></div>' : `
         <div class="meta">${esc(reviewerLabel(j.screening?.reviewer))} · ${aiCount} added finding${aiCount === 1 ? '' : 's'}${aiStatus ? `<br/>${esc(aiStatus.message)}` : ''}</div>

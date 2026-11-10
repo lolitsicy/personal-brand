@@ -7,7 +7,7 @@ import { seed } from './seed.js';
 import { createMockAdapters } from './adapters/index.js';
 import { createPlatform } from './services/platform.js';
 import { createCounter } from './services/counter.js';
-import { createDefaultFormulary } from './formulary/index.js';
+import { createDefaultFormulary, createFormulary, createLocalFormularySource } from './formulary/index.js';
 import { createPrint, registerPrintRoutes } from './print/index.js';
 import { schema as flowSchema, createFlowEngine, AUTOMATION_USER } from './flow/engine.js';
 import { registerFlowRoutes } from './flow/routes.js';
@@ -27,7 +27,25 @@ export const DEFAULT_CONFIG = {
  * Off by default so unit tests can drive each step by hand; the server turns it on.
  * formulary: a formulary instance (default: NZF if configured, else local demo data).
  */
-export function createApp({ dbPath = ':memory:', adapters = createMockAdapters(), config = DEFAULT_CONFIG, withSeed = true, pipeline = false, formulary = createDefaultFormulary() } = {}) {
+/**
+ * Clinical checks (interactions, dose, renal, duration, class duplication):
+ *   'licensed' — NZ Formulary connected (NZF_BASE_URL + NZF_API_KEY set). Default when configured.
+ *   'demo'     — local demo data, for demos and tests only. Never for real patients.
+ *   'off'      — default otherwise: allergy, same-medicine duplicates, early repeats,
+ *                controlled-drug markers and the original-vs-dispensing check still run.
+ */
+export function resolveClinicalChecks(env = process.env) {
+  if (env.CLINICAL_CHECKS === 'off' || env.CLINICAL_CHECKS === 'demo') return env.CLINICAL_CHECKS;
+  return env.NZF_BASE_URL && env.NZF_API_KEY ? 'licensed' : 'off';
+}
+
+export function createApp({ dbPath = ':memory:', adapters = createMockAdapters(), config: baseConfig = DEFAULT_CONFIG, withSeed = true, pipeline = false, clinicalChecks = resolveClinicalChecks(), formulary } = {}) {
+  const config = { ...baseConfig, clinicalChecks };
+  if (formulary === undefined) {
+    formulary = clinicalChecks === 'licensed' ? createDefaultFormulary()
+      : clinicalChecks === 'demo' ? createFormulary({ source: createLocalFormularySource() })
+      : null;
+  }
   const db = openDb(dbPath);
   if (withSeed) seed(db);
   const platform = createPlatform({ db, adapters, config });
@@ -58,7 +76,7 @@ export function createApp({ dbPath = ':memory:', adapters = createMockAdapters()
   };
 
   route('GET', '/api/health', () => ({ ok: true }));
-  route('GET', '/api/config', () => ({ pharmacy: config.pharmacy, allowSelfCheck: config.allowSelfCheck, sources: Object.keys(adapters.scriptSources) }));
+  route('GET', '/api/config', () => ({ pharmacy: config.pharmacy, allowSelfCheck: config.allowSelfCheck, sources: Object.keys(adapters.scriptSources), clinicalChecks: config.clinicalChecks, aiReviewer: !!adapters.reviewer }));
   route('GET', '/api/users', () => platform.users());
   route('GET', '/api/dashboard', () => platform.dashboard());
   route('GET', '/api/home', ({ user }) => platform.home(user));

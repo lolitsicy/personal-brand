@@ -6,6 +6,11 @@ import { createRequire } from 'node:module';
 import { createApp } from '../src/server.js';
 import { makeScid } from '../src/domain/scid.js';
 
+// Tests below exercise the optional clinical checks (demo data) and the offline AI reviewer;
+// both are off by default in the product (see test/scope.test.js).
+process.env.CLINICAL_CHECKS ??= 'demo';
+process.env.AI_REVIEWER ??= 'mock';
+
 const require = createRequire(import.meta.url);
 let chromium;
 try { ({ chromium } = require('playwright')); } catch { /* skipped below */ }

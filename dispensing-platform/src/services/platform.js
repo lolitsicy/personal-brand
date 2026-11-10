@@ -297,8 +297,9 @@ export function createPlatform({ db, adapters, config, hooks = {} }) {
   function ruleFindings(job) {
     const ctx = screeningContext(job);
     const meds = all('SELECT * FROM medicines');
-    const findings = [...screen(ctx), ...lasaFindings(ctx.medicine, meds)].map((f) => ({ ...f, origin: 'rules' }));
-    if (hooks.formulary) {
+    const clinical = config.clinicalChecks && config.clinicalChecks !== 'off';
+    const findings = [...screen(ctx, { clinical }), ...(clinical ? lasaFindings(ctx.medicine, meds) : [])].map((f) => ({ ...f, origin: 'rules' }));
+    if (hooks.formulary && clinical) {
       try {
         const history = hooks.formulary.buildHistory ? hooks.formulary.buildHistory(supplyHistory(job.patient_id, job.id)) : [];
         const extra = hooks.formulary.check({ ...ctx, history });
