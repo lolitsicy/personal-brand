@@ -65,13 +65,20 @@ class Config:
     hq_effort: str = "medium"
     hq_budget_usd: float = 0.75  # per briefing
 
-    # Jarvis's voice. auto = ElevenLabs if a key is set, else the phone's own voice in the browser
-    # and Piper/espeak/say on the desk speaker.
-    tts_engine: str = "auto"  # auto | elevenlabs | browser
+    # Jarvis's voice, for both the phone dashboard and the desk speaker.
+    # auto = ElevenLabs if you set a key, else Kokoro (free, local, natural) if installed,
+    # else Piper if piper_voice is set, else the phone's own voice / espeak / say.
+    tts_engine: str = "auto"  # auto | kokoro | piper | elevenlabs | browser
+    kokoro_voice: str = "bm_george"  # British male; also bm_daniel, bm_lewis, bm_fable, af_heart...
+    kokoro_speed: float = 1.0
+    kokoro_lang: str = "en-gb"
+    # How to say words the voice gets wrong: "Word=phonetic; Other=…". Adjust by ear.
+    tts_pronounce: str = "Maison Belasi=May-zon Beh-lah-see; Belasi=Beh-lah-see"
+    kokoro_dir: str = ""  # "" = ~/.jarvis/kokoro (model files from `jarvis voices download`)
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "onwK4e9ZLuTAKqWW03F9"  # "Daniel": calm British male
     elevenlabs_model: str = "eleven_flash_v2_5"  # low latency
-    voice_name: str = "Daniel"
+    voice_name: str = ""  # display name; "" = derived from the engine
 
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech
@@ -158,9 +165,13 @@ hq_briefing_times = "08:30,13:00,18:30"
 # - Sales (Shopify): ...
 # '''
 
-# Jarvis's voice. Best: an ElevenLabs key (natural, ~$5/mo plan covers daily briefings).
-# Without one, your phone's built-in voice is used in the dashboard.
+# Jarvis's voice. Default: Kokoro, free and local (`jarvis voices download` once, ~350 MB).
+# British male voices: bm_george, bm_daniel, bm_lewis, bm_fable.
 tts_engine = "auto"
+kokoro_voice = "bm_george"
+# Fix how names are said (adjust by ear): "Word=phonetic; Other=..."
+tts_pronounce = "Maison Belasi=May-zon Beh-lah-see; Belasi=Beh-lah-see"
+# Optional paid upgrade: an ElevenLabs key takes over when set.
 elevenlabs_api_key = ""
 # elevenlabs_voice_id = "onwK4e9ZLuTAKqWW03F9"   # Daniel
 

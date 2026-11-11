@@ -132,17 +132,26 @@ briefing card on the dashboard. Edit `hq_sources` in the config to change what i
   Sonnet.
 - "Brief me" within 20 minutes of the last briefing answers instantly from that briefing.
 
-### Jarvis's voice
+### Jarvis's voice: free and local by default
 
-| Where | Default | Best |
-|---|---|---|
-| Phone dashboard | your phone's built-in voice, auto-picking the most natural English one (choose it in ⚙︎) | **ElevenLabs**: set `elevenlabs_api_key`. The default voice is "Daniel" (calm British male); change it with `elevenlabs_voice_id` |
-| Desk speaker (`jarvis up --voice`) | Piper (local, free) → espeak / `say` | ElevenLabs, same key |
+Jarvis speaks with **Kokoro**, an open-source voice model (Apache 2.0, about 350 MB) that runs
+on your own CPU. It needs no account, has no per-use cost, and sends no audio to the cloud. The
+same voice is used on your phone (the dashboard plays audio generated on your machine) and on the
+desk speaker. The installer downloads it, or run `jarvis voices download`.
 
-ElevenLabs is the recommendation if you'll listen every day. Phone voices range from good
-(iPhone "Premium" voices, once downloaded in Settings → Accessibility → Spoken Content) to
-robotic. The key lives only in `~/.jarvis/config.toml`, which agents aren't allowed to read
-without your approval.
+- **Voices:** `kokoro_voice = "bm_george"` (default, British male). Also try `bm_daniel`,
+  `bm_lewis` and `bm_fable`; `jarvis voices list` shows all of them, and
+  `jarvis voices test "…"` speaks a sample.
+- **Speed:** a 9-second reply took about 2 seconds to generate on a 4-core CPU. Fine on a Mac
+  mini or a modern mini PC; too slow on a Raspberry Pi.
+- **Pronunciation:** `tts_pronounce` fixes names it gets wrong. It ships with a phonetic
+  spelling of "Maison Belasi"; listen once and adjust.
+- **Verified:** Kokoro speech fed back through Whisper transcribed word for word (except the
+  brand name, see above). The dashboard's `/api/tts` returned that audio in about 2.5 s.
+
+Fallbacks, in order: Kokoro → Piper (if `piper_voice` is set) → the phone's built-in voice /
+espeak / macOS `say`. **ElevenLabs is optional:** set `elevenlabs_api_key` only if you want a
+studio-quality voice and don't mind a monthly fee. When a key is set, it takes over.
 
 ### Phone, via Tailscale (recommended)
 
@@ -231,7 +240,9 @@ Raspberry Pi 5 works with `base.en`.
 | `web_port` | `8765` | dashboard (loopback only) |
 | `hq_name`, `hq_sources`, `hq_briefing_times` | Maison Belasi; sales/ads/inbox/calendar; 08:30,13:00,18:30 | briefings |
 | `hq_model`, `hq_effort`, `hq_budget_usd` | worker model, `medium`, `0.75` | |
-| `tts_engine`, `elevenlabs_api_key`, `elevenlabs_voice_id` | `auto`, —, Daniel | voice |
+| `tts_engine` | `auto` | `kokoro` / `piper` / `elevenlabs` / `browser` |
+| `kokoro_voice`, `kokoro_speed`, `tts_pronounce` | `bm_george`, `1.0`, brand name | local voice |
+| `elevenlabs_api_key`, `elevenlabs_voice_id` | —, Daniel | optional paid voice |
 | `tailscale_allowed_users` | machine owner | comma-separated tailnet logins |
 | `speak_notifications` | `false` | |
 | `whisper_model`, `whisper_device`, `wake_word`, `piper_voice` | | voice |

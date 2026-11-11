@@ -81,8 +81,8 @@ def overview(cfg: Config, store: Store, user: str) -> dict:
         "chart": {"days": days},
         "hq": {"briefing": b, "running": hq.is_running(store) or store.kv_get("hq_requested") == "1",
                "next_at": nxt.timestamp() if nxt else None, "name": cfg.hq_name},
-        "voice": {"server_tts": tts.use_elevenlabs(cfg), "engine": "elevenlabs" if tts.use_elevenlabs(cfg)
-                  else "browser", "voice_name": cfg.voice_name},
+        "voice": {"server_tts": tts.server_engine(cfg) is not None,
+                  "engine": tts.server_engine(cfg) or "browser", "voice_name": tts.voice_label(cfg)},
         "status": router.spoken_status(store),
     }
 
@@ -230,17 +230,17 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                 return self._json(200, {"reply": "Pulling a fresh HQ update. It takes a minute or two."})
 
             if path == "/api/tts":
-                if not tts.use_elevenlabs(cfg):
+                if tts.server_engine(cfg) is None:
                     return self._json(404, {"error": "no server voice configured"})
                 text = str(data.get("text", "")).strip()[:2500]
                 if not text:
                     return self._json(400, {"error": "no text"})
                 try:
-                    audio = tts.elevenlabs_mp3(cfg, text)
+                    audio, mime = tts.synthesize(cfg, text)
                 except Exception as e:
                     log.warning("tts failed: %s", e)
-                    return self._json(502, {"error": "voice service failed"})
-                return self._send(200, audio, "audio/mpeg")
+                    return self._json(502, {"error": "voice failed"})
+                return self._send(200, audio, mime)
 
             gid = self._goal_id(path)
             if gid is None or not store.get(gid):

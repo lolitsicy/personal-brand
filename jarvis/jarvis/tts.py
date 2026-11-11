@@ -22,7 +22,7 @@ _voices: dict[str, object] = {}  # piper voice cache, keyed by model path
 
 
 def speak(cfg: Config, text: str) -> None:
-    text = (text or "").strip()
+    text = pronounce(cfg, (text or "").strip())
     if not text:
         return
     with _lock:
@@ -32,6 +32,13 @@ def speak(cfg: Config, text: str) -> None:
                     return
             except Exception as e:  # noqa: BLE001 - fall back to local voices
                 log.warning("ElevenLabs failed: %s", e)
+        if cfg.tts_engine in ("auto", "kokoro") and kokoro_ready(cfg):
+            try:
+                audio, sr = synthesize_kokoro(cfg, text)
+                if play_audio((audio * 32767).clip(-32768, 32767).astype("int16"), sr):
+                    return
+            except Exception as e:  # noqa: BLE001
+                log.warning("Kokoro failed: %s", e)
         try:
             if cfg.piper_voice and _speak_piper(cfg.piper_voice, text):
                 return
@@ -43,6 +50,133 @@ def speak(cfg: Config, text: str) -> None:
         except Exception as e:  # noqa: BLE001
             log.warning("system TTS failed: %s", e)
         print(f"Jarvis: {text}", flush=True)
+
+
+# --- engine choice (shared by the desk speaker and the phone dashboard) ----------
+def server_engine(cfg: Config) -> str | None:
+    """Which engine the server will synthesize with, or None to let the phone speak itself."""
+    if use_elevenlabs(cfg):
+        return "elevenlabs"
+    if cfg.tts_engine in ("auto", "kokoro") and kokoro_ready(cfg):
+        return "kokoro"
+    if cfg.tts_engine in ("auto", "piper") and cfg.piper_voice and _piper_voice(cfg.piper_voice) is not None:
+        return "piper"
+    return None
+
+
+def voice_label(cfg: Config) -> str:
+    if cfg.voice_name:
+        return cfg.voice_name
+    eng = server_engine(cfg)
+    if eng == "kokoro":
+        v = cfg.kokoro_voice.split("_", 1)[-1].capitalize()
+        return f"{v} (Kokoro, local)"
+    if eng == "elevenlabs":
+        return "ElevenLabs"
+    if eng == "piper":
+        return "Piper (local)"
+    return "Phone voice"
+
+
+def pronounce(cfg: Config, text: str) -> str:
+    """Apply tts_pronounce substitutions (longest first, whole words, case-insensitive)."""
+    import re
+    pairs = []
+    for part in (cfg.tts_pronounce or "").split(";"):
+        if "=" in part:
+            k, v = part.split("=", 1)
+            if k.strip():
+                pairs.append((k.strip(), v.strip()))
+    for k, v in sorted(pairs, key=lambda p: -len(p[0])):
+        text = re.sub(rf"\b{re.escape(k)}\b", v, text, flags=re.I)
+    return text
+
+
+def synthesize(cfg: Config, text: str) -> tuple[bytes, str]:
+    """Speech for the dashboard: (audio bytes, mime type). Raises if no server engine works."""
+    text = pronounce(cfg, text)
+    eng = server_engine(cfg)
+    if eng == "elevenlabs":
+        return elevenlabs_mp3(cfg, text), "audio/mpeg"
+    if eng == "kokoro":
+        audio, sr = synthesize_kokoro(cfg, text)
+        return _wav_bytes((audio * 32767).clip(-32768, 32767).astype("int16"), sr), "audio/wav"
+    if eng == "piper":
+        out = synthesize_piper(cfg.piper_voice, text)
+        if out:
+            return _wav_bytes(*out), "audio/wav"
+    raise RuntimeError("no server voice available")
+
+
+def _wav_bytes(audio, sr: int) -> bytes:
+    import io
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(audio.astype("<i2").tobytes())
+    return buf.getvalue()
+
+
+# --- Kokoro (free, local, natural) -------------------------------------------------
+KOKORO_FILES = {
+    "kokoro-v1.0.onnx": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx",
+    "voices-v1.0.bin": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin",
+}
+_kokoro = None
+_kokoro_lock = threading.Lock()
+
+
+def kokoro_dir(cfg: Config) -> Path:
+    return Path(cfg.kokoro_dir).expanduser() if cfg.kokoro_dir else cfg.home / "kokoro"
+
+
+def kokoro_ready(cfg: Config) -> bool:
+    d = kokoro_dir(cfg)
+    if not all((d / f).exists() for f in KOKORO_FILES):
+        return False
+    try:
+        import kokoro_onnx  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def _kokoro_model(cfg: Config):
+    global _kokoro
+    with _kokoro_lock:
+        if _kokoro is None:
+            from kokoro_onnx import Kokoro
+            d = kokoro_dir(cfg)
+            _kokoro = Kokoro(str(d / "kokoro-v1.0.onnx"), str(d / "voices-v1.0.bin"))
+        return _kokoro
+
+
+def synthesize_kokoro(cfg: Config, text: str):
+    """Return (float32 numpy array in [-1, 1], sample_rate)."""
+    k = _kokoro_model(cfg)
+    return k.create(text[:3000], voice=cfg.kokoro_voice, speed=cfg.kokoro_speed, lang=cfg.kokoro_lang)
+
+
+def download_kokoro(cfg: Config, progress=print) -> Path:
+    import httpx
+    d = kokoro_dir(cfg)
+    d.mkdir(parents=True, exist_ok=True)
+    for name, url in KOKORO_FILES.items():
+        dest = d / name
+        if dest.exists() and dest.stat().st_size > 1_000_000:
+            progress(f"  ✓ {name} already present")
+            continue
+        tmp = dest.with_suffix(dest.suffix + ".part")
+        progress(f"  ↓ {name}…")
+        with httpx.stream("GET", url, follow_redirects=True, timeout=60) as r:
+            r.raise_for_status()
+            with open(tmp, "wb") as f:
+                for chunk in r.iter_bytes(1 << 20):
+                    f.write(chunk)
+        tmp.replace(dest)
+    return d
 
 
 # --- ElevenLabs -----------------------------------------------------------------

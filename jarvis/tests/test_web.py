@@ -221,7 +221,7 @@ def test_overview_shape(srv):
     assert [g["title"] for g in d["needs_you"]] == ["Ask me"] and [g["title"] for g in d["active"]] == ["Running"]
     assert len(d["chart"]["days"]) == 14 and d["chart"]["days"][-1]["done"] == 1
     assert d["hq"]["briefing"]["headline"] == "Sales up." and d["hq"]["name"] == "Maison Belasi"
-    assert d["voice"] == {"server_tts": False, "engine": "browser", "voice_name": "Daniel"}
+    assert d["voice"] == {"server_tts": False, "engine": "browser", "voice_name": "Phone voice"}
     assert d["summary"]["spend_today"] == pytest.approx(0.7)
 
 

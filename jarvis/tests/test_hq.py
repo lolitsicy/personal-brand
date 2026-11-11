@@ -145,3 +145,37 @@ def test_elevenlabs_request_shape(env, monkeypatch):
     assert seen["url"].endswith(f"/v1/text-to-speech/{cfg.elevenlabs_voice_id}")
     assert seen["headers"]["xi-api-key"] == "secret" and seen["json"]["text"] == "Hello there"
     assert seen["json"]["model_id"] == cfg.elevenlabs_model
+
+
+def test_kokoro_engine_selection_and_wav(env, monkeypatch, tmp_path):
+    import io
+    import sys
+    import types
+    import wave
+
+    import numpy as np
+    cfg, _ = env
+    assert tts.server_engine(cfg) is None and tts.voice_label(cfg) == "Phone voice"
+    d = tmp_path / "kk"
+    d.mkdir()
+    for f in tts.KOKORO_FILES:
+        (d / f).write_bytes(b"x")
+    cfg.kokoro_dir = str(d)
+    monkeypatch.setitem(sys.modules, "kokoro_onnx", types.ModuleType("kokoro_onnx"))
+    monkeypatch.setattr(tts, "synthesize_kokoro", lambda c, t: (np.zeros(2400, dtype="float32"), 24000))
+    assert tts.server_engine(cfg) == "kokoro" and tts.voice_label(cfg) == "George (Kokoro, local)"
+    audio, mime = tts.synthesize(cfg, "hello")
+    assert mime == "audio/wav"
+    with wave.open(io.BytesIO(audio)) as w:
+        assert w.getframerate() == 24000 and w.getnframes() == 2400
+    cfg.elevenlabs_api_key = "k"  # a key, when set, takes precedence
+    assert tts.server_engine(cfg) == "elevenlabs"
+    cfg.tts_engine = "browser"
+    assert tts.server_engine(cfg) is None
+
+
+def test_pronunciation_map(env):
+    cfg, _ = env
+    assert tts.pronounce(cfg, "Maison Belasi sales. belasi!") == "May-zon Beh-lah-see sales. Beh-lah-see!"
+    cfg.tts_pronounce = ""
+    assert tts.pronounce(cfg, "Maison Belasi") == "Maison Belasi"

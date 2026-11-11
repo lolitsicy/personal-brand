@@ -10,7 +10,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-voice = ["faster-whisper>=1.1", "sounddevice>=0.5", "numpy>=1.26", "openwakeword>=0.4", "piper-tts>=1.2"]
+voice = ["faster-whisper>=1.1", "sounddevice>=0.5", "numpy>=1.26", "openwakeword>=0.4", "piper-tts>=1.2",
+         "kokoro-onnx>=0.4"]
 ingest = ["whisperx>=3.3"]
 dev = ["pytest>=8"]
 

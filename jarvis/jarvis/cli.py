@@ -133,6 +133,30 @@ def cmd_web(a):
     anyio.run(run_web, cfg, store, allowed)
 
 
+def cmd_voices(a):
+    from . import tts
+    cfg = Config.load()
+    if a.action == "download":
+        try:
+            import kokoro_onnx  # noqa: F401
+        except ImportError:
+            sys.exit("Install the voice extras first: pip install 'jarvis-home[voice]'")
+        print(f"Downloading Kokoro (free local voice, ~350 MB) to {tts.kokoro_dir(cfg)}")
+        tts.download_kokoro(cfg)
+        print(f"Done. Voice: {tts.voice_label(cfg)}. Try: jarvis voices test")
+    elif a.action == "list":
+        if not tts.kokoro_ready(cfg):
+            sys.exit("Kokoro isn't set up. Run: jarvis voices download")
+        voices = tts._kokoro_model(cfg).get_voices()
+        print("British:", ", ".join(v for v in voices if v[:2] in ("bf", "bm")))
+        print("American:", ", ".join(v for v in voices if v[:2] in ("af", "am")))
+        print(f"Current: {cfg.kokoro_voice}. Change it with kokoro_voice in ~/.jarvis/config.toml")
+    else:
+        text = " ".join(a.text) or "Good morning. Sales are up on last week, and two orders need shipping today."
+        print(f"Speaking with {tts.voice_label(cfg)}…")
+        tts.speak(cfg, text)
+
+
 def cmd_tailscale(a):
     from . import tailnet
     cfg, store, _ = _ctx()
@@ -255,6 +279,11 @@ def main(argv=None):
     sp.add_parser("telegram", help="run the Telegram bot only").set_defaults(f=cmd_telegram)
 
     sp.add_parser("web", help="run the dashboard only").set_defaults(f=cmd_web)
+
+    s = sp.add_parser("voices", help="local voice: download | test [text] | list")
+    s.add_argument("action", choices=["download", "test", "list"])
+    s.add_argument("text", nargs="*")
+    s.set_defaults(f=cmd_voices)
 
     s = sp.add_parser("tailscale", help="put the dashboard on your tailnet (on | off | status)")
     s.add_argument("action", nargs="?", default="on", choices=["on", "off", "status"])

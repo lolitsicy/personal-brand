@@ -80,6 +80,10 @@ JARVIS="$BIN/jarvis"
 ok "jarvis → $JARVIS"
 case ":$PATH:" in *":$BIN:"*) ;; *) warn "Add $BIN to your PATH (e.g. in ~/.zshrc or ~/.bashrc)." ;; esac
 "$JARVIS" init | sed 's/^/  /'
+if [ "$VOICE" = 1 ]; then
+  say "Jarvis's voice (Kokoro: free, runs locally)"
+  "$JARVIS" voices download | sed 's/^/  /' || warn "Voice download failed; retry later with: jarvis voices download"
+fi
 
 say "Tailscale dashboard"
 TS_URL=""
