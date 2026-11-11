@@ -51,8 +51,26 @@ async def run(cfg: Config, store: Store, notifier: Notifier, runner: AgentRunner
             running.discard(goal.id)
             sem.release()
 
+    from . import hq
+    hq.init_db(store)
+    store.kv_set("hq_running", "0")
+
+    async def brief():
+        try:
+            b = await hq.run_briefing(cfg, store)
+            body = b.get("spoken") or b.get("headline", "")
+            attention = [s["title"] for s in b.get("sections", []) if s.get("status") == "attention"]
+            notifier.send(f"HQ update{' — needs a look: ' + ', '.join(attention) if attention else ''}",
+                          body, "high" if attention else "default")
+        except Exception as e:
+            log.exception("HQ briefing failed")
+            notifier.send("HQ update failed", repr(e), "default")
+
     async with anyio.create_task_group() as tg:
         while True:
+            if not stop_when_idle and not hq.is_running(store) and hq.due(cfg, store):
+                store.kv_set("hq_running", "1")
+                tg.start_soon(brief)
             # Fill free slots
             while sem.value > 0:
                 await sem.acquire()

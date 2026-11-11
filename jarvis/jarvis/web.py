@@ -24,9 +24,11 @@ from urllib.parse import urlparse
 
 import anyio
 
-from . import router
+import time
+
+from . import hq, router, tts
 from .config import Config
-from .store import ACTIVE, Store
+from .store import ACTIVE, DONE, NEEDS_INPUT, Store
 
 log = logging.getLogger("jarvis.web")
 
@@ -46,6 +48,43 @@ def goal_json(g, events: list[dict] | None = None) -> dict:
     if events is not None:
         d["events"] = [{"ts": e["ts"], "kind": e["kind"], "text": e["text"][:2000]} for e in events]
     return d
+
+
+def overview(cfg: Config, store: Store, user: str) -> dict:
+    goals = store.list(None, limit=300)
+    now = time.time()
+    day = 86400
+    active = [g for g in goals if g.status in ACTIVE]
+    needs = [g for g in active if g.status == NEEDS_INPUT]
+    recent = [g for g in goals if g.status not in ACTIVE][:12]
+    done_7d = [g for g in goals if g.status == DONE and now - g.updated < 7 * day]
+    import datetime as _dt
+    today = _dt.date.today()
+    days = []
+    for i in range(13, -1, -1):
+        d = today - _dt.timedelta(days=i)
+        lo = _dt.datetime.combine(d, _dt.time()).timestamp()
+        hi = lo + day
+        days.append({"date": d.isoformat(),
+                     "done": sum(1 for g in goals if g.status == DONE and lo <= g.updated < hi),
+                     "spend": round(sum(g.spent_usd for g in goals if lo <= g.updated < hi), 2)})
+    b = hq.latest(store)
+    nxt = hq.next_slot(cfg)
+    return {
+        "user": user, "updated_ts": now, "hq_name": cfg.hq_name,
+        "summary": {"needs_you": len(needs), "in_motion": len(active) - len(needs),
+                    "done_7d": len(done_7d), "spend_7d": round(sum(d["spend"] for d in days[-7:]), 2),
+                    "spend_today": days[-1]["spend"], "budget_default": cfg.default_budget_usd},
+        "needs_you": [goal_json(g) for g in needs],
+        "active": [goal_json(g) for g in active if g.status != NEEDS_INPUT],
+        "recent": [goal_json(g) for g in recent],
+        "chart": {"days": days},
+        "hq": {"briefing": b, "running": hq.is_running(store) or store.kv_get("hq_requested") == "1",
+               "next_at": nxt.timestamp() if nxt else None, "name": cfg.hq_name},
+        "voice": {"server_tts": tts.use_elevenlabs(cfg), "engine": "elevenlabs" if tts.use_elevenlabs(cfg)
+                  else "browser", "voice_name": cfg.voice_name},
+        "status": router.spoken_status(store),
+    }
 
 
 def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
@@ -114,6 +153,10 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
             if path in ("/", "/index.html"):
                 return self._send(200, PAGE.replace("{{USER}}", _esc(user)).encode(),
                                   "text/html; charset=utf-8")
+            if path == "/api/overview":
+                return self._json(200, overview(cfg, store, user))
+            if path == "/api/hq":
+                return self._json(200, {"briefing": hq.latest(store), "running": hq.is_running(store)})
             if path == "/api/goals":
                 active = store.list(ACTIVE, limit=50)
                 recent = [g for g in store.list(None, limit=30) if g.status not in ACTIVE][:15]
@@ -162,7 +205,7 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                     return self._json(200, {"heard": "", "reply": "I didn't catch that."})
                 reply = anyio.run(router.handle, cfg, store, heard)
                 store.log(None, "web", f"{user} (voice): {heard}")
-                return self._json(200, {"heard": heard, "reply": reply})
+                return self._json(200, {"heard": heard, "reply": reply, "speak": reply})
 
             if ctype != "application/json":
                 return self._json(415, {"error": "send application/json"})
@@ -180,7 +223,24 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                     return self._json(400, {"error": "say something"})
                 reply = anyio.run(router.handle, cfg, store, text)
                 store.log(None, "web", f"{user}: {text}")
-                return self._json(200, {"reply": reply})
+                return self._json(200, {"reply": reply, "speak": reply})
+
+            if path == "/api/hq/refresh":
+                hq.request(store)
+                return self._json(200, {"reply": "Pulling a fresh HQ update. It takes a minute or two."})
+
+            if path == "/api/tts":
+                if not tts.use_elevenlabs(cfg):
+                    return self._json(404, {"error": "no server voice configured"})
+                text = str(data.get("text", "")).strip()[:2500]
+                if not text:
+                    return self._json(400, {"error": "no text"})
+                try:
+                    audio = tts.elevenlabs_mp3(cfg, text)
+                except Exception as e:
+                    log.warning("tts failed: %s", e)
+                    return self._json(502, {"error": "voice service failed"})
+                return self._send(200, audio, "audio/mpeg")
 
             gid = self._goal_id(path)
             if gid is None or not store.get(gid):

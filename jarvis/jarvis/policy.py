@@ -351,8 +351,10 @@ def _check_tokens(toks: list[str], seg: str, cwd: Path, ctx: _Ctx, depth: int) -
         return approve("runs as root")
 
     if any(_is_protected(a, ctx.protected, cwd) for a in args):
-        if ctx.read_only or cmd not in ("cat", "ls", "head", "tail", "wc", "file", "stat", "grep"):
+        if ctx.read_only or cmd not in ("cat", "ls", "head", "tail", "wc", "file", "stat", "grep",
+                                        "less", "more", "strings", "base64", "xxd", "od"):
             return deny("modifies Jarvis's own state")
+        return approve("reads Jarvis's config or queue (holds your API keys)")
 
     for a in args:
         val = a.split("=", 1)[1] if a.startswith("-") and "=" in a else a
@@ -526,6 +528,13 @@ def check(tool: str, args: dict, workspace: Path, approvals: list[str],
 
     if tool in ("Read", "Glob", "Grep"):
         raw = str(args.get("file_path") or args.get("path") or "")
+        rp = _resolve(raw, workspace) if raw else None
+        if rp is not None and rp.name in ("config.toml", "jarvis.db") and \
+                any(_inside(rp, q.parent if q.suffix else q) for q in ctx.protected):
+            key = f"{tool}: {raw}"
+            if key in approvals:
+                return Decision(ALLOW, "approved by owner", key, True)
+            return Decision(APPROVE, "reads Jarvis's config or queue (holds your API keys)", key)
         pattern = str(args.get("pattern") or "") if tool == "Glob" else ""
         p = _resolve(raw, workspace) if raw else workspace
         key = f"{tool}: {raw} {pattern}".strip()

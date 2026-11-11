@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 
 from .config import Config
 from .store import ACTIVE, NEEDS_INPUT, Store
@@ -131,9 +132,26 @@ async def handle(cfg: Config, store: Store, text: str) -> str:
     return apply(cfg, store, d)
 
 
+BRIEF_RE = re.compile(
+    r"^(?:hey jarvis[, ]*)?(?:brief me|briefing|give me (?:an |the |my )?(?:update|briefing|rundown)|"
+    r"(?:any |an )?updates?|what'?s (?:happening|new|going on) (?:at|with|in) (?:hq|the business|the store|"
+    r"maison belasi|mb)|how(?:'s| is| are) (?:hq|the business|the store|sales|maison belasi)(?: doing| going)?|"
+    r"hq (?:update|status|briefing))(?: please)?$")
+FRESH_SECONDS = 20 * 60
+
+
 def _fast_path(cfg: Config, store: Store, text: str) -> str | None:
     """Commands that shouldn't cost a model call."""
     t = text.lower().strip(" .!?")
+    if BRIEF_RE.match(t):
+        from . import hq
+        b = hq.latest(store)
+        if b and time.time() - b["ts"] < FRESH_SECONDS:
+            return b.get("spoken") or b.get("headline") or "Nothing new at HQ."
+        hq.request(store)
+        lead = (f"Last update {int((time.time() - b['ts']) // 60)} minutes ago: {b.get('headline', '')} "
+                if b else "")
+        return lead + "I'm pulling a fresh HQ update now. I'll tell you when it's ready."
     m = re.fullmatch(r"(?:approve|approved)(?: goal)? #?(\d+)", t)
     if m:
         gid = int(m.group(1))

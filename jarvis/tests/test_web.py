@@ -110,7 +110,8 @@ def test_answer_approve_cancel(srv):
 def test_voice_upload(srv):
     _, _, client, _, heard = srv
     r = client.post("/api/voice", content=b"\x1aE\xdf\xa3" + b"0" * 5000, headers={"Content-Type": "audio/webm"})
-    assert r.json() == {"heard": "build me a website", "reply": "ok: build me a website"}
+    assert r.json() == {"heard": "build me a website", "reply": "ok: build me a website",
+                        "speak": "ok: build me a website"}
     assert client.post("/api/voice", content=b"x", headers={"Content-Type": "text/plain"}).status_code == 415
 
 
@@ -201,3 +202,40 @@ def test_policy_blocks_webfetch_to_local_and_tailnet(tmp_path):
     assert policy.check("WebFetch", {"url": "https://docs.python.org/3/"}, tmp_path, []).verdict == policy.ALLOW
     assert policy.check("Bash", {"command": "curl -s http://localhost:3000/health"}, tmp_path, []).verdict \
         == policy.ALLOW
+
+
+# --- overview / HQ / voice endpoints ------------------------------------------
+
+def test_overview_shape(srv):
+    from jarvis import hq
+    _, store, client, _, _ = srv
+    a = store.add_goal("Ask me", "p", "d", 5, 3)
+    store.update(a.id, status=NEEDS_INPUT, pending_question="Blue?", spent_usd=0.4)
+    b = store.add_goal("Running", "p", "d", 5, 3)
+    store.update(b.id, status="running")
+    c = store.add_goal("Done", "p", "d", 5, 3)
+    store.update(c.id, status="done", spent_usd=0.3)
+    hq.save(store, {"headline": "Sales up.", "spoken": "Sales are up.", "sections": []})
+    d = client.get("/api/overview").json()
+    assert d["summary"]["needs_you"] == 1 and d["summary"]["in_motion"] == 1 and d["summary"]["done_7d"] == 1
+    assert [g["title"] for g in d["needs_you"]] == ["Ask me"] and [g["title"] for g in d["active"]] == ["Running"]
+    assert len(d["chart"]["days"]) == 14 and d["chart"]["days"][-1]["done"] == 1
+    assert d["hq"]["briefing"]["headline"] == "Sales up." and d["hq"]["name"] == "Maison Belasi"
+    assert d["voice"] == {"server_tts": False, "engine": "browser", "voice_name": "Daniel"}
+    assert d["summary"]["spend_today"] == pytest.approx(0.7)
+
+
+def test_hq_refresh_and_tts_without_key(srv):
+    _, store, client, _, _ = srv
+    assert "Pulling" in client.post("/api/hq/refresh", json={}).json()["reply"]
+    assert store.kv_get("hq_requested") == "1"
+    assert client.post("/api/tts", json={"text": "hi"}).status_code == 404
+
+
+def test_tts_with_key(srv, monkeypatch):
+    from jarvis import tts
+    cfg, _, client, _, _ = srv
+    cfg.elevenlabs_api_key = "k"
+    monkeypatch.setattr(tts, "elevenlabs_mp3", lambda c, t: b"ID3" + t.encode())
+    r = client.post("/api/tts", json={"text": "hello"})
+    assert r.status_code == 200 and r.headers["content-type"] == "audio/mpeg" and r.content == b"ID3hello"

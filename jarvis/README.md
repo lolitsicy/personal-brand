@@ -112,6 +112,38 @@ jarvis add "Weekly sales CSV" --done "report.csv exists with one row per day for
 
 Goals get their own folder under `~/jarvis-workspaces/` unless you pass `--workspace`.
 
+### HQ briefings (Maison Belasi)
+
+At `hq_briefing_times` (08:30, 13:00 and 18:30 by default), or whenever you say *"brief me"*,
+*"any updates?"* or *"how's the business doing?"*, a read-only agent checks your business and
+reports back. The default checks are sales (Shopify), ads (Meta Ads), inbox (Gmail) and calendar.
+You get a short spoken summary, a push notification (urgent if anything needs a look), and a
+briefing card on the dashboard. Edit `hq_sources` in the config to change what it checks.
+
+- **It only uses connectors you've given Claude Code.** Add them with `claude mcp add …` (user
+  scope), or enable the claude.ai connectors in Claude Code. A source it can't reach shows
+  as *Not connected*. It never estimates or invents figures. Verified: with no connectors, it
+  reported all four sources unavailable. With a test Shopify connector, it reported the exact
+  figures.
+- **Briefings are strictly read-only.** Any tool that would change something (send, create,
+  update…) is denied outright, not queued for approval. In testing it was told to create a
+  discount code; the call was blocked, and it told you it hadn't been done.
+- Each briefing is capped at `hq_budget_usd` ($0.75). A run with no connectors cost $0.17 on
+  Sonnet.
+- "Brief me" within 20 minutes of the last briefing answers instantly from that briefing.
+
+### Jarvis's voice
+
+| Where | Default | Best |
+|---|---|---|
+| Phone dashboard | your phone's built-in voice, auto-picking the most natural English one (choose it in ⚙︎) | **ElevenLabs**: set `elevenlabs_api_key`. The default voice is "Daniel" (calm British male); change it with `elevenlabs_voice_id` |
+| Desk speaker (`jarvis up --voice`) | Piper (local, free) → espeak / `say` | ElevenLabs, same key |
+
+ElevenLabs is the recommendation if you'll listen every day. Phone voices range from good
+(iPhone "Premium" voices, once downloaded in Settings → Accessibility → Spoken Content) to
+robotic. The key lives only in `~/.jarvis/config.toml`, which agents aren't allowed to read
+without your approval.
+
 ### Phone, via Tailscale (recommended)
 
 `jarvis tailscale on` (the installer runs it) publishes the dashboard at
@@ -197,6 +229,9 @@ Raspberry Pi 5 works with `base.en`.
 | `sandbox_allowed_domains` | registries + GitHub | comma-separated |
 | `ntfy_topic`, `telegram_token`, `telegram_chat_id` | | phone |
 | `web_port` | `8765` | dashboard (loopback only) |
+| `hq_name`, `hq_sources`, `hq_briefing_times` | Maison Belasi; sales/ads/inbox/calendar; 08:30,13:00,18:30 | briefings |
+| `hq_model`, `hq_effort`, `hq_budget_usd` | worker model, `medium`, `0.75` | |
+| `tts_engine`, `elevenlabs_api_key`, `elevenlabs_voice_id` | `auto`, —, Daniel | voice |
 | `tailscale_allowed_users` | machine owner | comma-separated tailnet logins |
 | `speak_notifications` | `false` | |
 | `whisper_model`, `whisper_device`, `wake_word`, `piper_voice` | | voice |

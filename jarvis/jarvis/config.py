@@ -50,6 +50,29 @@ class Config:
     tailscale_allowed_users: str = ""  # comma-separated tailnet logins; "" = this machine's owner
     public_url: str = ""  # set by `jarvis tailscale on`; used as the tap-through link in notifications
 
+    # HQ briefings: what Jarvis checks and reports on
+    hq_name: str = "Maison Belasi"
+    hq_sources: str = (
+        "- Sales (Shopify): orders and revenue today so far vs the same time last week; best seller; "
+        "any order problems (unfulfilled > 48h, refunds).\n"
+        "- Ads (Meta Ads): spend today and over the last 7 days, ROAS/CPA vs the prior 7 days, any "
+        "ad set that's spending without results.\n"
+        "- Inbox (Gmail): unread emails from the last 24h that need a reply from the owner "
+        "(customers, suppliers, press); ignore newsletters and notifications.\n"
+        "- Calendar (Google Calendar): what's left today and the first thing tomorrow.")
+    hq_briefing_times: str = "08:30,13:00,18:30"  # local time; "" = only on request
+    hq_model: str = ""  # "" = worker_model
+    hq_effort: str = "medium"
+    hq_budget_usd: float = 0.75  # per briefing
+
+    # Jarvis's voice. auto = ElevenLabs if a key is set, else the phone's own voice in the browser
+    # and Piper/espeak/say on the desk speaker.
+    tts_engine: str = "auto"  # auto | elevenlabs | browser
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = "onwK4e9ZLuTAKqWW03F9"  # "Daniel": calm British male
+    elevenlabs_model: str = "eleven_flash_v2_5"  # low latency
+    voice_name: str = "Daniel"
+
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech
     whisper_device: str = "auto"  # auto | cpu | cuda
@@ -126,6 +149,20 @@ sandbox = "on"
 # empty = whoever owns this machine in Tailscale.
 web_port = 8765
 tailscale_allowed_users = ""
+
+# HQ briefings. Jarvis checks these through the MCP connectors you've added to Claude Code
+# (`claude mcp add ...`). Anything it can't reach is reported as unavailable, never guessed.
+hq_name = "Maison Belasi"
+hq_briefing_times = "08:30,13:00,18:30"
+# hq_sources = '''
+# - Sales (Shopify): ...
+# '''
+
+# Jarvis's voice. Best: an ElevenLabs key (natural, ~$5/mo plan covers daily briefings).
+# Without one, your phone's built-in voice is used in the dashboard.
+tts_engine = "auto"
+elevenlabs_api_key = ""
+# elevenlabs_voice_id = "onwK4e9ZLuTAKqWW03F9"   # Daniel
 
 speak_notifications = false
 whisper_model = "small.en"

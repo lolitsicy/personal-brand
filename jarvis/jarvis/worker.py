@@ -120,7 +120,15 @@ class SDKRunner:
     async def run(self, *, prompt, cwd, model, effort, system_append, schema, budget_usd,
                   max_turns, resume, read_only, guard, should_stop=lambda: False) -> RunResult:
         from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher,
-                                      ResultMessage, TextBlock, ToolUseBlock, query)
+                                      PermissionResultAllow, PermissionResultDeny, ResultMessage,
+                                      TextBlock, ToolUseBlock, query)
+
+        async def can_use(tool, args, _ctx):  # MCP tools aren't pre-allowed; policy decides
+            d = guard(tool, args or {})
+            if d.verdict == policy.ALLOW:
+                return PermissionResultAllow()
+            return PermissionResultDeny(message=f"Blocked: {d.reason}. This needs owner approval."
+                                        if d.verdict == policy.APPROVE else f"Blocked permanently: {d.reason}.")
 
         async def pre_tool(inp: dict, _tool_use_id, _ctx) -> dict:
             d = guard(inp["tool_name"], inp.get("tool_input") or {})
@@ -148,6 +156,8 @@ class SDKRunner:
             max_turns=max_turns,
             resume=resume,
             sandbox=self.sandbox,
+            can_use_tool=can_use,
+            setting_sources=["user", "project"],  # your Claude Code MCP servers + CLAUDE.md
         )
         res = RunResult(None, 0.0, resume, "error_during_execution")
         async for msg in query(prompt=prompt, options=opts):

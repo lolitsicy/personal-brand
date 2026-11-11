@@ -26,6 +26,12 @@ def speak(cfg: Config, text: str) -> None:
     if not text:
         return
     with _lock:
+        if use_elevenlabs(cfg):
+            try:
+                if _play_mp3(elevenlabs_mp3(cfg, text)):
+                    return
+            except Exception as e:  # noqa: BLE001 - fall back to local voices
+                log.warning("ElevenLabs failed: %s", e)
         try:
             if cfg.piper_voice and _speak_piper(cfg.piper_voice, text):
                 return
@@ -37,6 +43,40 @@ def speak(cfg: Config, text: str) -> None:
         except Exception as e:  # noqa: BLE001
             log.warning("system TTS failed: %s", e)
         print(f"Jarvis: {text}", flush=True)
+
+
+# --- ElevenLabs -----------------------------------------------------------------
+def use_elevenlabs(cfg: Config) -> bool:
+    return bool(cfg.elevenlabs_api_key) and cfg.tts_engine in ("auto", "elevenlabs")
+
+
+def elevenlabs_mp3(cfg: Config, text: str) -> bytes:
+    """Synthesize speech with ElevenLabs. Returns MP3 bytes; raises on failure."""
+    import httpx
+    r = httpx.post(
+        f"https://api.elevenlabs.io/v1/text-to-speech/{cfg.elevenlabs_voice_id}",
+        params={"output_format": "mp3_44100_128"},
+        headers={"xi-api-key": cfg.elevenlabs_api_key, "Accept": "audio/mpeg"},
+        json={"text": text[:2500], "model_id": cfg.elevenlabs_model,
+              "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}},
+        timeout=30,
+    )
+    if r.status_code != 200:
+        raise RuntimeError(f"ElevenLabs HTTP {r.status_code}: {r.text[:200]}")
+    return r.content
+
+
+def _play_mp3(data: bytes) -> bool:
+    import shutil
+    import subprocess
+    import tempfile
+    for cmd in (["afplay"], ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"], ["mpg123", "-q"]):
+        if shutil.which(cmd[0]):
+            with tempfile.NamedTemporaryFile(suffix=".mp3") as f:
+                f.write(data)
+                f.flush()
+                return subprocess.run([*cmd, f.name], timeout=120).returncode == 0
+    return False
 
 
 # --- piper -------------------------------------------------------------------
