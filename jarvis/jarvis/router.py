@@ -49,10 +49,16 @@ the current queue. Decide the single action:
 - briefing: they want a business update (sales, ads, inbox, calendar, "brief me", "how's the
   business"). Speech-to-text often garbles short commands ("breathe me", "brief meet") — if it
   plausibly means "brief me", choose briefing rather than asking.
-- chat: anything else; just reply.
+- chat: anything else; just reply. For questions that need current information (weather,
+  news, prices, opening hours, sports scores, facts you're unsure of), use web search first and
+  answer from what you find. You do have web search; never say you lack permission for it.
 
 Replies are spoken aloud: short, plain, no markdown, no lists.
 """
+
+
+ROUTER_SEARCH_TOOLS = ["WebSearch", "mcp__keenable__search_web_pages",
+                       "mcp__keenable__fetch_page_content"]
 
 
 def queue_snapshot(store: Store) -> str:
@@ -74,7 +80,9 @@ async def classify(cfg: Config, store: Store, text: str) -> dict:
     prompt = f"## Queue\n{queue_snapshot(store)}\n\n## Owner said\n{text}"
     opts = ClaudeAgentOptions(
         model=cfg.router_model, effort=cfg.router_effort, system_prompt=ROUTER_SYSTEM,
-        tools=[], max_turns=3, max_budget_usd=0.5,
+        # Read-only web search so chat can answer live questions (weather, news, facts).
+        # Built-in WebSearch isn't available on every account; Keenable MCP covers that case.
+        tools=["WebSearch"], allowed_tools=ROUTER_SEARCH_TOOLS, max_turns=6, max_budget_usd=0.5,
         output_format={"type": "json_schema", "schema": ROUTE_SCHEMA},
         cwd=str(cfg.home),
     )
