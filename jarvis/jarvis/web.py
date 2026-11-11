@@ -80,7 +80,8 @@ def overview(cfg: Config, store: Store, user: str) -> dict:
         "recent": [goal_json(g) for g in recent],
         "chart": {"days": days},
         "hq": {"briefing": b, "running": hq.is_running(store) or store.kv_get("hq_requested") == "1",
-               "next_at": nxt.timestamp() if nxt else None, "name": cfg.hq_name},
+               "next_at": nxt.timestamp() if nxt else None, "name": cfg.hq_name,
+               "times": [t.strftime("%H:%M") for t in hq.slots(cfg)]},
         "voice": {"server_tts": tts.server_engine(cfg) is not None,
                   "engine": tts.server_engine(cfg) or "browser", "voice_name": tts.voice_label(cfg)},
         "status": router.spoken_status(store),
@@ -198,6 +199,8 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                         fn = transcribe or (lambda p: __import__("jarvis.voice", fromlist=["x"])
                                             .transcribe_file(cfg, p))
                         heard = (fn(f.name) or "").strip()
+                    except ValueError as e:
+                        return self._json(422, {"error": str(e)})
                     except Exception as e:
                         log.exception("transcription failed")
                         return self._json(500, {"error": f"transcription failed: {e}"})

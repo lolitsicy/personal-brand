@@ -179,3 +179,17 @@ def test_pronunciation_map(env):
     assert tts.pronounce(cfg, "Maison Belasi sales. belasi!") == "May-zon Beh-lah-see sales. Beh-lah-see!"
     cfg.tts_pronounce = ""
     assert tts.pronounce(cfg, "Maison Belasi") == "Maison Belasi"
+
+
+def test_router_briefing_action_handles_misheard_command(env):
+    cfg, store = env
+    out = router.apply(cfg, store, {"action": "briefing", "goal_id": 0, "title": "", "prompt": "",
+                                    "done_criteria": "", "budget_usd": 0, "answer_text": "", "reply": "ok"})
+    assert "HQ update" in out and store.kv_get("hq_requested") == "1"
+
+
+def test_whisper_vocabulary_includes_brand(env):
+    from jarvis import voice
+    cfg, _ = env
+    v = voice.vocabulary(cfg)
+    assert "brief me" in v and "Maison Belasi" in v

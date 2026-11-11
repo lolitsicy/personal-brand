@@ -19,7 +19,7 @@
   --ok:#16a34a; --bad:#dc2626; --warn:#b45309; --warn-bg:#fdf3e4; --warn-line:#f1c98a;
   --chart:#8b3cf6; --chart-fill-a:rgba(176,92,245,.34); --chart-fill-b:rgba(176,92,245,0);
   --glow1:rgba(229,90,226,.13); --glow2:rgba(139,92,246,.10);
-  --dock:rgba(252,252,254,.82); --field:#fff; --chip:#f0eff3;
+  --dock:rgba(252,252,254,.92); --field:#fff; --chip:#f0eff3;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --r:16px;
 }
@@ -32,7 +32,7 @@
   --ok:#4ade80; --bad:#f87171; --warn:#fbbf5a; --warn-bg:rgba(251,191,90,.08); --warn-line:rgba(251,191,90,.35);
   --chart:#b18bff; --chart-fill-a:rgba(177,139,255,.30); --chart-fill-b:rgba(177,139,255,0);
   --glow1:rgba(222,70,220,.16); --glow2:rgba(124,58,237,.16);
-  --dock:rgba(22,20,36,.82); --field:#0f0d1a; --chip:#1e1b2e;
+  --dock:rgba(22,20,36,.92); --field:#0f0d1a; --chip:#1e1b2e;
 }}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:16px}
@@ -90,6 +90,9 @@ h1 .sl{color:var(--magenta);margin:0 .14em;font-weight:500}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
 @media (min-width:700px){.card{padding:20px 22px}}
 .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:16px}
+/* Phone/tablet: the HQ briefing is why you opened this, so it goes first, above the summary. */
+@media (max-width:1099px){#main{display:flex;flex-direction:column}#main>.grid{display:contents}
+  #main>.summary{order:2;margin-top:16px}#main>.grid>*{order:3;margin-top:16px}#main>.grid>#hq{order:1}}
 @media (min-width:1100px){.grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
   .s12{grid-column:span 12}.s7{grid-column:span 7}.s5{grid-column:span 5}}
 .summary{margin-top:22px}
@@ -102,7 +105,7 @@ h1 .sl{color:var(--magenta);margin:0 .14em;font-weight:500}
 .stat .n small{font-size:15px;font-weight:550}
 .stat .c{font-size:12px;color:var(--mute)}
 .stat svg{flex:none}
-.alertdot{width:20px;height:20px;border-radius:50%;background:var(--bad);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800;flex:none}
+.alertdot{width:20px;height:20px;border-radius:50%;background:#e5484d;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800;flex:none}
 .alertdot.off{background:var(--faint)}
 @media (min-width:700px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
   .stat:nth-child(odd){border-left:1px solid var(--line2);padding-left:22px}.stat:first-child{border-left:0;padding-left:0}.stat{padding:0 22px}}
@@ -166,6 +169,7 @@ h1 .sl{color:var(--magenta);margin:0 .14em;font-weight:500}
 .ask:first-of-type{border-top:0;margin-top:12px;padding-top:0}
 .ask .gt{font-weight:600;font-size:15px;overflow-wrap:anywhere}
 .ask .q{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 10px;padding:12px 14px;border-radius:12px;background:var(--warn-bg);border:1px solid var(--warn-line);font-size:14.5px;color:var(--ink)}
+@media (min-width:900px){.ask{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start}.ask .gt{grid-column:1/-1}.ask .q{margin:8px 0 0}.ask .ans{margin-top:8px}.ask .ans label{display:none}.ask .ans .btnrow{margin-top:8px}}
 .ask label{font-size:12.5px;color:var(--mute);display:block;margin-bottom:4px}
 textarea,.field{width:100%;border:1px solid var(--line2);background:var(--field);border-radius:12px;padding:11px 13px;min-height:44px;font-size:16px;resize:vertical}
 textarea:focus,.field:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,60,246,.15)}
@@ -192,6 +196,8 @@ details.log[open]>summary::before{transform:rotate(45deg)}
 .kv{font-size:13px;color:var(--ink2);margin:4px 0 8px;overflow-wrap:anywhere}
 .kv b{color:var(--mute);font-weight:500}
 .ev{font:12px/1.5 var(--mono);color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto}
+#goalList,#needList{margin-top:12px}
+.spend span,.stat .n,.rtile .meta,.tile .val{font-variant-numeric:tabular-nums}
 .none{color:var(--mute);font-size:14px;margin:14px 0 2px}
 
 /* chart */
@@ -204,7 +210,7 @@ details.log[open]>summary::before{transform:rotate(45deg)}
 .chartbox .halo{fill:var(--chart);opacity:.18}
 .chartbox .vline{stroke:var(--chart);stroke-width:1;stroke-dasharray:3 4;opacity:.5}
 .chartbox .zero{fill:var(--mute);font-size:12.5px}
-.flt{position:absolute;pointer-events:none;background:var(--card-solid);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:8px 12px;font-size:12.5px;white-space:nowrap;transform:translate(-50%,calc(-100% - 14px));transition:left .15s,top .15s}
+.flt{position:absolute;pointer-events:none;background:var(--card-solid);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px 12px;font-size:12.5px;white-space:nowrap;transform:translateX(-50%);transition:left .15s;text-align:center;line-height:1.3}
 .flt b{font-size:15px;font-weight:650}
 .flt .d{color:var(--blue);font-size:11.5px;display:block;margin-top:1px}
 .legend{display:flex;gap:16px;font-size:12.5px;color:var(--mute);margin-top:10px;flex-wrap:wrap}
@@ -229,6 +235,7 @@ details.log[open]>summary::before{transform:rotate(45deg)}
 .bubble p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .bubble p+p{margin-top:6px}
 .bubble .err{color:var(--bad)}
+.bubble .detail{display:block;color:var(--mute);font-size:12px;margin-top:4px}
 .bubble .x{position:absolute;top:2px;right:2px;width:44px;height:44px;border:0;background:none;color:var(--mute);cursor:pointer;font-size:18px;border-radius:50%}
 .bar2{display:flex;align-items:center;gap:10px;background:var(--dock);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 40px rgba(20,18,40,.12);padding:6px 6px 6px 8px}
 .bar2 form{flex:1;display:flex;align-items:center;gap:6px;min-width:0}
@@ -317,13 +324,13 @@ select.field{font-size:15px;appearance:auto;margin-top:8px}
   <main id="main">
     <div class="top">
       <div style="min-width:0">
-        <a class="crumb" href="#hq"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4"/></svg><span>{{USER}}</span></a>
+        <a class="crumb" href="#hq" title="Signed in as {{USER}} via Tailscale"><span id="greet">Hello</span></a>
         <h1><span class="t1">Jarvis</span><span class="sl">/</span><span>Overview</span></h1>
         <p id="sub">Loading…</p>
       </div>
       <div class="iconbtns">
         <button class="ibtn" id="reload" type="button" aria-label="Refresh now" title="Refresh"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3v3.5h-3.5"/></svg></button>
-        <button class="ibtn" id="gear" type="button" aria-label="Voice settings" title="Settings"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg></button>
+        <button class="ibtn" id="gear" type="button" aria-label="Voice settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
     </div>
     <div class="chips" aria-label="Context">
@@ -351,7 +358,7 @@ select.field{font-size:15px;appearance:auto;margin-top:8px}
           </div>
           <div class="acts">
             <div class="ghostgrp"><button class="ghost" id="hqRefresh" type="button" aria-label="Refresh briefing"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3v3.5h-3.5"/></svg><span class="lbl">Refresh</span></button></div>
-            <button class="pill" id="hqPlay" type="button" disabled><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3 1.6v8.8L10.4 6z"/></svg><span>Play</span></button>
+            <button class="pill" id="hqPlay" type="button" hidden><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3 1.6v8.8L10.4 6z"/></svg><span>Play</span></button>
           </div>
         </div>
         <div id="hqBody"></div>
@@ -380,7 +387,8 @@ select.field{font-size:15px;appearance:auto;margin-top:8px}
 
       <section class="card s12" id="recent" aria-labelledby="rech">
         <div class="wh"><div style="min-width:0"><div class="wt"><h2 id="rech">Recent</h2></div>
-          <p class="desc">Finished goals and what came of them.</p></div></div>
+          <p class="desc">Finished goals and what came of them.</p></div>
+          <div class="acts"><div class="ghostgrp" hidden><button class="ghost" id="recentMore" type="button"><span>Show all</span></button></div></div></div>
         <div id="recentList"></div>
       </section>
     </div>
@@ -413,7 +421,7 @@ select.field{font-size:15px;appearance:auto;margin-top:8px}
 <dialog id="settings" aria-labelledby="seth">
   <form method="dialog" class="sheet">
     <div class="grab" aria-hidden="true"></div>
-    <div class="wh"><h2 id="seth">Voice</h2><button class="ghost" value="close" aria-label="Close settings">Done</button></div>
+    <div class="wh"><h2 id="seth">Voice</h2><button class="ghost" id="setDone" value="close">Done</button></div>
     <div class="srow"><label for="optSpeak"><div class="t">Speak replies</div><div class="s">Jarvis reads every reply aloud.</div></label><input class="sw" type="checkbox" id="optSpeak" role="switch"></div>
     <div class="srow"><label for="optConvo"><div class="t">Conversation mode</div><div class="s">Listen again after Jarvis speaks.</div></label><input class="sw" type="checkbox" id="optConvo" role="switch"></div>
     <div class="srow" style="display:block">
@@ -482,7 +490,11 @@ async function api(path, body, type = "application/json") {
 const B = {
   show() { $("#bubble").hidden = false; },
   you(t) { $("#youTxt").textContent = t; $("#youLine").hidden = !t; this.show(); },
-  jarvis(t, err) { const j = $("#jTxt"); j.textContent = t; j.className = err ? "err" : ""; $("#jLine").hidden = !t; this.show(); },
+  jarvis(t, err, detail) {
+    const j = $("#jTxt"); j.replaceChildren(el("span", {class: err ? "err" : "", text: t}));
+    if (detail) j.append(el("small", {class: "detail", text: detail}));
+    $("#jLine").hidden = !t; this.show();
+  },
   state(t) { const s = $("#stateLbl"); s.textContent = t || ""; s.hidden = !t; if (t) this.show(); },
   clear() { this.you(""); this.jarvis(""); this.state(""); $("#bubble").hidden = true; },
 };
@@ -527,11 +539,19 @@ function renderContext(o) {
   for (const id of ["#sFocus", "#cFocus", "#hqTag"]) $(id).textContent = name;
   const vname = o.voice.server_tts ? (o.voice.voice_name || "Server voice") : (V.voice ? shortVoice(V.voice.name) : (o.voice.voice_name || "Browser"));
   $("#sVoice").textContent = vname; $("#cVoice").textContent = vname;
-  $("#sEngine").textContent = o.voice.server_tts ? "ElevenLabs" : "on device";
+  $("#sEngine").textContent = engineLabel(o.voice);
   const nx = fmtNext(o.hq.next_at);
-  $("#sBrief").textContent = nx || "On request"; $("#sBriefNote").textContent = nx ? "next" : "";
+  const times = (o.hq.times || []).join(" · ");
+  $("#sBrief").textContent = times || nx || "On request";
+  $("#sBriefNote").textContent = times && nx ? "next " + nx : (nx ? "next" : "");
+  const h = new Date().getHours();
+  $("#greet").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + " · " + name + " HQ";
   $("#cBrief").textContent = nx || "on request";
   updateSub();
+}
+function engineLabel(v) {
+  if (!v.server_tts) return "on device";
+  return {elevenlabs: "ElevenLabs", kokoro: "local", piper: "local"}[v.engine] || "server";
 }
 function updateSub() {
   if (!OV) return;
@@ -544,7 +564,7 @@ function renderHQ(o) {
   const hq = o.hq, b = hq.briefing, body = $("#hqBody"), card = $("#hq");
   card.classList.toggle("running", !!hq.running);
   card.setAttribute("aria-busy", hq.running ? "true" : "false");
-  $("#hqPlay").disabled = !(b && b.spoken);
+  $("#hqPlay").hidden = !(b && (b.spoken || b.headline));
   const sig = JSON.stringify([b, hq.running, hq.next_at]);
   if (body.dataset.sig === sig) return;
   body.dataset.sig = sig;
@@ -612,7 +632,7 @@ function needCard(g) {
   return el("div", {class: "ask"},
     el("div", {class: "gt", text: g.title}),
     el("div", {class: "q", text: g.question || "Jarvis needs your input."}),
-    el("label", {for: id, text: "Your answer"}), ta, row);
+    el("div", {class: "ans"}, el("label", {for: id, text: "Your answer"}), ta, row));
 }
 
 function goalCard(g) {
@@ -677,19 +697,26 @@ function renderLists(o) {
   const rec = el("div", {class: "rgrid"});
   const box = $("#recentList");
   let grid = box.querySelector(".rgrid");
-  const recent = o.recent || [];
-  if (!recent.length) { box.replaceChildren(el("p", {class: "none", text: "Finished goals will show up here."})); return; }
+  const all = o.recent || [];
+  const recent = showAllRecent ? all : all.slice(0, 6);
+  const mb = $("#recentMore");
+  mb.parentElement.hidden = all.length <= 6;
+  mb.querySelector("span").textContent = showAllRecent ? "Show fewer" : `Show all ${all.length}`;
+  if (!all.length) { box.replaceChildren(el("p", {class: "none", text: "Finished goals will show up here."})); return; }
   if (!grid) { grid = rec; box.replaceChildren(grid); }
   reconcile(grid, recent, g => g.id, g => JSON.stringify([g.status, g.summary, g.updated]), recentCard);
 }
+
+let showAllRecent = false;
+$("#recentMore").addEventListener("click", () => { showAllRecent = !showAllRecent; if (OV) renderLists(OV); });
 
 /* ---------------- chart ---------------- */
 let chartIdx = null;
 function renderChart(o) {
   const days = (o.chart && o.chart.days) || [];
   const box = $("#chart");
-  const W = Math.max(260, box.clientWidth || 600), H = W < 500 ? 190 : 230;
-  const L = 30, R = 14, T = 18, Bm = 26;
+  const W = Math.max(260, box.clientWidth || 600), H = W < 500 ? 210 : 270;
+  const L = 30, R = 14, T = 62, Bm = 26;
   const n = days.length;
   box.replaceChildren();
   if (!n) return;
@@ -703,7 +730,7 @@ function renderChart(o) {
   svg.append(sv("defs", null, sv("linearGradient", {id: gid, x1: "0", y1: "0", x2: "0", y2: "1"},
     sv("stop", {offset: "0", "stop-color": "var(--chart-fill-a)", style: "stop-color:var(--chart-fill-a)"}),
     sv("stop", {offset: "1", style: "stop-color:var(--chart-fill-b)"}))));
-  const ticks = [0, Math.round(top / 2), top].filter((v, i, a) => a.indexOf(v) === i);
+  const ticks = (max <= 0 ? [0] : [0, Math.round(top / 2), top]).filter((v, i, a) => a.indexOf(v) === i);
   for (const t of ticks) {
     svg.append(sv("line", {class: "gl", x1: L, x2: W - R, y1: y(t), y2: y(t), "stroke-dasharray": t ? "2 4" : null}));
     svg.append(sv("text", {class: "ax", x: L - 8, y: y(t) + 3.5, "text-anchor": "end"}, String(t)));
@@ -715,18 +742,17 @@ function renderChart(o) {
   svg.append(sv("path", {d: `${path} L${pts[n - 1][0]},${y(0)} L${pts[0][0]},${y(0)} Z`, fill: `url(#${gid})`}));
   svg.append(sv("path", {class: "line", d: path}));
   const idx = chartIdx == null || chartIdx >= n ? n - 1 : chartIdx;
-  svg.append(sv("line", {class: "vline", x1: pts[idx][0], x2: pts[idx][0], y1: T - 6, y2: y(0)}));
+  svg.append(sv("line", {class: "vline", x1: pts[idx][0], x2: pts[idx][0], y1: 48, y2: y(0)}));
   pts.forEach((p, i) => { if (i !== idx) svg.append(sv("circle", {class: "pt", cx: p[0], cy: p[1], r: 3.6})); });
   svg.append(sv("circle", {class: "halo", cx: pts[idx][0], cy: pts[idx][1], r: 13}));
   svg.append(sv("circle", {class: "pt", cx: pts[idx][0], cy: pts[idx][1], r: 5.5}));
-  if (max <= 0) svg.append(sv("text", {class: "zero", x: (L + W - R) / 2, y: y(top * .55), "text-anchor": "middle"}, "No goals finished yet. Results will chart here."));
+  if (max <= 0) svg.append(sv("text", {class: "zero", x: (L + W - R) / 2, y: y(top * .5), "text-anchor": "middle"}, "No goals finished yet. Results will chart here."));
   box.append(svg);
   const d = days[idx];
   const card = el("div", {class: "flt"}, el("b", {text: `${d.done} done`}), ` · ${money(d.spend)}`, el("span", {class: "d", text: idx === n - 1 ? "Today" : lbl(idx)}));
   const px = Math.min(Math.max(pts[idx][0], 70), W - 70);
   card.style.left = (px / W * 100) + "%";
-  card.style.top = pts[idx][1] + "px";
-  if (pts[idx][1] < 60) { card.style.transform = "translate(-50%, 16px)"; }
+  card.style.top = "0px";
   box.append(card);
   const tot = days.reduce((a, d) => a + d.done, 0), sp = days.reduce((a, d) => a + d.spend, 0);
   $("#legendTxt").textContent = `${tot} done in 14 days · ${money(sp)} spent`;
@@ -819,6 +845,7 @@ function loadVoices() {
   if (OV) renderContext(OV);
 }
 if (synth) { loadVoices(); synth.addEventListener ? synth.addEventListener("voiceschanged", loadVoices) : (synth.onvoiceschanged = loadVoices); }
+if (!$("#optVoice").options.length) $("#optVoice").append(el("option", {value: "", text: "Automatic (best English voice)"}));
 $("#optSpeak").checked = S.speak; $("#optConvo").checked = S.convo;
 $("#optSpeak").addEventListener("change", e => { S.speak = e.target.checked; store.set("speak", S.speak); if (!S.speak) stopSpeaking(); });
 $("#optConvo").addEventListener("change", e => { S.convo = e.target.checked; store.set("convo", S.convo); misses = 0; });
@@ -826,7 +853,7 @@ $("#optVoice").addEventListener("change", e => { S.voiceURI = e.target.value; st
 $("#testVoice").addEventListener("click", () => { unlockAudio(); speak("Good afternoon. Everything at " + ((OV && OV.hq_name) || "HQ") + " is in hand."); });
 $("#gear").addEventListener("click", () => {
   const server = OV && OV.voice.server_tts;
-  $("#voiceNote").textContent = server ? `Replies use the ${OV.voice.voice_name || "server"} voice (ElevenLabs). This picker is the fallback.` : (synth ? "Browser voice on this device." : "This browser has no built-in voice.");
+  $("#voiceNote").textContent = server ? `Replies use ${OV.voice.voice_name || "the server voice"}. This browser voice is only a fallback.` : (synth ? "Browser voice on this device." : "This browser has no built-in voice.");
   $("#optVoice").disabled = !synth;
   const d = $("#settings"); if (d.showModal) d.showModal(); else d.setAttribute("open", "");
 });
@@ -1045,14 +1072,14 @@ async function sendVoice(blob, type) {
     return res;
   } catch (e) {
     setState("idle");
-    B.jarvis(friendlyVoiceError(e.message), true);
+    const f = friendlyVoiceError(e.message); B.jarvis(f[0], true, f[1]);
   }
 }
 window.jarvisSendVoice = sendVoice; // for testing
 function friendlyVoiceError(m) {
-  if (/transcri/i.test(m)) return "Sorry, I couldn't make out that recording. Try again, or type it.\n(" + m.slice(0, 160) + ")";
-  if (/too large/i.test(m)) return "That recording was too long. Try a shorter message.";
-  return m;
+  if (/transcri/i.test(m)) return ["Sorry, I couldn't make out that recording. Try again, or type it.", m.slice(0, 160)];
+  if (/too large/i.test(m)) return ["That recording was too long. Try a shorter message.", ""];
+  return [m, ""];
 }
 function afterSpeech() {
   if (S.convo && canRecord && !document.hidden && lastWasVoice && misses < 2) setTimeout(() => { if (state === "idle") startListening(true); }, 350);

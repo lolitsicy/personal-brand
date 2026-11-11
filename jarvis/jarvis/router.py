@@ -16,7 +16,7 @@ ROUTE_SCHEMA = {
     "type": "object",
     "properties": {
         "action": {"type": "string",
-                   "enum": ["new_goal", "answer", "approve", "cancel", "status", "chat"]},
+                   "enum": ["new_goal", "answer", "approve", "cancel", "status", "briefing", "chat"]},
         "goal_id": {"type": "integer", "description": "Target goal for answer/approve/cancel/status; 0 if none."},
         "title": {"type": "string", "description": "new_goal: short title (≤8 words)."},
         "prompt": {"type": "string", "description": "new_goal: full brief for an autonomous agent, "
@@ -45,7 +45,10 @@ the current queue. Decide the single action:
 - answer: the owner is replying to a waiting question (match it to the right goal_id).
 - approve: the owner approves a pending APPROVAL request.
 - cancel: stop a goal.
-- status: they ask what's going on.
+- status: they ask what Jarvis itself is working on.
+- briefing: they want a business update (sales, ads, inbox, calendar, "brief me", "how's the
+  business"). Speech-to-text often garbles short commands ("breathe me", "brief meet") — if it
+  plausibly means "brief me", choose briefing rather than asking.
 - chat: anything else; just reply.
 
 Replies are spoken aloud: short, plain, no markdown, no lists.
@@ -112,6 +115,8 @@ def apply(cfg: Config, store: Store, d: dict) -> str:
         return f"Cancelled goal {gid}." if store.cancel(gid) else f"Goal {gid} isn't active."
     if action == "status":
         return reply
+    if action == "briefing":
+        return _fast_path(cfg, store, "brief me") or reply
     return reply
 
 

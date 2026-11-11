@@ -204,10 +204,17 @@ def get_whisper(cfg: Config):
     return m
 
 
+def vocabulary(cfg: Config) -> str:
+    """Words Jarvis hears often; biases Whisper toward them (short commands mishear easily)."""
+    return (f"Jarvis, brief me. Any updates? Approve goal 3. Cancel goal 2. Status. "
+            f"{cfg.hq_name}, Shopify, Meta Ads, Gmail, ROAS, orders, inbox, calendar.")
+
+
 def _transcribe(cfg: Config, audio_or_path) -> str:
     model = get_whisper(cfg)
     segments, _info = model.transcribe(
         audio_or_path, beam_size=5, vad_filter=True, condition_on_previous_text=False,
+        initial_prompt=vocabulary(cfg),
     )
     return " ".join(s.text.strip() for s in segments if s.text.strip()).strip()
 
@@ -276,7 +283,12 @@ def transcribe_file(cfg: Config, path: str | Path) -> str:
     if not path.exists():
         raise FileNotFoundError(path)
     audio = load_audio(path)
-    return _transcribe(cfg, audio if audio is not None else str(path))
+    if audio is None:
+        hint = "" if shutil.which("ffmpeg") else " Install ffmpeg (brew/apt install ffmpeg)."
+        raise ValueError(f"couldn't decode that audio ({path.suffix or 'unknown format'}).{hint}")
+    if audio.size < SAMPLE_RATE // 4:  # under 0.25 s
+        return ""
+    return _transcribe(cfg, audio)
 
 
 async def handle_file(cfg: Config, store: Store, path: str | Path) -> str:
