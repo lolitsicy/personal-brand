@@ -45,6 +45,11 @@ class Config:
     telegram_chat_id: str = ""  # only this chat may control Jarvis
     speak_notifications: bool = False  # say notifications out loud via TTS
 
+    # Tailscale dashboard
+    web_port: int = 8765  # dashboard listens on 127.0.0.1 only; tailscale serve fronts it
+    tailscale_allowed_users: str = ""  # comma-separated tailnet logins; "" = this machine's owner
+    public_url: str = ""  # set by `jarvis tailscale on`; used as the tap-through link in notifications
+
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech
     whisper_device: str = "auto"  # auto | cpu | cuda
@@ -116,6 +121,11 @@ telegram_chat_id = ""
 # macOS: built in). "auto" warns and falls back to the command policy alone. Keep "on".
 sandbox = "on"
 # sandbox_allowed_domains = "pypi.org,files.pythonhosted.org,registry.npmjs.org,github.com"
+
+# Tailscale dashboard (`jarvis tailscale on`). Only these tailnet logins may open it;
+# empty = whoever owns this machine in Tailscale.
+web_port = 8765
+tailscale_allowed_users = ""
 
 speak_notifications = false
 whisper_model = "small.en"

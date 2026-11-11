@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Jarvis</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#14161a;--mute:#626a75;--line:#e3e6ea;--accent:#2f6df6;--warn:#b45309;--warnbg:#fff4e5;--ok:#15803d;--bad:#b91c1c;--chip:#eef1f5;--onaccent:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a20;--ink:#e8eaee;--mute:#9aa3ae;--line:#272b33;--accent:#6b9bff;--warn:#f5b454;--warnbg:#2a2113;--ok:#4ade80;--bad:#f87171;--chip:#20242c;--onaccent:#0b1020}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 16px calc(170px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:baseline;justify-content:space-between;padding:18px 0 8px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.who{color:var(--mute);font-size:13px}
+#status{color:var(--mute);font-size:14px;margin:0 0 14px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:22px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card.ask{border-color:var(--warn);background:var(--warnbg)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.title{font-weight:600;overflow-wrap:anywhere}
+.chip{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--mute);white-space:nowrap}
+.chip.needs_input{color:var(--warn)}.chip.running{color:var(--accent)}.chip.done{color:var(--ok)}.chip.failed,.chip.cancelled{color:var(--bad)}
+.meta{font-size:13px;color:var(--mute);margin-top:4px}
+.q{white-space:pre-wrap;margin:10px 0;font-size:15px;overflow-wrap:anywhere}
+.sum{white-space:pre-wrap;font-size:14px;margin-top:8px;overflow-wrap:anywhere}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;min-height:44px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--onaccent)}
+button.danger{color:var(--bad)}
+textarea,input{font:inherit;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--ink)}
+textarea{min-height:44px;resize:vertical}
+details{margin-top:8px}summary{cursor:pointer;color:var(--mute);font-size:14px;min-height:32px}
+.ev{font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mute);white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;margin-top:6px}
+.empty{color:var(--mute);font-size:14px}
+#dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+#dock .row{align-items:flex-end}
+#say{flex:1}
+#mic{width:56px;height:56px;border-radius:50%;padding:0;font-size:22px;flex:none;touch-action:none;user-select:none;-webkit-user-select:none}
+#mic.rec{background:var(--bad);border-color:var(--bad);color:#fff}
+#reply{font-size:14px;color:var(--mute);margin-bottom:8px;min-height:20px;white-space:pre-wrap}
+.wrap{max-width:720px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>Jarvis</h1><span class="who">{{USER}}</span></header>
+  <p id="status">Loading…</p>
+  <h2 id="h-ask" hidden>Needs you</h2><div id="ask"></div>
+  <h2>Working on</h2><div id="active"><p class="empty">Nothing yet.</p></div>
+  <h2>Recent</h2><div id="recent"></div>
+</div>
+<div id="dock"><div class="wrap">
+  <div id="reply" aria-live="polite"></div>
+  <form id="f" class="row">
+    <textarea id="say" rows="1" placeholder="Tell Jarvis what to do…" aria-label="Message"></textarea>
+    <button class="primary" type="submit" aria-label="Send">Send</button>
+    <button id="mic" type="button" aria-label="Hold to talk" title="Hold to talk">🎙</button>
+  </form>
+</div></div>
+<script>
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "class" ? n.className = v : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v);
+  for (const k of kids) n.append(k instanceof Node ? k : document.createTextNode(k ?? ""));
+  return n;
+};
+const say = t => { $("#reply").textContent = t; };
+async function api(path, body, type = "application/json") {
+  const opt = body === undefined ? {} : {method: "POST", headers: {"Content-Type": type}, body: type === "application/json" ? JSON.stringify(body) : body};
+  const r = await fetch(path, opt);
+  const j = await r.json().catch(() => ({error: r.statusText}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+const open = new Set();
+function card(g) {
+  const ask = g.status === "needs_input";
+  const c = el("div", {class: "card" + (ask ? " ask" : ""), id: "g" + g.id});
+  c.append(el("div", {class: "row"}, el("span", {class: "title"}, `#${g.id} ${g.title}`), el("span", {class: "chip " + g.status}, g.status.replace("_", " "))));
+  c.append(el("div", {class: "meta"}, `$${g.spent_usd.toFixed(2)} of $${g.budget_usd.toFixed(2)} · attempt ${g.attempts}/${g.max_attempts}`));
+  if (ask && g.question) {
+    c.append(el("div", {class: "q"}, g.question));
+    const ta = el("textarea", {rows: "2", placeholder: "Your answer…", "aria-label": "Answer"});
+    const btns = el("div", {class: "btns"});
+    btns.append(el("button", {class: "primary", type: "button", onclick: async () => {
+      if (!ta.value.trim()) return ta.focus();
+      try { say((await api(`/api/goals/${g.id}/answer`, {text: ta.value})).reply); refresh(); } catch (e) { say(e.message); }
+    }}, "Send answer"));
+    if (g.pending_approvals.length) btns.prepend(el("button", {class: "primary", type: "button", onclick: async () => {
+      if (!confirm("Allow, once:\n\n" + g.pending_approvals.join("\n"))) return;
+      try { say((await api(`/api/goals/${g.id}/approve`, {})).reply); refresh(); } catch (e) { say(e.message); }
+    }}, "Approve"));
+    c.append(ta, btns);
+  } else if (g.summary) c.append(el("div", {class: "sum"}, g.summary));
+  const d = el("details", {ontoggle: async () => {
+    if (!d.open) return open.delete(g.id);
+    open.add(g.id);
+    const box = d.querySelector(".ev");
+    try { const full = await api(`/api/goals/${g.id}`); box.textContent = full.events.map(e => new Date(e.ts * 1000).toLocaleTimeString() + "  " + e.kind.padEnd(11) + e.text).join("\n"); box.scrollTop = box.scrollHeight; } catch (e) { box.textContent = e.message; }
+  }}, el("summary", {}, "Log & details"), el("div", {class: "meta"}, "Done when: " + g.done_criteria), el("div", {class: "ev"}, "…"));
+  if (["queued", "running", "needs_input"].includes(g.status)) d.append(el("div", {class: "btns"}, el("button", {class: "danger", type: "button", onclick: async () => {
+    if (!confirm(`Cancel goal #${g.id}?`)) return;
+    try { say((await api(`/api/goals/${g.id}/cancel`, {})).reply); refresh(); } catch (e) { say(e.message); }
+  }}, "Cancel goal")));
+  c.append(d);
+  if (open.has(g.id)) { d.open = true; }
+  return c;
+}
+function fill(id, goals, empty) {
+  const box = $(id); const focused = box.contains(document.activeElement);
+  if (focused) return; // don't wipe a half-typed answer
+  box.replaceChildren(...(goals.length ? goals.map(card) : [el("p", {class: "empty"}, empty)]));
+}
+async function refresh() {
+  try {
+    const d = await api("/api/goals");
+    $("#status").textContent = d.status;
+    const ask = d.active.filter(g => g.status === "needs_input"), rest = d.active.filter(g => g.status !== "needs_input");
+    $("#h-ask").hidden = !ask.length; fill("#ask", ask, "");
+    fill("#active", rest, "Nothing running. Tell me what to do next.");
+    fill("#recent", d.recent, "No finished goals yet.");
+    document.title = ask.length ? `(${ask.length}) Jarvis` : "Jarvis";
+  } catch (e) { $("#status").textContent = "Can't reach Jarvis: " + e.message; }
+}
+$("#f").addEventListener("submit", async e => {
+  e.preventDefault(); const t = $("#say").value.trim(); if (!t) return;
+  say("Thinking…"); $("#say").value = "";
+  try { say((await api("/api/say", {text: t})).reply); refresh(); } catch (err) { say(err.message); $("#say").value = t; }
+});
+$("#say").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#f").requestSubmit(); } });
+
+// Hold-to-talk. Needs HTTPS, which `tailscale serve` provides.
+let rec, chunks = [], stream;
+const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
+async function start(e) {
+  e.preventDefault();
+  if (!navigator.mediaDevices || !window.MediaRecorder) return say("This browser can't record audio here (needs HTTPS).");
+  try { stream = stream || await navigator.mediaDevices.getUserMedia({audio: true}); } catch (err) { return say("Microphone blocked: " + err.message); }
+  chunks = []; rec = new MediaRecorder(stream, mime ? {mimeType: mime} : {});
+  rec.ondataavailable = ev => ev.data.size && chunks.push(ev.data);
+  rec.onstop = async () => {
+    const type = (rec.mimeType || mime || "audio/webm").split(";")[0];
+    const blob = new Blob(chunks, {type});
+    if (blob.size < 2000) return say("Hold the button while you talk.");
+    say("Listening back…");
+    try { const r = await api("/api/voice", blob, type); say((r.heard ? `“${r.heard}”\n` : "") + r.reply); refresh(); } catch (err) { say(err.message); }
+  };
+  rec.start(); $("#mic").classList.add("rec"); say("Recording… release to send");
+}
+function stop(e) { e && e.preventDefault(); if (rec && rec.state === "recording") { rec.stop(); $("#mic").classList.remove("rec"); } }
+const mic = $("#mic");
+mic.addEventListener("pointerdown", start); mic.addEventListener("pointerup", stop);
+mic.addEventListener("pointerleave", stop); mic.addEventListener("pointercancel", stop);
+mic.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) start(e); });
+mic.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") stop(e); });
+
+refresh(); setInterval(() => document.hidden || refresh(), 5000);
+document.addEventListener("visibilitychange", () => document.hidden || refresh());
+</script>
+</body>
+</html>

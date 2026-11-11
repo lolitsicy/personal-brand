@@ -193,6 +193,7 @@ def _slug(s: str) -> str:
 class Worker:
     def __init__(self, cfg: Config, store: Store, notifier: Notifier, runner: AgentRunner | None = None):
         self.cfg, self.store, self.notifier = cfg, store, notifier
+        policy.CONTROL_PORTS.add(int(cfg.web_port))
         self.runner = runner or SDKRunner(sandbox_settings(cfg))
 
     def workspace_for(self, g: Goal) -> Path:

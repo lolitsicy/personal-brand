@@ -73,6 +73,18 @@ Writes to them go through approval, and reads don't.
 
 ## Install
 
+**One command** (Linux or macOS). It sets up a venv, the sandbox tools, the config, the
+Tailscale dashboard and an always-on service:
+
+```bash
+git clone <this repo> && cd <repo>/jarvis && ./deploy/install.sh   # add --no-voice to skip mic packages
+```
+
+Before you run it: install Claude Code, run `claude` once and sign in (that login is Jarvis's
+only credential), and install Tailscale and run `tailscale up`.
+
+Manual install:
+
 ```bash
 # Python 3.10+ and Claude Code logged in (`claude` once, sign in). That login is all the auth needed.
 pip install -e .              # core: queue, workers, CLI, Telegram, push
@@ -86,7 +98,7 @@ jarvis init                   # writes ~/.jarvis/config.toml
 
 ```bash
 jarvis say "make me a script that renames my photos by date taken, test it on a few samples"
-jarvis up                     # daemon (+ Telegram if configured). Add --voice for the mic.
+jarvis up                     # daemon + dashboard (+ Telegram if configured). Add --voice for the mic.
 jarvis list                   # what's queued / running / waiting on you
 jarvis show 3                 # full log for goal 3: every tool call, block, verdict
 jarvis answer 3 "use the EXIF date, fall back to file mtime"
@@ -100,7 +112,34 @@ jarvis add "Weekly sales CSV" --done "report.csv exists with one row per day for
 
 Goals get their own folder under `~/jarvis-workspaces/` unless you pass `--workspace`.
 
-### Phone
+### Phone, via Tailscale (recommended)
+
+`jarvis tailscale on` (the installer runs it) publishes the dashboard at
+`https://<this-machine>.<your-tailnet>.ts.net` using `tailscale serve`. Open it on your phone
+with the Tailscale app connected and add it to your home screen. From there you can see what's
+running, read each goal's log, answer questions, **approve blocked actions** (it shows exactly
+what you're approving), cancel goals, type new goals, or **hold the mic button and talk**. Audio
+is transcribed on your machine.
+
+How it's locked down:
+- It's **tailnet-only**. `tailscale serve` never exposes anything to the internet (that would be
+  `funnel`, which Jarvis never uses). The dashboard itself listens only on `127.0.0.1`.
+- **Identity comes from Tailscale.** Each request must carry the tailnet login that
+  `tailscale serve` attaches, and it must be on `tailscale_allowed_users`. If that's empty, only
+  the machine's owner in Tailscale is allowed. Everyone else, including a browser on the same
+  machine, gets 403.
+- **Agents can't reach it.** Their shell sandbox blocks localhost. The policy denies commands
+  aimed at the dashboard port or carrying the identity header, and denies WebFetch to localhost
+  or `*.ts.net`. Changes are POST-only with a JSON or audio body plus an Origin check, so
+  another website can't submit forms to it.
+- Tap a phone notification (ntfy or Telegram) and it opens the dashboard.
+
+One-time Tailscale settings: enable **MagicDNS** and **HTTPS Certificates** in the admin console
+(DNS page). On Linux, `sudo tailscale set --operator=$USER` lets Jarvis configure serve without
+root; the installer does this for you. `jarvis tailscale status` shows the URL and who is
+allowed, and `jarvis tailscale off` unpublishes it.
+
+### Phone, other channels
 
 - **Push (one-way):** install the [ntfy](https://ntfy.sh) app, subscribe to a hard-to-guess
   topic, and set `ntfy_topic` to it. ntfy.sh topics are public to anyone who knows the name, so
@@ -157,6 +196,8 @@ Raspberry Pi 5 works with `base.en`.
 | `sandbox` | `auto` | `on` / `off` |
 | `sandbox_allowed_domains` | registries + GitHub | comma-separated |
 | `ntfy_topic`, `telegram_token`, `telegram_chat_id` | | phone |
+| `web_port` | `8765` | dashboard (loopback only) |
+| `tailscale_allowed_users` | machine owner | comma-separated tailnet logins |
 | `speak_notifications` | `false` | |
 | `whisper_model`, `whisper_device`, `wake_word`, `piper_voice` | | voice |
 
@@ -170,6 +211,9 @@ Raspberry Pi 5 works with `base.en`.
   determined attacker. The sandbox is the hard boundary, so keep it on. Network tools that don't
   go through the shell (WebFetch, MCP servers) aren't covered by the sandbox's domain allowlist.
   MCP writes still need approval.
+- **The Tailscale path was tested with a stand-in `tailscale` binary**, not a real tailnet.
+  The dashboard, identity checks and installer were run for real. If `tailscale serve` changes
+  its flags, `jarvis tailscale on` prints Tailscale's error.
 - **The router takes a few seconds** (one model call) for anything beyond the built-in fast
   commands (`status`, `approve N`, `cancel N`). That's fine for conversation, but you'll notice
   it.
@@ -186,7 +230,7 @@ Raspberry Pi 5 works with `base.en`.
 pip install -e '.[dev]' && python -m pytest -q
 ```
 
-The 134 unit tests use a scripted fake agent and fake audio/Telegram backends, so they need no
+The 150 unit tests use a scripted fake agent and fake audio/Telegram backends, so they need no
 network, mic or credentials. The full loop was also run for real against live agents: build,
 independent verification (retry-on-rejection is unit-tested only), an approval round-trip with `git push`, a question answered in
 plain English, a mid-run cancel, a sandbox escape attempt, and voice-file → goal.

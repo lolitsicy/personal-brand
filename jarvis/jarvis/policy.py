@@ -23,6 +23,7 @@ import re
 import shlex
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 ALLOW, APPROVE, DENY = "allow", "approve", "deny"
 
@@ -445,11 +446,18 @@ def _check_tokens(toks: list[str], seg: str, cwd: Path, ctx: _Ctx, depth: int) -
     return Decision(ALLOW)
 
 
+CONTROL_PORTS: set[int] = {8765}  # Jarvis dashboard; worker adds the configured port
+
+
 def _check_line(line: str, cwd: Path, ctx: _Ctx, depth: int = 0) -> Decision:
     line = _norm(line)
     whole = f"Bash: {line}"
     if re.search(r":\(\)\s*\{\s*:\|:&\s*\};:", line):
         return Decision(DENY, "fork bomb", whole)
+    if "tailscale-user-login" in line.lower() or any(
+            re.search(rf"(localhost|127\.\d+\.\d+\.\d+|\[::1\]|0\.0\.0\.0)\D{{0,3}}:{p}\b", line)
+            for p in CONTROL_PORTS):
+        return Decision(DENY, "talks to Jarvis's own control API", whole)
 
     results: list[Decision] = []
     if re.search(r"\b(curl|wget)\b[^|]*\|\s*(sudo\s+)?(" + "|".join(INTERPRETERS) + r")\b", line) or \
@@ -507,6 +515,14 @@ def check(tool: str, args: dict, workspace: Path, approvals: list[str],
         if key in approvals:
             return Decision(ALLOW, "approved by owner", key, True)
         return Decision(APPROVE, "writes outside the workspace", key)
+
+    if tool == "WebFetch":
+        url = str(args.get("url", "")).lower()
+        host = urlparse(url).hostname or ""
+        if host in ("localhost", "127.0.0.1", "::1", "0.0.0.0") or host.endswith(".ts.net") \
+                or host.startswith("127."):
+            return Decision(DENY, "talks to Jarvis's own control API or your tailnet", f"WebFetch: {url}")
+        return Decision(ALLOW)
 
     if tool in ("Read", "Glob", "Grep"):
         raw = str(args.get("file_path") or args.get("path") or "")

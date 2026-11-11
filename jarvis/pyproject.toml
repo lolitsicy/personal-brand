@@ -24,5 +24,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["jarvis*"]
 
+[tool.setuptools.package-data]
+jarvis = ["dashboard.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -114,14 +114,73 @@ def cmd_telegram(a):
     anyio.run(run_telegram, cfg, store)
 
 
+def _web_allowed(cfg, quiet=False):
+    from . import tailnet
+    info = None
+    try:
+        info = tailnet.status()
+    except tailnet.TailscaleError as e:
+        if not quiet:
+            print(f"Tailscale: {e}")
+    return tailnet.allowed_logins(cfg.tailscale_allowed_users, info), info
+
+
+def cmd_web(a):
+    from .web import run_web
+    cfg, store, _ = _ctx()
+    allowed, _info = _web_allowed(cfg)
+    print(f"Dashboard on http://127.0.0.1:{cfg.web_port} (tailnet users: {', '.join(sorted(allowed)) or 'none'})")
+    anyio.run(run_web, cfg, store, allowed)
+
+
+def cmd_tailscale(a):
+    from . import tailnet
+    cfg, store, _ = _ctx()
+    try:
+        if a.action == "off":
+            tailnet.unserve()
+            print("Stopped serving Jarvis on your tailnet.")
+            return
+        if a.action == "status":
+            info = tailnet.status()
+            allowed = tailnet.allowed_logins(cfg.tailscale_allowed_users, info)
+            print(f"This machine: {info.dns_name}\nDashboard URL: {info.url}\n"
+                  f"Allowed users: {', '.join(sorted(allowed)) or '(none)'}")
+            return
+        info = tailnet.serve(cfg.web_port)
+    except tailnet.TailscaleError as e:
+        sys.exit(str(e))
+    allowed = tailnet.allowed_logins(cfg.tailscale_allowed_users, info)
+    _set_config(cfg, "public_url", info.url)
+    print(f"✅ Jarvis dashboard: {info.url}\n   Only reachable on your tailnet, by: "
+          f"{', '.join(sorted(allowed))}\n   Notifications now link there. Start Jarvis with `jarvis up`.")
+
+
+def _set_config(cfg, key: str, value: str) -> None:
+    """Set one top-level key in config.toml, keeping everything else (and comments) as is."""
+    import re as _re
+    p = cfg.home / "config.toml"
+    text = p.read_text() if p.exists() else SAMPLE_CONFIG
+    line = f'{key} = "{value}"'
+    if _re.search(rf"(?m)^{key}\s*=", text):
+        text = _re.sub(rf"(?m)^{key}\s*=.*$", line, text)
+    else:
+        text = text.rstrip("\n") + f"\n{line}\n"
+    p.write_text(text)
+
+
 def cmd_up(a):
-    """Daemon + Telegram (+ voice) in one process."""
+    """Daemon + dashboard + Telegram (+ voice) in one process."""
     from .daemon import run
     cfg, store, notifier = _ctx()
+    allowed, info = _web_allowed(cfg, quiet=True)
 
     async def main():
         async with anyio.create_task_group() as tg:
             tg.start_soon(run, cfg, store, notifier)
+            if allowed and not a.no_web:
+                from .web import run_web
+                tg.start_soon(run_web, cfg, store, allowed)
             if cfg.telegram_token:
                 from .telegram_bot import run_telegram
                 tg.start_soon(run_telegram, cfg, store)
@@ -130,6 +189,10 @@ def cmd_up(a):
                 notifier.extra.append(speaking_notifier(cfg))
                 tg.start_soon(run_voice, cfg, store, notifier)
     print(f"Jarvis is up. DB: {cfg.db_path}")
+    if allowed and not a.no_web:
+        where = cfg.public_url or (info.url if info else "")
+        print(f"Dashboard: {where or f'http://127.0.0.1:{cfg.web_port}'}"
+              + ("" if cfg.public_url else "  (run `jarvis tailscale on` to reach it from your phone)"))
     anyio.run(main)
 
 
@@ -191,8 +254,15 @@ def main(argv=None):
 
     sp.add_parser("telegram", help="run the Telegram bot only").set_defaults(f=cmd_telegram)
 
-    s = sp.add_parser("up", help="daemon + Telegram (+ --voice) together")
+    sp.add_parser("web", help="run the dashboard only").set_defaults(f=cmd_web)
+
+    s = sp.add_parser("tailscale", help="put the dashboard on your tailnet (on | off | status)")
+    s.add_argument("action", nargs="?", default="on", choices=["on", "off", "status"])
+    s.set_defaults(f=cmd_tailscale)
+
+    s = sp.add_parser("up", help="daemon + dashboard + Telegram (+ --voice) together")
     s.add_argument("--voice", action="store_true")
+    s.add_argument("--no-web", action="store_true")
     s.set_defaults(f=cmd_up)
 
     a = p.parse_args(argv)

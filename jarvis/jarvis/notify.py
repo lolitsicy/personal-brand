@@ -24,7 +24,8 @@ class Notifier:
                     f"{self.cfg.ntfy_server.rstrip('/')}/{self.cfg.ntfy_topic}",
                     content=body.encode(),
                     headers={"Title": title.encode("utf-8").decode("latin-1", "ignore"),
-                             "Priority": priority, "Tags": "robot"},
+                             "Priority": priority, "Tags": "robot",
+                             **({"Click": self.cfg.public_url} if self.cfg.public_url else {})},
                     timeout=10,
                 )
             except httpx.HTTPError as e:
@@ -33,7 +34,9 @@ class Notifier:
             try:
                 httpx.post(
                     f"https://api.telegram.org/bot{self.cfg.telegram_token}/sendMessage",
-                    json={"chat_id": self.cfg.telegram_chat_id, "text": f"{title}\n\n{body}"[:4000]},
+                    json={"chat_id": self.cfg.telegram_chat_id,
+                          "text": (f"{title}\n\n{body}" + (f"\n\n{self.cfg.public_url}"
+                                                            if self.cfg.public_url else ""))[:4000]},
                     timeout=10,
                 )
             except httpx.HTTPError as e:
