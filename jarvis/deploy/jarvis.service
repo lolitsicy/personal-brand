@@ -1,0 +1,14 @@
+# Linux: cp deploy/jarvis.service ~/.config/systemd/user/ && systemctl --user enable --now jarvis
+# Keep it running after logout: loginctl enable-linger $USER
+[Unit]
+Description=Jarvis autonomous goal runner
+After=network-online.target
+
+[Service]
+ExecStart=%h/.local/bin/jarvis up
+Restart=on-failure
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

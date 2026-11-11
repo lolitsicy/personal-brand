@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- macOS: edit the jarvis path below (`which jarvis`), then
+     cp deploy/com.jarvis.agent.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.jarvis.agent.plist -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jarvis.agent</string>
+  <key>ProgramArguments</key>
+  <array><string>/usr/local/bin/jarvis</string><string>up</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/jarvis.log</string>
+  <key>StandardErrorPath</key><string>/tmp/jarvis.log</string>
+</dict>
+</plist>
