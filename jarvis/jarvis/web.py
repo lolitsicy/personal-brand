@@ -151,6 +151,15 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
             if user is None:
                 return
             path = urlparse(self.path).path
+            if path == "/static/assistant.woff2":
+                self.send_response(200)
+                body = FONT
+                self.send_header("Content-Type", "font/woff2")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+                self.end_headers()
+                self.wfile.write(body)
+                return
             if path in ("/", "/index.html"):
                 return self._send(200, PAGE.replace("{{USER}}", _esc(user)).encode(),
                                   "text/html; charset=utf-8")
@@ -293,3 +302,4 @@ async def run_web(cfg: Config, store: Store, allowed: set[str]) -> None:
 
 
 PAGE = Path(__file__).with_name("dashboard.html").read_text(encoding="utf-8")
+FONT = (Path(__file__).parent / "static" / "assistant-latin.woff2").read_bytes()

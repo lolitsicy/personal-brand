@@ -1,0 +1,4 @@
+Assistant (latin subset, variable 300-700) by Ben Nathan.
+Licensed under the SIL Open Font License 1.1: https://openfontlicense.org
+Source: https://fonts.google.com/specimen/Assistant
+Served locally by Jarvis so the dashboard needs no third-party requests.

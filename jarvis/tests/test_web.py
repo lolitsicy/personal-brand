@@ -239,3 +239,12 @@ def test_tts_with_key(srv, monkeypatch):
     monkeypatch.setattr(tts, "elevenlabs_mp3", lambda c, t: b"ID3" + t.encode())
     r = client.post("/api/tts", json={"text": "hello"})
     assert r.status_code == 200 and r.headers["content-type"] == "audio/mpeg" and r.content == b"ID3hello"
+
+
+def test_brand_font_served_locally(srv):
+    _, _, client, base, _ = srv
+    r = client.get("/static/assistant.woff2")
+    assert r.status_code == 200 and r.headers["content-type"] == "font/woff2" and r.content[:4] == b"wOF2"
+    assert httpx.get(base + "/static/assistant.woff2").status_code == 403  # still tailnet-only
+    page = client.get("/").text
+    assert "/static/assistant.woff2" in page and "#548cc0" in page and "fonts.googleapis" not in page
