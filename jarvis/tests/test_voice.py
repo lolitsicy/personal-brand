@@ -387,3 +387,19 @@ def test_ane_missing_helper_falls_back(tmp_path):
     cfg = Config(home=tmp_path)
     cfg.tts_engine, cfg.ane_tts_bin = "ane", str(tmp_path / "nope")
     assert not tts.ane_ready(cfg) and tts.server_engine(cfg) != "ane"
+
+
+def test_dashboard_settings_validate_persist_and_apply(tmp_path):
+    from jarvis.config import Config, current_settings, load_settings, save_settings
+    cfg = Config(home=tmp_path)
+    saved = save_settings(cfg, {"ane_model": "paradee", "router_model": "claude-haiku-5-5", "home_city": "  Auckland  "})
+    assert saved["ane_model"] == "paradee" and cfg.ane_model == "paradee" and cfg.home_city == "Auckland"
+    assert load_settings(cfg)["router_model"] == "claude-haiku-5-5"
+    for bad in ({"router_model": "gpt"}, {"tts_engine": "elevenlabs"}, {"whisper_model": "large"}):
+        with pytest.raises(ValueError):
+            save_settings(cfg, bad)
+    assert current_settings(cfg)["router_model"] == "claude-haiku-5-5"
+    fresh = Config(home=tmp_path)
+    from jarvis.config import apply_settings
+    apply_settings(fresh, load_settings(fresh))
+    assert fresh.ane_model == "paradee"

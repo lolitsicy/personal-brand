@@ -96,6 +96,11 @@ class Config:
     # paradee = Paradee-8M, Kokoro distilled ~10x smaller (~0.07 s; voices bm_fable, bf_isabella, af_heart, am_puck).
     ane_model: str = "kokoro"
     ane_voice: str = ""  # "" = kokoro_voice for kokoro, bm_fable for paradee
+    home_city: str = ""  # where the owner is, for weather / local questions ("" = ask)
+    # Keep one Claude Code process for the router instead of starting one per reply (~3-4 s less per reply).
+    # It is restarted every router_session_turns replies (or when the model changes) so context stays small.
+    router_persistent: bool = True
+    router_session_turns: int = 12
 
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech
@@ -145,7 +150,74 @@ class Config:
             setattr(cfg, f.name, val)
         cfg.home.mkdir(parents=True, exist_ok=True)
         cfg.workspaces.mkdir(parents=True, exist_ok=True)
+        apply_settings(cfg, load_settings(cfg))
         return cfg
+
+
+# --- dashboard-editable settings (~/.jarvis/settings.json, applied over config.toml) -----------------
+# Only these keys, only these values: the phone's Voice sheet writes them and they take effect at once.
+SETTINGS_CHOICES: dict[str, tuple[str, ...] | None] = {
+    "tts_engine": ("ane", "kokoro", "f5", "browser"),
+    "ane_model": ("kokoro", "paradee"),
+    "ane_voice": ("", "bm_george", "bm_fable", "bm_daniel", "bm_lewis", "bf_isabella", "bf_emma", "af_heart", "am_puck"),
+    "router_model": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"),
+    "router_effort": ("low", "medium", "high"),
+    "home_city": None,  # free text, trimmed, max 80 chars
+}
+
+
+def settings_path(cfg: "Config") -> Path:
+    return cfg.home / "settings.json"
+
+
+def load_settings(cfg: "Config") -> dict:
+    import json
+    try:
+        data = json.loads(settings_path(cfg).read_text())
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def clean_settings(updates: dict) -> dict:
+    """Keep known keys with allowed values; raise ValueError on anything else."""
+    out = {}
+    for k, v in (updates or {}).items():
+        if k not in SETTINGS_CHOICES:
+            raise ValueError(f"unknown setting {k}")
+        choices = SETTINGS_CHOICES[k]
+        v = str(v if v is not None else "").strip()
+        if choices is None:
+            v = " ".join(v.split())[:80]
+        elif v not in choices:
+            raise ValueError(f"{k} must be one of {', '.join(c or '(default)' for c in choices)}")
+        out[k] = v
+    return out
+
+
+def apply_settings(cfg: "Config", data: dict) -> None:
+    try:
+        clean = clean_settings({k: v for k, v in data.items() if k in SETTINGS_CHOICES})
+    except ValueError:
+        return  # a hand-edited bad file never breaks start-up
+    for k, v in clean.items():
+        setattr(cfg, k, v)
+
+
+def save_settings(cfg: "Config", updates: dict) -> dict:
+    """Validate, merge into settings.json, apply to the running cfg. Returns the saved settings."""
+    import json
+    clean = clean_settings(updates)
+    data = {**{k: v for k, v in load_settings(cfg).items() if k in SETTINGS_CHOICES}, **clean}
+    tmp = settings_path(cfg).with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, indent=2))
+    tmp.replace(settings_path(cfg))
+    apply_settings(cfg, data)
+    return data
+
+
+def current_settings(cfg: "Config") -> dict:
+    return {k: getattr(cfg, k) for k in SETTINGS_CHOICES}
 
 
 SAMPLE_CONFIG = """\

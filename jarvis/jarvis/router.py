@@ -6,6 +6,9 @@ import json
 import logging
 import re
 import time
+from pathlib import Path
+
+import anyio
 
 from .config import Config
 from .store import ACTIVE, NEEDS_INPUT, Store
@@ -74,10 +77,92 @@ def queue_snapshot(store: Store) -> str:
     return "\n".join(lines)
 
 
+def _search_servers() -> dict:
+    """The user's Keenable MCP server entry (from ~/.claude.json, read at run time; never copied anywhere)."""
+    try:
+        servers = json.loads((Path.home() / ".claude.json").read_text()).get("mcpServers") or {}
+    except (OSError, ValueError):
+        return {}
+    k = servers.get("keenable")
+    return {"keenable": k} if isinstance(k, dict) else {}
+
+
+class _Session:
+    """One long-lived Claude Code process for the router, on its own event-loop thread (each web request runs
+    in its own anyio.run, so the client can't live in any one of them). Serialised by a lock; reconnects when
+    the options change, after cfg.router_session_turns replies, or after an error."""
+
+    def __init__(self):
+        import threading
+        self.lock = threading.Lock()
+        self.portal = None
+        self._portal_cm = None
+        self.client = None
+        self.key = None
+        self.turns = 0
+
+    def _ensure_portal(self):
+        if self.portal is None:
+            import atexit
+
+            from anyio.from_thread import start_blocking_portal
+            self._portal_cm = start_blocking_portal()
+            self.portal = self._portal_cm.__enter__()
+            atexit.register(self.close)
+
+    async def _drop(self):
+        c, self.client, self.key, self.turns = self.client, None, None, 0
+        if c is not None:
+            try:
+                await c.disconnect()
+            except Exception:  # noqa: BLE001
+                pass
+
+    async def _ask(self, opts, key, prompt: str, max_turns: int):
+        from claude_agent_sdk import ClaudeSDKClient, ResultMessage
+        if self.client is None or self.key != key or self.turns >= max_turns:
+            await self._drop()
+            c = ClaudeSDKClient(opts)
+            await c.connect()
+            self.client, self.key = c, key
+        try:
+            await self.client.query(prompt)
+            out = None
+            async for msg in self.client.receive_response():
+                if isinstance(msg, ResultMessage):
+                    out = msg.structured_output
+                    if out is None and msg.result:
+                        m = re.search(r"\{.*\}", msg.result, re.S)
+                        out = json.loads(m.group(0)) if m else None
+            self.turns += 1
+            return out
+        except BaseException:
+            await self._drop()
+            raise
+
+    def ask(self, opts, key, prompt: str, max_turns: int):
+        with self.lock:
+            self._ensure_portal()
+            return self.portal.call(self._ask, opts, key, prompt, max_turns)
+
+    def close(self):
+        try:
+            if self.portal is not None:
+                self.portal.call(self._drop)
+                self._portal_cm.__exit__(None, None, None)
+        except Exception:  # noqa: BLE001
+            pass
+        self.portal = self._portal_cm = None
+
+
+_session = _Session()
+
+
 async def classify(cfg: Config, store: Store, text: str) -> dict:
     from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
-    prompt = f"## Queue\n{queue_snapshot(store)}\n\n## Owner said\n{text}"
+    where = f"\n\n## Owner's location\n{cfg.home_city} (use it for weather and local questions)" if cfg.home_city else ""
+    prompt = f"## Queue\n{queue_snapshot(store)}{where}\n\n## Owner said\n{text}"
     opts = ClaudeAgentOptions(
         model=cfg.router_model, effort=cfg.router_effort, system_prompt=ROUTER_SYSTEM,
         # Read-only web search so chat can answer live questions (weather, news, facts).
@@ -85,8 +170,19 @@ async def classify(cfg: Config, store: Store, text: str) -> dict:
         tools=["WebSearch"], allowed_tools=ROUTER_SEARCH_TOOLS, max_turns=6, max_budget_usd=0.5,
         output_format={"type": "json_schema", "schema": ROUTE_SCHEMA},
         cwd=str(cfg.home),
+        # Speed: every reply starts a fresh Claude Code process. Skip the user's settings (plugins, hooks,
+        # CLAUDE.md) and every MCP server except the web search one: ~2 s less per reply.
+        setting_sources=[], mcp_servers=_search_servers(), extra_args={"strict-mcp-config": None},
     )
     out = None
+    if cfg.router_persistent:
+        key = (cfg.router_model, cfg.router_effort)
+        try:
+            out = await anyio.to_thread.run_sync(_session.ask, opts, key, prompt, max(1, cfg.router_session_turns))
+            if out:
+                return out
+        except Exception as e:  # noqa: BLE001 - fall back to a one-off process
+            log.warning("router session failed, using a one-off call: %s", e)
     async for msg in query(prompt=prompt, options=opts):
         if isinstance(msg, ResultMessage):
             out = msg.structured_output

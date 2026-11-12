@@ -27,7 +27,7 @@ import anyio
 import time
 
 from . import hq, router, tts
-from .config import Config
+from .config import Config, current_settings, save_settings
 from .store import ACTIVE, DONE, NEEDS_INPUT, Store
 
 log = logging.getLogger("jarvis.web")
@@ -165,6 +165,9 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                                   "text/html; charset=utf-8")
             if path == "/api/overview":
                 return self._json(200, overview(cfg, store, user))
+            if path == "/api/settings":
+                return self._json(200, {"settings": current_settings(cfg), "voice": tts.voice_label(cfg),
+                                        "engine": tts.server_engine(cfg) or "browser"})
             if path == "/api/hq":
                 return self._json(200, {"briefing": hq.latest(store), "running": hq.is_running(store)})
             if path == "/api/goals":
@@ -236,6 +239,18 @@ def make_handler(cfg: Config, store: Store, allowed: set[str], transcribe=None):
                 reply = anyio.run(router.handle, cfg, store, text)
                 store.log(None, "web", f"{user}: {text}")
                 return self._json(200, {"reply": reply, "speak": reply})
+
+            if path == "/api/settings":
+                try:
+                    saved = save_settings(cfg, data.get("settings") or {})
+                except ValueError as e:
+                    return self._json(422, {"error": str(e)})
+                if "tts_engine" in saved or "ane_model" in saved or "ane_voice" in saved:
+                    import threading
+                    threading.Thread(target=tts.ane_warm, args=(cfg,), daemon=True).start()  # load the new voice now
+                store.log(None, "web", f"{user} changed settings: {', '.join(sorted(data.get('settings') or {}))}")
+                return self._json(200, {"settings": current_settings(cfg), "voice": tts.voice_label(cfg),
+                                        "engine": tts.server_engine(cfg) or "browser"})
 
             if path == "/api/hq/refresh":
                 hq.request(store)

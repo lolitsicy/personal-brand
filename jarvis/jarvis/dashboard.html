@@ -428,7 +428,40 @@ select.field{font-size:15px;appearance:auto;margin-top:8px}
     <div class="srow"><label for="optSpeak"><div class="t">Speak replies</div><div class="s">Jarvis reads every reply aloud.</div></label><input class="sw" type="checkbox" id="optSpeak" role="switch"></div>
     <div class="srow"><label for="optConvo"><div class="t">Conversation mode</div><div class="s">Listen again after Jarvis speaks.</div></label><input class="sw" type="checkbox" id="optConvo" role="switch"></div>
     <div class="srow" style="display:block">
-      <label for="optVoice"><div class="t">Voice</div><div class="s" id="voiceNote">Browser voice on this device.</div></label>
+      <label for="setEngine"><div class="t">Jarvis's voice</div><div class="s" id="setVoiceNow">Made on the Mac.</div></label>
+      <select class="field" id="setEngine" data-key="tts_engine">
+        <option value="ane">Neural Engine (fastest)</option>
+        <option value="kokoro">Kokoro on the CPU</option>
+        <option value="f5">Your cloned voice (F5, slow)</option>
+        <option value="browser">This device's own voice</option>
+      </select>
+    </div>
+    <div class="srow" style="display:block" id="rowModel">
+      <label for="setModel"><div class="t">Voice model</div><div class="s">Kokoro sounds most natural; Paradee answers almost instantly.</div></label>
+      <select class="field" id="setModel" data-key="ane_model">
+        <option value="kokoro">Kokoro: natural, ~0.35 s to start</option>
+        <option value="paradee">Paradee: fastest, ~0.07 s to start</option>
+      </select>
+    </div>
+    <div class="srow" style="display:block" id="rowVoice">
+      <label for="setVoice"><div class="t">Speaker</div></label>
+      <select class="field" id="setVoice" data-key="ane_voice"></select>
+    </div>
+    <div class="srow" style="display:block">
+      <label for="setRouter"><div class="t">Thinking model</div><div class="s">Answers every message. Faster models reply sooner.</div></label>
+      <select class="field" id="setRouter" data-key="router_model">
+        <option value="claude-haiku-5-5">Haiku: fastest</option>
+        <option value="claude-sonnet-5-5">Sonnet: balanced</option>
+        <option value="claude-opus-5-5">Opus: smartest, slowest</option>
+      </select>
+    </div>
+    <div class="srow" style="display:block">
+      <label for="setCity"><div class="t">Home city</div><div class="s">For weather and local questions.</div></label>
+      <input class="field" id="setCity" data-key="home_city" maxlength="80" placeholder="e.g. Auckland" autocomplete="address-level2">
+    </div>
+    <p class="s" id="setStatus" role="status" aria-live="polite"></p>
+    <div class="srow" style="display:block">
+      <label for="optVoice"><div class="t">Fallback voice</div><div class="s" id="voiceNote">Browser voice on this device.</div></label>
       <select class="field" id="optVoice"></select>
     </div>
     <div class="btnrow"><button class="btn" type="button" id="testVoice">Test voice</button></div>
@@ -861,6 +894,45 @@ $("#gear").addEventListener("click", () => {
   const d = $("#settings"); if (d.showModal) d.showModal(); else d.setAttribute("open", "");
 });
 $("#settings").addEventListener("click", e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+
+/* ---------------- server settings (~/.jarvis/settings.json via /api/settings) ---------------- */
+const SPEAKERS = {
+  kokoro: [["bm_george", "George (British)"], ["bm_fable", "Fable (British)"], ["bm_daniel", "Daniel (British)"], ["bm_lewis", "Lewis (British)"], ["bf_emma", "Emma (British)"], ["bf_isabella", "Isabella (British)"], ["af_heart", "Heart (American)"]],
+  paradee: [["bm_fable", "Fable (British)"], ["bf_isabella", "Isabella (British)"], ["af_heart", "Heart (American)"], ["am_puck", "Puck (American)"]],
+};
+let SET = null;
+function renderSettings(r) {
+  SET = r.settings;
+  $("#setEngine").value = SET.tts_engine === "auto" ? "ane" : SET.tts_engine;
+  $("#setModel").value = SET.ane_model;
+  const list = SPEAKERS[SET.ane_model] || SPEAKERS.kokoro, sv = $("#setVoice");
+  sv.replaceChildren(...list.map(([v, t]) => el("option", {value: v, text: t})));
+  const cur = SET.ane_voice || (SET.ane_model === "paradee" ? "bm_fable" : "bm_george");
+  sv.value = list.some(([v]) => v === cur) ? cur : list[0][0];
+  $("#setRouter").value = SET.router_model;
+  if (document.activeElement !== $("#setCity")) $("#setCity").value = SET.home_city || "";
+  const ane = $("#setEngine").value === "ane";
+  $("#rowModel").hidden = !ane; $("#rowVoice").hidden = !ane;
+  $("#setVoiceNow").textContent = `Now: ${r.voice}.`;
+}
+async function loadSettings() {
+  try { renderSettings(await api("/api/settings")); } catch (e) { $("#setStatus").textContent = e.message; }
+}
+async function saveSetting(key, value) {
+  const st = $("#setStatus"); st.textContent = "Saving…";
+  const upd = {[key]: value};
+  if (key === "ane_model") upd.ane_voice = "";  // each model has its own speakers
+  try {
+    renderSettings(await api("/api/settings", {settings: upd}));
+    st.textContent = key === "router_model" || key === "home_city" ? "Saved." : "Saved. The new voice loads on the Mac in a few seconds.";
+    refresh();
+  } catch (e) { st.textContent = e.message; }
+}
+for (const id of ["setEngine", "setModel", "setVoice", "setRouter"]) {
+  $("#" + id).addEventListener("change", e => saveSetting(e.target.dataset.key, e.target.value));
+}
+$("#setCity").addEventListener("change", e => saveSetting("home_city", e.target.value));
+$("#gear").addEventListener("click", loadSettings);
 
 /* ---------------- voice: speaking ---------------- */
 const player = new Audio(); player.preload = "auto";
