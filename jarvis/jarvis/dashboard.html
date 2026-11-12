@@ -974,12 +974,34 @@ function speakBrowser(text, token) {
     next();
   });
 }
-async function speakServer(text, token) {
+// The first sentence alone (so Jarvis starts talking at once), then ~220-char chunks; each chunk's audio is
+// fetched while the previous one plays.
+function serverParts(text) {
+  const t = String(text).replace(/\s+/g, " ").trim();
+  const m = t.match(/^.+?[.!?](\s|$)/);
+  if (!m || m[0].length >= t.length) return [t];
+  return [m[0].trim(), ...chunks(t.slice(m[0].length))].filter(x => x.trim());
+}
+async function fetchTts(text) {
   const r = await fetch("/api/tts", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text})});
   if (!r.ok || !(r.headers.get("Content-Type") || "").includes("audio")) throw new Error("tts");
-  const url = URL.createObjectURL(await r.blob());
-  if (token !== speakToken) { URL.revokeObjectURL(url); return; }
-  await new Promise((res, rej) => {
+  return URL.createObjectURL(await r.blob());
+}
+async function speakServer(text, token) {
+  const parts = serverParts(text);
+  let next = fetchTts(parts[0]), played = 0;
+  for (let i = 0; i < parts.length; i++) {
+    let url;
+    try { url = await next; } catch (e) { if (!played) throw e; return; }  // nothing said yet: browser voice takes over
+    next = i + 1 < parts.length ? fetchTts(parts[i + 1]) : null;
+    if (next) next.catch(() => {});
+    if (token !== speakToken) { URL.revokeObjectURL(url); if (next) next.then(URL.revokeObjectURL, () => {}); return; }
+    try { await playUrl(url); } catch (e) { if (!played) throw e; return; }  // mid-reply: don't restart in the browser voice
+    played++;
+  }
+}
+function playUrl(url) {
+  return new Promise((res, rej) => {
     const done = () => { player.onended = player.onerror = player.onpause = null; URL.revokeObjectURL(url); res(); };
     player.onended = done; player.onpause = done;
     player.onerror = () => { player.onended = player.onerror = player.onpause = null; URL.revokeObjectURL(url); rej(new Error("play")); };
