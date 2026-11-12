@@ -92,6 +92,10 @@ class Config:
     # ~5x faster than the ONNX Kokoro on an M1, same voices (kokoro_voice). Falls back to ONNX Kokoro on failure.
     ane_tts_bin: str = "~/.local/share/jarvis/src/jarvis-tts/.build/release/jarvis-tts"
     ane_version: str = "v3"  # v3 (newer hybrid pipeline) | legacy
+    # kokoro = Kokoro-82M on the Neural Engine (~0.35 s to first audio on an M1, uses kokoro_voice);
+    # paradee = Paradee-8M, Kokoro distilled ~10x smaller (~0.07 s; voices bm_fable, bf_isabella, af_heart, am_puck).
+    ane_model: str = "kokoro"
+    ane_voice: str = ""  # "" = kokoro_voice for kokoro, bm_fable for paradee
 
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech

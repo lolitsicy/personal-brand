@@ -87,8 +87,8 @@ def voice_label(cfg: Config) -> str:
         return cfg.voice_name
     eng = server_engine(cfg)
     if eng == "ane":
-        v = cfg.kokoro_voice.split("_", 1)[-1].capitalize()
-        return f"{v} (Kokoro, Neural Engine)"
+        v = ane_voice(cfg).split("_", 1)[-1].capitalize()
+        return f"{v} (Paradee, local)" if cfg.ane_model == "paradee" else f"{v} (Kokoro, Neural Engine)"
     if eng == "f5":
         return "Cloned voice (F5, local)"
     if eng == "kokoro":
@@ -227,8 +227,18 @@ _ane: dict = {"proc": None, "key": None}
 _ane_lock = threading.Lock()  # one request at a time over the helper's stdin/stdout
 
 
+PARADEE_VOICES = ("bm_fable", "bf_isabella", "af_heart", "am_puck")
+
+
 def _ane_bin(cfg: Config) -> Path:
     return Path(cfg.ane_tts_bin).expanduser()
+
+
+def ane_voice(cfg: Config) -> str:
+    if cfg.ane_model == "paradee":
+        v = cfg.ane_voice or "bm_fable"
+        return v if v in PARADEE_VOICES else "bm_fable"
+    return cfg.ane_voice or cfg.kokoro_voice
 
 
 def ane_ready(cfg: Config) -> bool:
@@ -258,13 +268,13 @@ def _ane_readline(proc, timeout: float) -> dict:
 
 def _ane_proc(cfg: Config):
     """The running helper for (binary, voice, version), started (and warmed) if needed. Caller holds _ane_lock."""
-    key = (str(_ane_bin(cfg)), cfg.kokoro_voice, cfg.ane_version)
+    key = (str(_ane_bin(cfg)), cfg.ane_model, ane_voice(cfg), cfg.ane_version)
     p = _ane["proc"]
     if p is not None and p.poll() is None and _ane["key"] == key:
         return p
     if p is not None and p.poll() is None:
         p.terminate()
-    p = subprocess.Popen([key[0], "--voice", cfg.kokoro_voice, "--version", cfg.ane_version],
+    p = subprocess.Popen([key[0], "--engine", cfg.ane_model, "--voice", ane_voice(cfg), "--version", cfg.ane_version],
                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
     try:
         hello = _ane_readline(p, ANE_START_TIMEOUT_S)
@@ -274,7 +284,7 @@ def _ane_proc(cfg: Config):
     if not hello.get("ready"):
         p.kill()
         raise RuntimeError(f"Neural Engine voice failed to start: {hello.get('error')}")
-    log.info("Neural Engine voice ready in %s ms (%s)", hello.get("load_ms"), cfg.kokoro_voice)
+    log.info("Neural Engine voice ready in %s ms (%s, %s)", hello.get("load_ms"), cfg.ane_model, ane_voice(cfg))
     _ane.update(proc=p, key=key)
     return p
 
@@ -299,7 +309,7 @@ def _ane_chunk(cfg: Config, text: str):
     try:
         with _ane_lock:
             p = _ane_proc(cfg)
-            p.stdin.write(json.dumps({"text": text, "out": out, "voice": cfg.kokoro_voice,
+            p.stdin.write(json.dumps({"text": text, "out": out, "voice": ane_voice(cfg),
                                       "speed": float(cfg.kokoro_speed)}) + "\n")
             p.stdin.flush()
             res = _ane_readline(p, ANE_REQUEST_TIMEOUT_S)
