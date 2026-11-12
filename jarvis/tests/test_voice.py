@@ -249,3 +249,141 @@ def test_speak_uses_system_command(cfg, monkeypatch):
     monkeypatch.setattr(tts.subprocess, "run", lambda args, **k: calls.append(args) or R())
     tts.speak(cfg, "hi")
     assert calls == [["/usr/bin/espeak-ng", "hi"]]
+
+
+# --- F5 cloned voice ---------------------------------------------------------
+@pytest.fixture
+def f5cfg(cfg, tmp_path, monkeypatch):
+    ref = tmp_path / "ref.wav"
+    tts.write_wav(ref, np.zeros(tts.F5_SAMPLE_RATE, dtype=np.int16), tts.F5_SAMPLE_RATE)
+    cfg.tts_engine, cfg.f5_ref_audio, cfg.f5_ref_text = "f5", str(ref), "Reference words."
+    monkeypatch.setattr(tts, "f5_ready", lambda c: True)
+    return cfg
+
+
+def test_split_sentences_joins_short_ones():
+    assert tts.split_sentences("Done. The report is ready in your workspace. Anything else?") == \
+        ["Done. The report is ready in your workspace.", "Anything else?"]
+    assert tts.split_sentences("  ") == []
+
+
+def test_f5_frames_scales_with_text_length():
+    assert tts.f5_frames(100, "abcd", "abcdabcd") == 300
+    assert tts.f5_frames(100, "abcd", "abcdabcd", speed=2.0) == 200
+
+
+def test_f5_ready_needs_reference(cfg, tmp_path):
+    cfg.tts_engine = "f5"
+    assert not tts.f5_ready(cfg)
+    cfg.f5_ref_audio, cfg.f5_ref_text = str(tmp_path / "missing.wav"), "hi"
+    assert not tts.f5_ready(cfg)
+
+
+def test_engine_choice_f5_and_fallback(f5cfg, monkeypatch):
+    monkeypatch.setattr(tts, "kokoro_ready", lambda c: True)
+    assert tts.server_engine(f5cfg) == "f5"
+    assert tts.voice_label(f5cfg).startswith("Cloned voice")
+    monkeypatch.setattr(tts, "f5_ready", lambda c: False)
+    assert tts.server_engine(f5cfg) == "kokoro"
+    f5cfg.tts_engine = "auto"
+    monkeypatch.setattr(tts, "f5_ready", lambda c: True)
+    assert tts.server_engine(f5cfg) == "kokoro"  # F5 is opt-in only
+
+
+def test_synthesize_f5_joins_sentences(f5cfg, monkeypatch):
+    monkeypatch.setattr(tts, "iter_f5", lambda c, t: iter([np.full(10, 0.5, np.float32)] * 2))
+    data, mime = tts.synthesize(f5cfg, "One sentence here, long enough. And another one.")
+    assert mime == "audio/wav"
+    gap = int(tts.F5_SAMPLE_RATE * tts.F5_GAP_SECONDS)
+    assert len(data) == 44 + 2 * (20 + gap)
+
+
+def test_synthesize_f5_falls_back_to_kokoro(f5cfg, monkeypatch):
+    def boom(c, t):
+        raise RuntimeError("mlx exploded")
+        yield
+    monkeypatch.setattr(tts, "iter_f5", boom)
+    monkeypatch.setattr(tts, "kokoro_ready", lambda c: True)
+    monkeypatch.setattr(tts, "synthesize_kokoro", lambda c, t: (np.zeros(5, np.float32), 24000))
+    data, mime = tts.synthesize(f5cfg, "hello")
+    assert mime == "audio/wav" and len(data) == 44 + 10
+
+
+def test_long_reply_skips_f5(f5cfg, monkeypatch):
+    f5cfg.f5_max_chars = 10
+    assert not tts.use_f5(f5cfg, "x" * 11)
+    assert tts.use_f5(f5cfg, "x" * 10)
+
+
+def test_speak_f5_streams_each_sentence(f5cfg, monkeypatch):
+    played = []
+    monkeypatch.setattr(tts, "iter_f5", lambda c, t: iter([np.ones(3, np.float32), np.ones(4, np.float32)]))
+    monkeypatch.setattr(tts, "play_audio", lambda a, sr: played.append((len(a), sr)) or True)
+    tts.speak(f5cfg, "First sentence that is long enough. Second.")
+    gap = int(tts.F5_SAMPLE_RATE * tts.F5_GAP_SECONDS)
+    assert played == [(3 + gap, 24000), (4 + gap, 24000)]
+
+
+def test_speak_f5_failure_before_audio_uses_kokoro(f5cfg, monkeypatch):
+    def boom(c, t):
+        raise RuntimeError("no gpu")
+        yield
+    played = []
+    monkeypatch.setattr(tts, "iter_f5", boom)
+    monkeypatch.setattr(tts, "kokoro_ready", lambda c: True)
+    monkeypatch.setattr(tts, "synthesize_kokoro", lambda c, t: (np.zeros(7, np.float32), 24000))
+    monkeypatch.setattr(tts, "play_audio", lambda a, sr: played.append(len(a)) or True)
+    tts.speak(f5cfg, "hello")
+    assert played == [7]
+
+
+def test_read_ref_wav_rejects_wrong_format(tmp_path):
+    p = tmp_path / "bad.wav"
+    tts.write_wav(p, np.zeros(100, np.int16), 16000)
+    with pytest.raises(ValueError, match="24000"):
+        tts._read_ref_wav(p)
+    p2 = tmp_path / "ok.wav"
+    tts.write_wav(p2, np.full(100, 16384, np.int16), 24000)
+    assert abs(tts._read_ref_wav(p2)[0] - 0.5) < 1e-6
+
+
+def test_ane_engine_streams_sentences_through_the_helper(tmp_path, monkeypatch):
+    """tts_engine = "ane": a long-running helper (faked here) answers one JSON line per sentence."""
+    import sys
+    import numpy as np
+    from jarvis import tts
+    fake = tmp_path / "jarvis-tts"
+    fake.write_text(f"""#!{sys.executable}
+import json, sys, wave
+print(json.dumps({{"ready": True, "load_ms": 1}}), flush=True)
+for line in sys.stdin:
+    r = json.loads(line)
+    with wave.open(r["out"], "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000)
+        w.writeframes(b"\\x01\\x00" * (100 * len(r["text"])))
+    print(json.dumps({{"ok": True, "out": r["out"], "ms": 1, "seconds": 0.1}}), flush=True)
+""")
+    fake.chmod(0o755)
+    cfg = Config(home=tmp_path)
+    cfg.tts_engine, cfg.ane_tts_bin = "ane", str(fake)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    played = []
+    monkeypatch.setattr(tts, "play_audio", lambda a, sr: played.append((len(a), sr)) or True)
+    try:
+        assert tts.server_engine(cfg) == "ane" and "Neural Engine" in tts.voice_label(cfg)
+        tts.speak(cfg, "This is the first sentence of the reply. And this is the second one, a bit longer.")
+        assert len(played) == 2 and all(sr == 24000 for _, sr in played)
+        data, mime = tts.synthesize(cfg, "Hello there.")
+        assert mime == "audio/wav" and data[:4] == b"RIFF"
+    finally:
+        p = tts._ane["proc"]
+        if p is not None:
+            p.kill()
+        tts._ane.update(proc=None, key=None)
+
+
+def test_ane_missing_helper_falls_back(tmp_path):
+    from jarvis import tts
+    cfg = Config(home=tmp_path)
+    cfg.tts_engine, cfg.ane_tts_bin = "ane", str(tmp_path / "nope")
+    assert not tts.ane_ready(cfg) and tts.server_engine(cfg) != "ane"

@@ -1,4 +1,6 @@
-"""Text to speech: piper (if configured) -> macOS `say` -> espeak-ng/espeak -> print.
+"""Text to speech: ElevenLabs (if keyed) -> Kokoro on the Neural Engine (if chosen) -> F5 cloned voice (if chosen)
+-> Kokoro -> piper
+-> macOS `say` -> espeak-ng/espeak -> print.
 
 `speak` never raises; it is called from notifier hooks and the voice loop.
 """
@@ -32,7 +34,19 @@ def speak(cfg: Config, text: str) -> None:
                     return
             except Exception as e:  # noqa: BLE001 - fall back to local voices
                 log.warning("ElevenLabs failed: %s", e)
-        if cfg.tts_engine in ("auto", "kokoro") and kokoro_ready(cfg):
+        if cfg.tts_engine == "ane" and ane_ready(cfg):
+            try:
+                if speak_ane(cfg, text):
+                    return
+            except Exception as e:  # noqa: BLE001 - fall back to ONNX Kokoro
+                log.warning("Neural Engine voice failed: %s", e)
+        if use_f5(cfg, text):
+            try:
+                if speak_f5(cfg, text):
+                    return
+            except Exception as e:  # noqa: BLE001 - fall back to Kokoro
+                log.warning("F5 failed: %s", e)
+        if cfg.tts_engine in ("auto", "kokoro", "f5", "ane") and kokoro_ready(cfg):
             try:
                 audio, sr = synthesize_kokoro(cfg, text)
                 if play_audio((audio * 32767).clip(-32768, 32767).astype("int16"), sr):
@@ -57,7 +71,11 @@ def server_engine(cfg: Config) -> str | None:
     """Which engine the server will synthesize with, or None to let the phone speak itself."""
     if use_elevenlabs(cfg):
         return "elevenlabs"
-    if cfg.tts_engine in ("auto", "kokoro") and kokoro_ready(cfg):
+    if cfg.tts_engine == "ane" and ane_ready(cfg):
+        return "ane"
+    if cfg.tts_engine == "f5" and f5_ready(cfg):
+        return "f5"
+    if cfg.tts_engine in ("auto", "kokoro", "f5", "ane") and kokoro_ready(cfg):
         return "kokoro"
     if cfg.tts_engine in ("auto", "piper") and cfg.piper_voice and _piper_voice(cfg.piper_voice) is not None:
         return "piper"
@@ -68,6 +86,11 @@ def voice_label(cfg: Config) -> str:
     if cfg.voice_name:
         return cfg.voice_name
     eng = server_engine(cfg)
+    if eng == "ane":
+        v = cfg.kokoro_voice.split("_", 1)[-1].capitalize()
+        return f"{v} (Kokoro, Neural Engine)"
+    if eng == "f5":
+        return "Cloned voice (F5, local)"
     if eng == "kokoro":
         v = cfg.kokoro_voice.split("_", 1)[-1].capitalize()
         return f"{v} (Kokoro, local)"
@@ -98,6 +121,19 @@ def synthesize(cfg: Config, text: str) -> tuple[bytes, str]:
     eng = server_engine(cfg)
     if eng == "elevenlabs":
         return elevenlabs_mp3(cfg, text), "audio/mpeg"
+    if eng == "ane":
+        try:
+            return _wav_bytes(ane_synthesize(cfg, text), ANE_SAMPLE_RATE), "audio/wav"
+        except Exception as e:  # noqa: BLE001 - fall back to ONNX Kokoro
+            log.warning("Neural Engine voice failed: %s", e)
+            eng = "kokoro" if kokoro_ready(cfg) else None
+    if eng == "f5":
+        if use_f5(cfg, text):
+            try:
+                return _wav_bytes(_to_int16(synthesize_f5(cfg, text)), F5_SAMPLE_RATE), "audio/wav"
+            except Exception as e:  # noqa: BLE001 - fall back to Kokoro
+                log.warning("F5 failed: %s", e)
+        eng = "kokoro" if kokoro_ready(cfg) else None
     if eng == "kokoro":
         audio, sr = synthesize_kokoro(cfg, text)
         return _wav_bytes((audio * 32767).clip(-32768, 32767).astype("int16"), sr), "audio/wav"
@@ -177,6 +213,289 @@ def download_kokoro(cfg: Config, progress=print) -> Path:
                     f.write(chunk)
         tmp.replace(dest)
     return d
+
+
+# --- Kokoro on the Apple Neural Engine (Core ML via FluidAudio; a long-running Swift helper) --------
+# ~/.local/share/jarvis/src/jarvis-tts: models load once (~30 s, at daemon start via ane_warm), then each request is
+# one JSON line in, one JSON line out, with the wav written to a temp file. Measured on an M1: 1.6-2 s for 8.7 s of
+# speech (ONNX Kokoro ~9 s), so sentence-by-sentence playback starts in well under a second.
+ANE_SAMPLE_RATE = 24000
+ANE_GAP_SECONDS = 0.08
+ANE_START_TIMEOUT_S = 180  # first run downloads and compiles the models
+ANE_REQUEST_TIMEOUT_S = 60
+_ane: dict = {"proc": None, "key": None}
+_ane_lock = threading.Lock()  # one request at a time over the helper's stdin/stdout
+
+
+def _ane_bin(cfg: Config) -> Path:
+    return Path(cfg.ane_tts_bin).expanduser()
+
+
+def ane_ready(cfg: Config) -> bool:
+    import sys
+    return sys.platform == "darwin" and _ane_bin(cfg).is_file()
+
+
+def _ane_readline(proc, timeout: float) -> dict:
+    import json
+    import select
+    import time
+    end = time.monotonic() + timeout
+    while True:
+        left = end - time.monotonic()
+        if left <= 0:
+            raise TimeoutError("Neural Engine voice didn't answer in time")
+        r, _, _ = select.select([proc.stdout], [], [], left)
+        if not r:
+            continue
+        line = proc.stdout.readline()
+        if not line:
+            raise RuntimeError(f"Neural Engine voice helper exited (code {proc.poll()})")
+        line = line.strip()
+        if line.startswith("{"):
+            return json.loads(line)
+
+
+def _ane_proc(cfg: Config):
+    """The running helper for (binary, voice, version), started (and warmed) if needed. Caller holds _ane_lock."""
+    key = (str(_ane_bin(cfg)), cfg.kokoro_voice, cfg.ane_version)
+    p = _ane["proc"]
+    if p is not None and p.poll() is None and _ane["key"] == key:
+        return p
+    if p is not None and p.poll() is None:
+        p.terminate()
+    p = subprocess.Popen([key[0], "--voice", cfg.kokoro_voice, "--version", cfg.ane_version],
+                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
+    try:
+        hello = _ane_readline(p, ANE_START_TIMEOUT_S)
+    except Exception:
+        p.kill()
+        raise
+    if not hello.get("ready"):
+        p.kill()
+        raise RuntimeError(f"Neural Engine voice failed to start: {hello.get('error')}")
+    log.info("Neural Engine voice ready in %s ms (%s)", hello.get("load_ms"), cfg.kokoro_voice)
+    _ane.update(proc=p, key=key)
+    return p
+
+
+def ane_warm(cfg: Config) -> None:
+    """Start the helper in the background so the first reply isn't the slow one. Never raises."""
+    if cfg.tts_engine != "ane" or not ane_ready(cfg):
+        return
+    try:
+        with _ane_lock:
+            _ane_proc(cfg)
+    except Exception as e:  # noqa: BLE001
+        log.warning("Neural Engine voice warm-up failed: %s", e)
+
+
+def _ane_chunk(cfg: Config, text: str):
+    """One request -> int16 numpy array at ANE_SAMPLE_RATE."""
+    import json
+    import numpy as np
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        out = f.name
+    try:
+        with _ane_lock:
+            p = _ane_proc(cfg)
+            p.stdin.write(json.dumps({"text": text, "out": out, "voice": cfg.kokoro_voice,
+                                      "speed": float(cfg.kokoro_speed)}) + "\n")
+            p.stdin.flush()
+            res = _ane_readline(p, ANE_REQUEST_TIMEOUT_S)
+        if not res.get("ok"):
+            raise RuntimeError(res.get("error") or "synthesis failed")
+        with wave.open(out) as w:
+            return np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").copy()
+    finally:
+        Path(out).unlink(missing_ok=True)
+
+
+def ane_chunks(text: str) -> list[str]:
+    """The first sentence alone (so speech starts at once), then sentence chunks of a natural length."""
+    import re
+    parts = [x.strip() for x in re.split(r"(?<=[.!?])\s+", text.strip()) if x.strip()]
+    if not parts:
+        return []
+    return [parts[0]] + (split_sentences(" ".join(parts[1:]), min_chars=40) if len(parts) > 1 else [])
+
+
+def iter_ane(cfg: Config, text: str):
+    for chunk in ane_chunks(text):
+        yield _ane_chunk(cfg, chunk)
+
+
+def ane_synthesize(cfg: Config, text: str):
+    """Whole reply in one request (the dashboard plays one file)."""
+    return _ane_chunk(cfg, text)
+
+
+def speak_ane(cfg: Config, text: str) -> bool:
+    """Play each sentence as soon as it's ready while the next one is made."""
+    import queue
+    import numpy as np
+    q: queue.Queue = queue.Queue(maxsize=3)
+    done = object()
+
+    def produce():
+        try:
+            for c in iter_ane(cfg, text):
+                q.put(c)
+        except Exception as e:  # noqa: BLE001
+            q.put(e)
+        q.put(done)
+
+    threading.Thread(target=produce, daemon=True, name="ane-tts").start()
+    played = False
+    gap = np.zeros(int(ANE_SAMPLE_RATE * ANE_GAP_SECONDS), dtype=np.int16)
+    while (item := q.get()) is not done:
+        if isinstance(item, Exception):
+            if not played:
+                raise item  # nothing said yet: the caller falls back to ONNX Kokoro
+            log.warning("Neural Engine voice failed mid-reply: %s", item)
+            return True
+        played = play_audio(np.concatenate([item, gap]), ANE_SAMPLE_RATE) or played
+    return played
+
+
+# --- F5-TTS (voice cloning; Apple Silicon via MLX) -----------------------------------
+F5_SAMPLE_RATE = 24000
+F5_GAP_SECONDS = 0.12  # pause between sentences
+_f5 = None  # (model, reference audio as mx.array)
+_f5_lock = threading.Lock()  # MLX generation is not thread-safe; one sentence at a time
+
+
+def f5_ready(cfg: Config) -> bool:
+    if not (cfg.f5_ref_audio and cfg.f5_ref_text.strip()):
+        return False
+    if not Path(cfg.f5_ref_audio).expanduser().exists():
+        return False
+    try:
+        import f5_tts_mlx  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def use_f5(cfg: Config, text: str) -> bool:
+    return cfg.tts_engine == "f5" and len(text) <= cfg.f5_max_chars and f5_ready(cfg)
+
+
+def split_sentences(text: str, min_chars: int = 40) -> list[str]:
+    """Sentence chunks for F5. Very short sentences are joined to the next so each chunk sounds natural."""
+    import re
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", text.strip()) if p.strip()]
+    out: list[str] = []
+    for p in parts:
+        if out and len(out[-1]) < min_chars:
+            out[-1] = f"{out[-1]} {p}"
+        else:
+            out.append(p)
+    return out
+
+
+def _read_ref_wav(path: Path):
+    import numpy as np
+    with wave.open(str(path)) as w:
+        if w.getframerate() != F5_SAMPLE_RATE or w.getnchannels() != 1 or w.getsampwidth() != 2:
+            raise ValueError(f"{path} must be mono 16-bit {F5_SAMPLE_RATE} Hz wav; convert with: "
+                             f"ffmpeg -i in -ac 1 -ar {F5_SAMPLE_RATE} -sample_fmt s16 out.wav")
+        return np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(np.float32) / 32768
+
+
+def _f5_model(cfg: Config):
+    global _f5
+    if _f5 is None:
+        import mlx.core as mx
+        from f5_tts_mlx.cfm import F5TTS
+        from f5_tts_mlx.generate import TARGET_RMS
+        model = F5TTS.from_pretrained(cfg.f5_model)
+        # float32 matters: float64 (soundfile's default) pushes MLX off the fast path.
+        ref = mx.array(_read_ref_wav(Path(cfg.f5_ref_audio).expanduser()))
+        rms = mx.sqrt(mx.mean(mx.square(ref)))
+        if rms < TARGET_RMS:
+            ref = ref * TARGET_RMS / rms
+        _f5 = (model, ref)
+    return _f5
+
+
+def iter_f5(cfg: Config, text: str):
+    """Yield one float32 numpy chunk (24 kHz) per sentence, so playback can start early."""
+    import mlx.core as mx
+    import numpy as np
+    from f5_tts_mlx.generate import HOP_LENGTH
+    from f5_tts_mlx.utils import convert_char_to_pinyin
+    ref_text = cfg.f5_ref_text.strip()
+    for sentence in split_sentences(text):
+        with _f5_lock:
+            model, ref = _f5_model(cfg)
+            # Pass an explicit length: without it the output can come back nearly empty.
+            frames = f5_frames(ref.shape[0] // HOP_LENGTH, ref_text, sentence, cfg.f5_speed)
+            out, _ = model.sample(
+                mx.expand_dims(ref, axis=0), text=convert_char_to_pinyin([f"{ref_text} {sentence}"]),
+                duration=frames, steps=cfg.f5_steps, method="euler", speed=cfg.f5_speed,
+                cfg_strength=2.0, sway_sampling_coef=-1.0, seed=cfg.f5_seed)
+            out = out[ref.shape[0]:]
+            mx.eval(out)
+            chunk = np.array(out, dtype=np.float32)
+        yield chunk
+
+
+def f5_frames(ref_frames: int, ref_text: str, text: str, speed: float = 1.0) -> int:
+    """Total mel frames (reference + new speech), scaled from the reference's speaking rate.
+    Same formula as f5_tts_mlx's estimated_duration, minus its print()."""
+    ref_len = max(1, len(ref_text.encode()))
+    return ref_frames + int(ref_frames / ref_len * len(text.encode()) / speed)
+
+
+def synthesize_f5(cfg: Config, text: str):
+    """Whole reply as one float32 array at F5_SAMPLE_RATE."""
+    import numpy as np
+    gap = np.zeros(int(F5_SAMPLE_RATE * F5_GAP_SECONDS), dtype=np.float32)
+    chunks = []
+    for c in iter_f5(cfg, text):
+        chunks += [c, gap]
+    if not chunks:
+        raise RuntimeError("F5 produced no audio")
+    return np.concatenate(chunks[:-1])
+
+
+def speak_f5(cfg: Config, text: str) -> bool:
+    """Play each sentence as soon as it's ready while the next one generates."""
+    import queue
+    import numpy as np
+    q: queue.Queue = queue.Queue()
+    done = object()
+
+    def produce():
+        try:
+            for c in iter_f5(cfg, text):
+                q.put(c)
+        except Exception as e:  # noqa: BLE001
+            q.put(e)
+        q.put(done)
+
+    threading.Thread(target=produce, daemon=True, name="f5-tts").start()
+    played = False
+    gap = np.zeros(int(F5_SAMPLE_RATE * F5_GAP_SECONDS), dtype=np.float32)
+    while (item := q.get()) is not done:
+        if isinstance(item, Exception):
+            if not played:
+                raise item  # nothing said yet: let the caller fall back to Kokoro
+            log.warning("F5 failed mid-reply: %s", item)
+            return True
+        played = play_audio(_to_int16(np.concatenate([item, gap])), F5_SAMPLE_RATE) or played
+    return played
+
+
+def download_f5(cfg: Config) -> None:
+    from huggingface_hub import snapshot_download
+    snapshot_download(cfg.f5_model)
+
+
+def _to_int16(audio):
+    import numpy as np
+    return (np.clip(audio, -1, 1) * 32767).astype(np.int16)
 
 
 # --- ElevenLabs -----------------------------------------------------------------

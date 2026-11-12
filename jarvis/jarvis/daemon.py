@@ -32,6 +32,11 @@ def _single_instance(cfg: Config):
 async def run(cfg: Config, store: Store, notifier: Notifier, runner: AgentRunner | None = None,
               stop_when_idle: bool = False) -> None:
     lock = _single_instance(cfg)  # noqa: F841  (held for the life of the daemon)
+    if cfg.tts_engine == "ane":  # load the Neural Engine voice now, not on the first reply
+        import threading
+
+        from . import tts
+        threading.Thread(target=tts.ane_warm, args=(cfg,), daemon=True, name="ane-warm").start()
     worker = Worker(cfg, store, notifier, runner)
     n = store.recover_orphans()
     if n:

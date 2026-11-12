@@ -68,7 +68,7 @@ class Config:
     # Jarvis's voice, for both the phone dashboard and the desk speaker.
     # auto = ElevenLabs if you set a key, else Kokoro (free, local, natural) if installed,
     # else Piper if piper_voice is set, else the phone's own voice / espeak / say.
-    tts_engine: str = "auto"  # auto | kokoro | piper | elevenlabs | browser
+    tts_engine: str = "auto"  # auto | ane | kokoro | f5 | piper | elevenlabs | browser
     kokoro_voice: str = "bm_george"  # British male; also bm_daniel, bm_lewis, bm_fable, af_heart...
     kokoro_speed: float = 1.0
     kokoro_lang: str = "en-gb"
@@ -79,6 +79,19 @@ class Config:
     elevenlabs_voice_id: str = "onwK4e9ZLuTAKqWW03F9"  # "Daniel": calm British male
     elevenlabs_model: str = "eleven_flash_v2_5"  # low latency
     voice_name: str = ""  # display name; "" = derived from the engine
+    # F5-TTS voice cloning (Apple Silicon, via MLX). Set tts_engine = "f5" to use it; Kokoro is
+    # the fallback if F5 fails or a reply is longer than f5_max_chars.
+    f5_ref_audio: str = ""  # 5-10 s mono 24 kHz wav of the voice to copy (with the speaker's consent)
+    f5_ref_text: str = ""  # exactly what is said in f5_ref_audio
+    f5_model: str = "lucasnewman/f5-tts-mlx"
+    f5_steps: int = 16  # 8 is about twice as fast, slightly rougher
+    f5_speed: float = 1.0
+    f5_seed: int = 7  # fixed so the voice sounds the same every time
+    f5_max_chars: int = 400  # longer replies use Kokoro so you aren't kept waiting
+    # Kokoro on the Apple Neural Engine (Core ML via FluidAudio, a long-running Swift helper). tts_engine = "ane":
+    # ~5x faster than the ONNX Kokoro on an M1, same voices (kokoro_voice). Falls back to ONNX Kokoro on failure.
+    ane_tts_bin: str = "~/.local/share/jarvis/src/jarvis-tts/.build/release/jarvis-tts"
+    ane_version: str = "v3"  # v3 (newer hybrid pipeline) | legacy
 
     # Voice
     whisper_model: str = "small.en"  # faster-whisper model for live speech
